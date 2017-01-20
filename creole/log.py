@@ -1,6 +1,7 @@
 # coding: utf-8
 import sys
 import logging
+import logging.config
 
 from flask import request
 
@@ -23,18 +24,28 @@ class CreoleFormatter(logging.Formatter):
     """
     MSG_SEPARTOR = '##'
 
+    def __init__(self, prefix, *args, **kwargs):
+        self.prefix = prefix
+        super(CreoleFormatter, self).__init__(*args, **kwargs)
+
     def _format(self, msg):
-        # meta log
-        rid = request.rid
-        ip = request.ip_route_list
-        os = request.platform
-        endpoint = request.endpoint
-        meta_log = \
-            '[rid: {rid}] [ip: {ip}] [os: {os}] [endpoint: {endpoint}]'.format(
-                rid=rid, ip=ip, os=os, endpoint=endpoint)
-        return ' '.join(meta_log, msg)
+        meta_log = ''
+        if request:
+            # meta log
+            rid = request.rid
+            ip = request.ip_route_list
+            os = request.platform
+            endpoint = request.endpoint
+            meta_log = \
+                '[rid: {rid}] [ip: {ip}] [os: {os}] ' \
+                '[endpoint: {endpoint}]'.format(
+                    rid=rid, ip=ip, os=os, endpoint=endpoint)
+        if meta_log:
+            return ' '.join(meta_log, msg)
+        return msg
 
     def format(self, record):
+        record.name = self.prefix + '.' + record.name
         if not isinstance(record.msg, basestring):
             record.msg = str(record.msg)
         record.msg = self.MSG_SEPARTOR + ' ' + record.msg
@@ -58,15 +69,16 @@ def _gen_console_log(app_name):
         },
         'handlers': {
             'console': {
-                'class': 'logging.StreamHandler',
-                'formatter': 'console',
                 'level': 'DEBUG',
+                'formatter': 'console',
+                'class': 'logging.StreamHandler',
             }
         },
         'formatters': {
             'console': {
                 '()': CreoleFormatter,
                 'format': CREOLE_CONSOLE_FORMAT,
+                'prefix': app_name,
             }
         },
     }
@@ -109,6 +121,7 @@ def _gen_syslog_log(app_name):
 
 def setup_logging(app_name):
     if sys.platform == 'darwin' or (not is_prod_env()):
-        logging.config.dictConfig(_gen_console_log(app_name))
+        log_dict = _gen_console_log(app_name)
     else:
-        logging.config.dictConfig(_gen_syslog_log(app_name))
+        log_dict = _gen_syslog_log(app_name)
+    logging.config.dictConfig(log_dict)
