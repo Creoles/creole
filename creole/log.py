@@ -41,7 +41,7 @@ class CreoleFormatter(logging.Formatter):
                 '[endpoint: {endpoint}]'.format(
                     rid=rid, ip=ip, os=os, endpoint=endpoint)
         if meta_log:
-            return ' '.join(meta_log, msg)
+            return ' '.join([meta_log, msg])
         return msg
 
     def format(self, record):

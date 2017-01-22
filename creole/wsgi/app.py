@@ -4,6 +4,7 @@ from flask import Flask
 
 from ..request import CreoleRequest
 from ..log import setup_logging
+from .api.v1 import blue_print as v1_bp
 
 
 class CreoleApp(Flask):
@@ -19,6 +20,7 @@ class CreoleApp(Flask):
 
     def _register_blueprints(self):
         """Register blueprints"""
+        self.register_blueprint(v1_bp, url_prefix='/ota/api/v1')
         pass
 
     def _setup_logger(self):
