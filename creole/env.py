@@ -1,2 +1,11 @@
+import sys
+
+from .conf import setting
+from . import const
+
+
 def is_prod_env():
-    return False
+    if sys.platform == 'darwin' or \
+            setting.CREOLE_ENV == const.CREOLE_TEST:
+        return False
+    return True

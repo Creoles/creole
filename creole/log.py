@@ -120,7 +120,7 @@ def _gen_syslog_log(app_name):
 
 
 def setup_logging(app_name):
-    if sys.platform == 'darwin' or (not is_prod_env()):
+    if not is_prod_env():
         log_dict = _gen_console_log(app_name)
     else:
         log_dict = _gen_syslog_log(app_name)
