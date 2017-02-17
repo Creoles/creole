@@ -1,3 +1,6 @@
+# coding: utf-8
+
+
 class BaseCreoleErrCode(object):
     """Some general error code."""
     # unknown error

@@ -1,3 +1,4 @@
+# coding: utf-8
 from sqlalchemy import (
     Column,
     Integer,
@@ -12,14 +13,13 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import validates
 
 from ..exc import InvalidateError
+from ..util import Enum
 
 
 class BaseMixin(object):
-    FIELD_STATUS_DELETED = 1
-    FIELD_STATUS_NO_DELETE = 0
-    FIELD_STATUSES = (
-        FIELD_STATUS_DELETED,
-        FIELD_STATUS_NO_DELETE,
+    FIELD_STATUSES = Enum(
+        ('FIELD_STATUS_DELETED', 1, u'已删除'),
+        ('FIELD_STATUS_NO_DELETE', 0, u'未删除'),
     )
 
     @declared_attr
