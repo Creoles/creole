@@ -5,6 +5,8 @@ from flask import Flask
 from ..request import CreoleRequest
 from ..log import setup_logging
 from .api.v1 import blue_print as v1_bp
+from ..db import DBManager
+from ..config import setting
 
 
 class CreoleApp(Flask):
@@ -14,6 +16,7 @@ class CreoleApp(Flask):
         super(CreoleApp, self).__init__(app_name)
         self._register_blueprints()
         self._setup_logger()
+        self._setup_db()
         self._register_error_handlers()
         self._register_before_request_handlers()
         self._register_after_request_handlers()
@@ -27,6 +30,11 @@ class CreoleApp(Flask):
         setup_logging(self.name)
         self.logger_name = self.name
         self._logger = logging.getLogger(self.name)
+
+    def _setup_db(self):
+        if getattr(setting, 'DB_SETTINGS', None):
+            self._db_manager = DBManager()
+            self._db_manager.create_sessions()
 
     def _register_error_handlers(self):
         pass
