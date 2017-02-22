@@ -1,4 +1,5 @@
 # coding: utf-8
+from flask import jsonify
 
 
 class BaseCreoleErrCode(object):
@@ -80,3 +81,11 @@ class ParameterError(CreoleError):
 
 class ClientError(CreoleError):
     pass
+
+
+def raise_error_json(err_obj):
+    assert isinstance(err_obj, CreoleError)
+    return jsonify({
+        'result': err_obj.errcode,
+        'message': err_obj.msg
+    })
