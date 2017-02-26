@@ -15,7 +15,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.dialects.mysql import (
     TINYINT,
 )
-from sqlalchemy import validates
+from sqlalchemy.orm import validates
 
 from . import Base, DBSession
 from .mixins import BaseMixin

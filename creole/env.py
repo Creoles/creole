@@ -1,6 +1,6 @@
 import sys
 
-from .conf import setting
+from .config import setting
 from . import const
 
 

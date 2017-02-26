@@ -16,6 +16,7 @@ class DBManager(object):
     def create_sessions(self):
         for db, db_config in setting.DB_SETTINGS.iteritems():
             self.add_session(db, db_config)
+        return self
 
     def get_session(self, name):
         try:
@@ -34,7 +35,8 @@ class DBManager(object):
         return self.create_engine(db, **db_config) 
 
     def create_engine(self, db, *args, **kwargs):
-        engine = sqlalchemy_create_engine(*args, **kwargs)
+        url = kwargs.pop('url')
+        engine = sqlalchemy_create_engine(url, **kwargs)
         logger.info('db: %s inited.', db)
         return engine
 
@@ -56,3 +58,4 @@ def gen_commit_deco(DBSession, raise_exc, error_type):
         return wrapper
     return decorated
 
+db_manager = DBManager().create_sessions()

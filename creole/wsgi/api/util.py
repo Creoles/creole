@@ -5,7 +5,7 @@ from flask import request
 from flask_restful.reqparse import RequestParser, Argument
 from werkzeug.exceptions import BadRequest
 
-from ....exc import raise_error_json, ParameterError
+from ...exc import raise_error_json, ParameterError
 
 logger = logging.getLogger(__name__)
 

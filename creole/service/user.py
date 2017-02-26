@@ -1,6 +1,7 @@
+# coding: utf-8
 from ..model.user import User
 from ..wsgi.api.v1.req_param.user import UserInfoParser
-from ..db import gen_commit_deco
+from ..model import gen_commit_deco
 from ..exc import (
     raise_error_json,
     ClientError,

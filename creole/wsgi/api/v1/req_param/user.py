@@ -1,3 +1,4 @@
+# coding: utf-8
 from flask_restful.reqparse import Argument
 
 from creole.util import Enum
