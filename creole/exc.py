@@ -14,6 +14,9 @@ class BaseCreoleErrCode(object):
     VALIDATION_ERROR = 2001
     PARAMETER_ERROR = 2002
 
+    # client error
+    USER_NAME_DUPLICATED = 3001
+
 
 class CreoleErrCode(BaseCreoleErrCode):
     pass
@@ -23,10 +26,15 @@ TRANSLATIONS = {
     200: u'ok',
     CreoleErrCode.UNKNOWN_SYSTEM_ERROR: u'unknown system error',
 
+    # database error
     CreoleErrCode.DATABASE_ERROR: u'database error',
 
+    # service error
     CreoleErrCode.VALIDATION_ERROR: u'validation error',
     CreoleErrCode.PARAMETER_ERROR: u'parameter error',
+
+    # client error
+    CreoleErrCode.USER_NAME_DUPLICATED: u'user name duplicated',
 }
 
 
@@ -37,6 +45,8 @@ class CreoleError(Exception):
     def __init__(self, errcode=None, msg=None, args=()):
         if not msg and (self.msg_pat and args):
             msg = self.msg_pat % args
+        if not msg:
+            msg = TRANSLATIONS.get(errcode, '') or None
 
         self.errcode = errcode or self.errcode
         self.msg = msg
@@ -54,18 +64,18 @@ class CreoleError(Exception):
 class SystemError(CreoleError):
     errcode = CreoleErrCode.UNKNOWN_SYSTEM_ERROR
 
-    def __init__(self):
+    def __init__(self, errcode=None, msg=None, args=()):
         self.errcode = self.errcode
-        self.msg = TRANSLATIONS.get(self.errcode, '')
+        self.msg = msg or TRANSLATIONS.get(self.errcode, '')
         super(SystemError, self).__init__(self.msg)
 
 
 class DatabaseError(CreoleError):
     errcode = CreoleErrCode.DATABASE_ERROR
 
-    def __init__(self):
+    def __init__(self, errcode=None, msg=None, args=()):
         self.errcode = self.errcode
-        self.msg = TRANSLATIONS.get(self.errcode, '')
+        self.msg = msg or TRANSLATIONS.get(self.errcode, '')
         super(SystemError, self).__init__(self.msg)
 
 

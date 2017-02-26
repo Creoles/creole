@@ -13,17 +13,28 @@ from sqlalchemy import (
 from sqlalchemy.dialects.mysql import (
     TINYINT,
 )
+from sqlalchemy import validates
 
-from . import Base
+from . import Base, DBSession
 from .mixins import BaseMixin
+from ..exc import raise_error_json, ClientError, CreoleErrCode
+# from ..util import Enum
 
 PASSWD_PREFIX = '5ad86243ed508405e'
 PASSWD_POSTFIX = 'a313c5b993b84'
 
 
-class UserMixin(Base, BaseMixin):
+# class Role(Base, BaseMixin):
+#     ROLES = Enum(
+#         ('SUPER_ADMIN', 999, u'超级管理员'),
+#         ('ADMIN', 99, u'管理员'),
+#         (),
+#     )
+
+
+class UserMixin(BaseMixin):
     # 基本用户信息
-    user_name = Column(Unicode(64), nullable=False, unique=True, doc=u'用户名')
+    user_name = Column(Unicode(40), nullable=False, unique=True, doc=u'用户名')
     password_hash = \
         Column(String(70), nullable=False, doc=u'用户密码哈希值')
     uuid = Column(String(40), nullable=False, unique=True, doc=u'uuid')
@@ -46,8 +57,12 @@ class UserMixin(Base, BaseMixin):
         md.update(PASSWD_PREFIX + password + PASSWD_POSTFIX)
         return binascii.hexlify(md.digest())
 
+    @validates('password_hash')
+    def validate_password_hash(self, key, password):
+        return self.passwd_hash(password)
 
-class CustomerUser(UserMixin):
+
+class CustomerUser(Base, UserMixin):
     """客户"""
     __tablename__ = 'customer_user'
 
@@ -55,7 +70,24 @@ class CustomerUser(UserMixin):
     address = Column(Unicode(256), nullable=False, doc=u'地址')
     telephone = Column(String(20), nullable=False, doc=u'联系电话')
 
+    @validates('user_name')
+    def validate_user_name(self, key, user_name):
+        """检验用户名"""
+        session = DBSession()
+        user = session.query(CustomerUser).filter(user_name == user_name).first()
+        if user is not None:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.USER_NAME_DUPLICATED))
 
-class AdminUser(UserMixin):
+class AdminUser(Base, UserMixin):
     """管理员"""
     __tablename__ = 'admin_user'
+
+    @validates('user_name')
+    def validate_user_name(self, key, user_name):
+        """检验用户名"""
+        session = DBSession()
+        user = session.query(AdminUser).filter(user_name == user_name).first()
+        if user is not None:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.USER_NAME_DUPLICATED))
