@@ -1,5 +1,11 @@
 from ..model.user import User
 from ..wsgi.api.v1.req_param.user import UserInfoParser
+from ..db import gen_commit_deco
+from ..exc import (
+    raise_error_json,
+    ClientError,
+    CreoleErrCode,
+)
 
 
 class UserService(object):
@@ -19,7 +25,8 @@ class UserService(object):
             telephone=telephone,
             role=role)
 
-    def get_user(key, type_):
+    @classmethod
+    def get_user(cls, key, type_):
         """查找用户"""
         user = None
         if type_ == UserInfoParser.TYPE.uuid:
@@ -37,3 +44,14 @@ class UserService(object):
             if not k.startswith('_'):
                 user_dict[k] = v
         return user_dict
+
+    
+    @classmethod
+    @gen_commit_deco
+    def delete_user(cls, key):
+        """删除用户"""
+        user = User.get_by_id(key)
+        if not user:
+            raise_error_json(ClientError(
+                errcode=CreoleErrCode.USER_NOT_EXIST))
+        User.delete(key)

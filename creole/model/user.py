@@ -80,16 +80,18 @@ class User(Base, BaseMixin):
 
     @classmethod
     def add_new_user(cls, **kwargs):
-        passwd = kwargs.pop('password')
-        password = cls.passwd_hash(passwd)
-        user = User(password=password, **kwargs)
         _uuid = str(uuid.uuid4())
         session = DBSession()
         _user = session.query(cls).filter(
-            uuid=_uuid).first()
+            cls.uuid==_uuid,
+            cls.is_delete==cls.FIELD_STATUSES.FIELD_STATUS_NO_DELETE
+        ).first()
         if _user:
             raise_error_json(
                 DatabaseError(msg='uuid has existed.'))
+        passwd = kwargs.pop('password')
+        password = cls.passwd_hash(passwd)
+        user = User(password=password, uuid=_uuid, **kwargs)
         session.add(user)
         try:
             session.commit()
@@ -100,24 +102,31 @@ class User(Base, BaseMixin):
     @classmethod
     def get_by_uuid(cls, uuid):
         session = DBSession()
-        user = session.query(cls).filter(uuid=uuid).first()
+        user = session.query(cls).filter(cls.uuid==uuid).first()
         return user
 
-    @classmethod
     def get_by_id(cls, id):
         session = DBSession()
-        user = session.query(cls).filter(id=id).first()
+        user = session.query(cls).filter(cls.id==id).first()
         return user
 
     @classmethod
     def get_by_name(cls, name):
         session = DBSession()
-        user = session.query(cls).filter(name=name).first()
+        user = session.query(cls).filter(cls.name==name).first()
         return user
 
     @classmethod
     def get_by_customer_name(cls, customer_name):
         session = DBSession()
         user = session.query(cls).filter(
-            customer_name=customer_name).first()
+            cls.customer_name==customer_name).first()
         return user
+
+    @classmethod
+    def delete(cls, id):
+        DBSession().query(cls).filter(
+            cls.id==id
+        ).update(
+            {'is_delete': cls.FIELD_STATUS.FIELD_STATUS_DELETED},
+            synchronize_session=False)

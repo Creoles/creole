@@ -1,6 +1,8 @@
 import logging
+import functools
 
 from sqlalchemy import create_engine as sqlalchemy_create_engine
+from sqlalchemy.exc import SQLAlchemyError
 
 from .config import setting
 
@@ -35,3 +37,22 @@ class DBManager(object):
         engine = sqlalchemy_create_engine(*args, **kwargs)
         logger.info('db: %s inited.', db)
         return engine
+
+def gen_commit_deco(DBSession, raise_exc, error_type):
+    def decorated(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            ret = func(*args, **kwargs)
+            session = DBSession()
+            try:
+                session.flush()
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise_exc(error_type(msg=repr(e)))
+            finally:
+                session.close()
+            return ret
+        return wrapper
+    return decorated
+

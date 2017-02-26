@@ -26,7 +26,11 @@ class UserInfoApi(ApiMixin, Resource):
         pass
 
     def delete(self, key):
-        pass
+        UserService.delete_user(key)
+        return jsonify({
+            'result': 200,
+            'message': 'ok'
+        })
 
 
 class CreateUserApi(ApiMixin, Resource):

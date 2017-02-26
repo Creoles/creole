@@ -16,6 +16,7 @@ class BaseCreoleErrCode(object):
 
     # client error
     USER_NAME_DUPLICATED = 3001
+    USER_NOT_EXIST = 3002
 
 
 class CreoleErrCode(BaseCreoleErrCode):
@@ -35,6 +36,7 @@ TRANSLATIONS = {
 
     # client error
     CreoleErrCode.USER_NAME_DUPLICATED: u'user name duplicated',
+    CreoleErrCode.USER_NOT_EXIST: u'user not exist',
 }
 
 
