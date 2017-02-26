@@ -2,10 +2,9 @@
 from flask_restful import Resource
 from flask import jsonify
 
-from .....util import Enum
 from ..req_param.user import UserInfoParser, UserInfoPostParser, UserInfoPutParser
 from ...util import ApiMixin
-from creole.handler.user import create_user
+from creole.service.user import UserService
 
 
 class UserInfoApi(ApiMixin, Resource):
@@ -18,7 +17,9 @@ class UserInfoApi(ApiMixin, Resource):
 
     def get(self, key):
         """查询用户信息"""
-        pass
+        return jsonify(
+            UserService.get_user(key, self.parsed_data['type_'])
+        )
 
     def put(self, key):
         """更新用户资料"""
@@ -37,7 +38,7 @@ class CreateUserApi(ApiMixin, Resource):
     def post(self):
         """添加新用户"""
         params = self.parsed_data
-        create_user(**params)
+        UserService.create_user(**params)
         return jsonify({
             'result': 200,
             'message': 'ok'

@@ -1,4 +1,5 @@
 # coding: utf-8
+import uuid
 import datetime
 import random
 import hashlib
@@ -10,6 +11,7 @@ from sqlalchemy import (
     String,
     DateTime,
 )
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.dialects.mysql import (
     TINYINT,
 )
@@ -17,7 +19,12 @@ from sqlalchemy import validates
 
 from . import Base, DBSession
 from .mixins import BaseMixin
-from ..exc import raise_error_json, ClientError, CreoleErrCode
+from ..exc import (
+    raise_error_json,
+    ClientError,
+    DatabaseError,
+    CreoleErrCode,
+)
 # from ..util import Enum
 
 PASSWD_PREFIX = '5ad86243ed508405e'
@@ -32,7 +39,8 @@ PASSWD_POSTFIX = 'a313c5b993b84'
 #     )
 
 
-class UserMixin(BaseMixin):
+class User(Base, BaseMixin):
+    __tablename__ = 'user'
     # 基本用户信息
     user_name = Column(Unicode(40), nullable=False, unique=True, doc=u'用户名')
     password_hash = \
@@ -41,6 +49,18 @@ class UserMixin(BaseMixin):
     session_id = Column(String(128), doc=u'用户session id')
     session_create_time = Column(DateTime, doc=u'session创建时间')
     role = Column(TINYINT, nullable=False, doc=u'用户权限')
+    customer_name = Column(Unicode(40), nullable=False, doc=u'客户名称')
+    address = Column(Unicode(256), nullable=False, doc=u'地址')
+    telephone = Column(String(20), nullable=False, doc=u'联系电话')
+
+    @validates('user_name')
+    def validate_user_name(self, key, user_name):
+        """检验用户名"""
+        session = DBSession()
+        user = session.query(User).filter(user_name == user_name).first()
+        if user is not None:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.USER_NAME_DUPLICATED))
 
     def new_session(self):
         # TODO: 建立缓存之后，注意新增new cache和删掉old cache
@@ -51,43 +71,53 @@ class UserMixin(BaseMixin):
         user_session = '%d%d' % (ss, rs)
         return user_session
 
-    def passwd_hash(self, password):
+    @classmethod
+    def passwd_hash(cls, password):
         """compute the hash value of the password"""
         md = hashlib.md5()
         md.update(PASSWD_PREFIX + password + PASSWD_POSTFIX)
         return binascii.hexlify(md.digest())
 
-    @validates('password_hash')
-    def validate_password_hash(self, key, password):
-        return self.passwd_hash(password)
-
-
-class CustomerUser(Base, UserMixin):
-    """客户"""
-    __tablename__ = 'customer_user'
-
-    customer_name = Column(Unicode(40), nullable=False, doc=u'客户名称')
-    address = Column(Unicode(256), nullable=False, doc=u'地址')
-    telephone = Column(String(20), nullable=False, doc=u'联系电话')
-
-    @validates('user_name')
-    def validate_user_name(self, key, user_name):
-        """检验用户名"""
+    @classmethod
+    def add_new_user(cls, **kwargs):
+        passwd = kwargs.pop('password')
+        password = cls.passwd_hash(passwd)
+        user = User(password=password, **kwargs)
+        _uuid = str(uuid.uuid4())
         session = DBSession()
-        user = session.query(CustomerUser).filter(user_name == user_name).first()
-        if user is not None:
+        _user = session.query(cls).filter(
+            uuid=_uuid).first()
+        if _user:
             raise_error_json(
-                ClientError(errcode=CreoleErrCode.USER_NAME_DUPLICATED))
+                DatabaseError(msg='uuid has existed.'))
+        session.add(user)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
-class AdminUser(Base, UserMixin):
-    """管理员"""
-    __tablename__ = 'admin_user'
-
-    @validates('user_name')
-    def validate_user_name(self, key, user_name):
-        """检验用户名"""
+    @classmethod
+    def get_by_uuid(cls, uuid):
         session = DBSession()
-        user = session.query(AdminUser).filter(user_name == user_name).first()
-        if user is not None:
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.USER_NAME_DUPLICATED))
+        user = session.query(cls).filter(uuid=uuid).first()
+        return user
+
+    @classmethod
+    def get_by_id(cls, id):
+        session = DBSession()
+        user = session.query(cls).filter(id=id).first()
+        return user
+
+    @classmethod
+    def get_by_name(cls, name):
+        session = DBSession()
+        user = session.query(cls).filter(name=name).first()
+        return user
+
+    @classmethod
+    def get_by_customer_name(cls, customer_name):
+        session = DBSession()
+        user = session.query(cls).filter(
+            customer_name=customer_name).first()
+        return user
