@@ -45,13 +45,22 @@ class UserService(object):
                 user_dict[k] = v
         return user_dict
 
+    @classmethod
+    def _get_user(cls, key):
+        user = User.get_by_id(key)
+        if not user:
+            raise_error_json(ClientError(
+                errcode=CreoleErrCode.USER_NOT_EXIST))
     
     @classmethod
     @gen_commit_deco
     def delete_user(cls, key):
         """删除用户"""
-        user = User.get_by_id(key)
-        if not user:
-            raise_error_json(ClientError(
-                errcode=CreoleErrCode.USER_NOT_EXIST))
+        cls._get_user(key)
         User.delete(key)
+
+    @classmethod
+    @gen_commit_deco
+    def update_user(cls, key, **kwargs):
+        cls._get_user(key)
+        User.update(key, **kwargs)

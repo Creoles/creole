@@ -130,3 +130,9 @@ class User(Base, BaseMixin):
         ).update(
             {'is_delete': cls.FIELD_STATUS.FIELD_STATUS_DELETED},
             synchronize_session=False)
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        DBSession().query(cls).filter(
+            cls.id==id
+        ).update(kwargs, synchronize_session=False)

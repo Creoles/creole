@@ -11,7 +11,7 @@ class UserInfoParser(BaseRequestParser):
         ('name', 2, u'根据用户名查询'),
         ('customer_name', 3, u'根据客户名查询'),
     )
-    type_ = Argument('type', required=True, default=TYPE.id)
+    type_ = Argument('type', default=TYPE.id)
 
 
 class UserInfoPutParser(BaseRequestParser):

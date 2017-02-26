@@ -23,7 +23,11 @@ class UserInfoApi(ApiMixin, Resource):
 
     def put(self, key):
         """更新用户资料"""
-        pass
+        UserService.update_user(key, **self.parsed_data)
+        return jsonify({
+            'result': 200,
+            'message': 'ok'
+        })
 
     def delete(self, key):
         UserService.delete_user(key)
