@@ -1,13 +1,12 @@
 # coding: utf-8
-from flask_restful import Resource
 from flask import jsonify
 
 from ..req_param.user import UserInfoParser, UserInfoPostParser, UserInfoPutParser
-from ...util import ApiMixin
+from ...util import Resource
 from creole.service.user import UserService
 
 
-class UserInfoApi(ApiMixin, Resource):
+class UserInfoApi(Resource):
     meta = {
         'args_parser_dict': {
             '*': UserInfoParser,
@@ -15,11 +14,14 @@ class UserInfoApi(ApiMixin, Resource):
         }
     }
 
-    def get(self, key):
+    def get(self, info):
         """查询用户信息"""
-        return jsonify(
-            UserService.get_user(key, self.parsed_data['type_'])
-        )
+        if self.parsed_data['type'] == UserInfoParser.TYPE.id:
+            info = int(info)
+        return jsonify({
+            'result': 200,
+            'user': UserService.get_user(info, self.parsed_data['type'])
+        })
 
     def put(self, key):
         """更新用户资料"""
@@ -37,12 +39,13 @@ class UserInfoApi(ApiMixin, Resource):
         })
 
 
-class CreateUserApi(ApiMixin, Resource):
+class CreateUserApi(Resource):
     meta = {
         'args_parser_dict': {
             'post': UserInfoPostParser,
         }
     }
+
     def post(self):
         """添加新用户"""
         params = self.parsed_data

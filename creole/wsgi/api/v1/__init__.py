@@ -9,5 +9,5 @@ blue_print = Blueprint('api_v1', __name__)
 app = Api(blue_print)
 
 # 用户
-app.add_resource(UserInfoApi, '/user/<key>', endpoint='user-info')
-app.add_resource(CreateUserApi, '/create_user', endpoint='user-create')
+app.add_resource(UserInfoApi, '/user/<info>', endpoint='user-info')
+app.add_resource(CreateUserApi, '/user/create_user', endpoint='user-create')
