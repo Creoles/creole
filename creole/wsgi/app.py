@@ -21,7 +21,6 @@ class CreoleApp(Flask):
     def _register_blueprints(self):
         """Register blueprints"""
         self.register_blueprint(v1_bp, url_prefix='/ota/api/v1')
-        pass
 
     def _setup_logger(self):
         setup_logging(self.name)

@@ -1,9 +1,9 @@
-import os
+# coding: utf-8
 import types
 import warnings
 import functools
 
-from .util import load_module_from_string
+from .util import import_string 
 from . import settings
 
 
@@ -40,14 +40,19 @@ class CreoleSetting(object):
             e.strerror = 'Unable to load configuration file (%s)' % e.strerror
             raise
         self.load_from_object(d)
+        return self
 
     @check_setting_initialized
     def load_from_object(self, obj):
+        #  import pdb
+        #  pdb.set_trace()
         if isinstance(obj, basestring):
-            obj = load_module_from_string(obj)
+            obj = import_string(obj)
         for key, value in obj.__dict__.iteritems():
-            if not key.startswith('__'):
+            if key.isupper() and \
+                    not key.startswith('__'):
                 self._settings[key] = value
+        return self
 
     def __getitem__(self, key):
         return self._settings.get(key)
@@ -59,37 +64,8 @@ class CreoleSetting(object):
         return val
 
 
-class EnvReader(object):
-    """Get the settings from the Environ.
-
-    Usage: r = EnvReader()
-           r.get('SETTING_VAR_NAME')
-    """
-    def __init__(self):
-        self._setting_dict = {}
-
-    def _normalize(self, key):
-        return key.strip()
-
-    def __getitem__(self, key):
-        value = self._setting_dict.get(key, None)
-        if not value:
-            value = os.getenv(key, None)
-            self._setting_dict.__setitem__(key, value)
-        return value
-
-    def get(self, key, default=None):
-        value = self.__getitem__(key)
-        if value is None:
-            value = default
-        return value
-
-
-def get_setting_manager():
-    return EnvReader()
-
-
-setting = CreoleSetting().load_from_object(settings)
+setting = CreoleSetting()
+setting.load_from_object(settings)
 """Get the environ var like this:
     setting.var_name
 or  setting['var_name']
