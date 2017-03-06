@@ -19,8 +19,6 @@ class UserInfoApi(Resource):
 
     def get(self, info):
         """查询用户信息"""
-        if self.parsed_data['type'] == UserInfoParser.TYPE.id:
-            info = int(info)
         try:
             user = UserService.get_user(info, self.parsed_data['type'])
         except ClientError as e:

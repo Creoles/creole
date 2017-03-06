@@ -1,6 +1,4 @@
 # coding: utf-8
-import logging
-logger = logging.getLogger(__name__)
 import uuid
 import datetime
 import random
@@ -96,8 +94,6 @@ class User(Base, BaseMixin):
         password_hash = cls.passwd_hash(passwd)
         user = User(password_hash=password_hash, uuid=_uuid, **kwargs)
         session.add(user)
-        logger.info('*******')
-        logger.info(user.role)
         try:
             session.commit()
         except SQLAlchemyError as e:
@@ -110,6 +106,7 @@ class User(Base, BaseMixin):
         user = session.query(cls).filter(cls.uuid==uuid).first()
         return user
 
+    @classmethod
     def get_by_id(cls, id):
         session = DBSession()
         user = session.query(cls).filter(cls.id==id).first()

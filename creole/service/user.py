@@ -33,7 +33,7 @@ class UserService(object):
         if type_ == UserInfoParser.TYPE.uuid:
             user = User.get_by_uuid(key)
         elif type_ == UserInfoParser.TYPE.id:
-            user = User.get_by_id(key)
+            user = User.get_by_id(int(key))
         elif type_ == UserInfoParser.TYPE.name:
             user = User.get_by_name(key)
         elif type_ == UserInfoParser.TYPE.customer_name:
@@ -41,7 +41,7 @@ class UserService(object):
         if user is None:
             return {}
         user_dict = {}
-        for k, v in user.__dict__:
+        for k, v in user.__dict__.iteritems():
             if not k.startswith('_'):
                 user_dict[k] = v
         return user_dict
