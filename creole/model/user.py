@@ -90,8 +90,8 @@ class User(Base, BaseMixin):
             raise_error_json(
                 DatabaseError(msg='uuid has existed.'))
         passwd = kwargs.pop('password')
-        password = cls.passwd_hash(passwd)
-        user = User(password=password, uuid=_uuid, **kwargs)
+        password_hash = cls.passwd_hash(passwd)
+        user = User(password_hash=password_hash, uuid=_uuid, **kwargs)
         session.add(user)
         try:
             session.commit()

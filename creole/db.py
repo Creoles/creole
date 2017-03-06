@@ -1,12 +1,45 @@
 import logging
 import functools
+import uuid
 
+import gevent
 from sqlalchemy import create_engine as sqlalchemy_create_engine
+from sqlalchemy.orm import Session, sessionmaker, scoped_session
 from sqlalchemy.exc import SQLAlchemyError
 
 from .config import setting
 
 logger = logging.getLogger(__name__)
+
+
+class RoutingSession(Session):
+    def __init__(self, engine, *args, **kwargs):
+        super(RoutingSession, self).__init__(*args, **kwargs)
+        self.engine = engine
+
+    def get_bind(self, mapper=None, clause=None):
+        return self.engine
+
+    def rollback(self):
+        with gevent.Timeout(5):
+            super(RoutingSession, self).rollback()
+
+    def close(self):
+        with gevent.Timeout(5):
+            super(RoutingSession, self).close()
+
+
+def make_session(engine, info=None):
+    session = scoped_session(
+        session_factory=sessionmaker(
+            class_=RoutingSession,
+            expire_on_commit=False,
+            engine=engine,
+            info=info or {"name": uuid.uuid4.hex},
+        ),
+        scopefunc=None
+    )
+    return session
 
 
 class DBManager(object):
@@ -31,8 +64,9 @@ class DBManager(object):
         self._session_map[db] = session
         return session
 
-    def _create_session(self, db, db_config):
-        return self.create_engine(db, **db_config) 
+    def _create_session(self, db_name, db_config):
+        engine = self.create_engine(db_name, **db_config) 
+        return make_session(engine, info={"name": db_name})
 
     def create_engine(self, db, *args, **kwargs):
         url = kwargs.pop('url')

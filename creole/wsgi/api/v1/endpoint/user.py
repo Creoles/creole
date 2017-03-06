@@ -1,7 +1,4 @@
 # coding: utf-8
-import logging
-logger = logging.getLogger(__name__)
-
 from ..req_param.user import (
     UserInfoParser,
     UserInfoPostParser,
@@ -28,10 +25,7 @@ class UserInfoApi(Resource):
             user = UserService.get_user(info, self.parsed_data['type'])
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
-        resp = api_response(data=user)
-        logger.info(resp.__dict__)
-        return resp
-        # return api_response(data=user)
+        return api_response(data=user)
 
     def put(self, key):
         """更新用户资料"""
