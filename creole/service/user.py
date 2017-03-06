@@ -11,7 +11,7 @@ from ..exc import (
 
 class UserService(object):
     @classmethod
-    def create_user(cls, user_name, password, role=999, 
+    def create_user(cls, user_name, password, role=99, 
                     customer_name=None, address=None,
                     telephone=None, is_admin=False):
         """创建新用户"""

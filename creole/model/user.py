@@ -1,4 +1,6 @@
 # coding: utf-8
+import logging
+logger = logging.getLogger(__name__)
 import uuid
 import datetime
 import random
@@ -49,7 +51,7 @@ class User(Base, BaseMixin):
     session_id = Column(String(128), doc=u'用户session id')
     session_create_time = Column(DateTime, doc=u'session创建时间')
     role = Column(TINYINT, nullable=False, doc=u'用户权限')
-    customer_name = Column(Unicode(40), nullable=False, doc=u'客户名称')
+    customer_name = Column(Unicode(40), nullable=True, doc=u'客户名称')
     address = Column(Unicode(256), nullable=False, doc=u'地址')
     telephone = Column(String(20), nullable=False, doc=u'联系电话')
 
@@ -57,10 +59,11 @@ class User(Base, BaseMixin):
     def validate_user_name(self, key, user_name):
         """检验用户名"""
         session = DBSession()
-        user = session.query(User).filter(user_name == user_name).first()
+        user = session.query(User).filter(User.user_name == user_name).first()
         if user is not None:
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.USER_NAME_DUPLICATED))
+        return user_name
 
     def new_session(self):
         # TODO: 建立缓存之后，注意新增new cache和删掉old cache
@@ -93,6 +96,8 @@ class User(Base, BaseMixin):
         password_hash = cls.passwd_hash(passwd)
         user = User(password_hash=password_hash, uuid=_uuid, **kwargs)
         session.add(user)
+        logger.info('*******')
+        logger.info(user.role)
         try:
             session.commit()
         except SQLAlchemyError as e:
