@@ -39,6 +39,9 @@ TRANSLATIONS = {
     CreoleErrCode.USER_NOT_EXIST: u'user not exist',
 }
 
+def get_translation(code):
+    return TRANSLATIONS.get(code, '')
+
 
 class CreoleError(Exception):
     errcode = None
@@ -69,7 +72,7 @@ class SystemError(CreoleError):
     def __init__(self, errcode=None, msg=None, args=()):
         self.errcode = self.errcode
         self.msg = msg or TRANSLATIONS.get(self.errcode, '')
-        super(SystemError, self).__init__(self.msg)
+        super(SystemError, self).__init__(msg=self.msg)
 
 
 class DatabaseError(CreoleError):
@@ -78,26 +81,23 @@ class DatabaseError(CreoleError):
     def __init__(self, errcode=None, msg=None, args=()):
         self.errcode = self.errcode
         self.msg = msg or TRANSLATIONS.get(self.errcode, '')
-        super(SystemError, self).__init__(self.msg)
-
-
-class InvalidateError(CreoleError):
-    msg_pat = 'invalidate argument: %r: %s'
-    errcode = CreoleErrCode.VALIDATION_ERROR
-
-
-class ParameterError(CreoleError):
-    msg_pat = 'parameter error: %r'
-    errcode = CreoleErrCode.PARAMETER_ERROR
+        super(DatabaseError, self).__init__(msg=self.msg)
 
 
 class ClientError(CreoleError):
     pass
 
 
+class InvalidateError(ClientError):
+    msg_pat = 'invalidate argument: %r: %s'
+    errcode = CreoleErrCode.VALIDATION_ERROR
+
+
+class ParameterError(ClientError):
+    msg_pat = 'parameter error: %r'
+    errcode = CreoleErrCode.PARAMETER_ERROR
+ 
+
 def raise_error_json(err_obj):
-    assert isinstance(err_obj, CreoleError)
-    return jsonify({
-        'result': err_obj.errcode,
-        'message': err_obj.msg
-    })
+    assert isinstance(err_obj, CreoleError) is True
+    raise err_obj

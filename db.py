@@ -1,12 +1,11 @@
-#! /usr/bin/env python
 # -*- coding:utf-8 -*-
 import argparse
 from sqlalchemy import create_engine
 
-from creole.model import Base
+from creole.model.user import Base
 from creole.config import setting
 
-engine = create_engine(setting.DB_SETTINGS, echo=True)
+engine = create_engine(setting.CREOLE_DB_URL, echo=True)
 
 
 def create_all():

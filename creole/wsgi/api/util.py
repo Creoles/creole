@@ -1,12 +1,12 @@
 # coding: utf-8
 import logging
 
-from flask import request
+from flask import request, jsonify, make_response
 from flask_restful import Resource as BaseResource
 from flask_restful.reqparse import RequestParser, Argument
 from werkzeug.exceptions import BadRequest
 
-from ...exc import raise_error_json, ParameterError
+from ...exc import raise_error_json, ParameterError, get_translation
 
 logger = logging.getLogger(__name__)
 
@@ -71,4 +71,22 @@ class Resource(BaseResource):
     
     def dispatch_request(self, *args, **kwargs):
         self._set_method_decorate()
-        super(Resource, self).dispatch_request(self, *args, **kwargs)
+        return super(Resource, self).dispatch_request(self, *args, **kwargs)
+
+
+def api_response(data=None, code=200, message=None, status_code=200):
+    translation = message or get_translation(code)
+    message = 'api response {}:{}:{}'.format(
+        code, repr(translation), repr(data)
+    )
+    logger.info(message)
+
+    return make_response(
+        jsonify(
+            {
+                'code': code,
+                'data': data,
+                'message': translation,
+            }
+        ), status_code
+    )

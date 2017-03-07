@@ -24,6 +24,7 @@ from ..exc import (
     ClientError,
     DatabaseError,
     CreoleErrCode,
+    ParameterError,
 )
 # from ..util import Enum
 
@@ -49,7 +50,7 @@ class User(Base, BaseMixin):
     session_id = Column(String(128), doc=u'用户session id')
     session_create_time = Column(DateTime, doc=u'session创建时间')
     role = Column(TINYINT, nullable=False, doc=u'用户权限')
-    customer_name = Column(Unicode(40), nullable=False, doc=u'客户名称')
+    customer_name = Column(Unicode(40), nullable=True, doc=u'客户名称')
     address = Column(Unicode(256), nullable=False, doc=u'地址')
     telephone = Column(String(20), nullable=False, doc=u'联系电话')
 
@@ -57,10 +58,11 @@ class User(Base, BaseMixin):
     def validate_user_name(self, key, user_name):
         """检验用户名"""
         session = DBSession()
-        user = session.query(User).filter(user_name == user_name).first()
+        user = session.query(User).filter(User.user_name == user_name).first()
         if user is not None:
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.USER_NAME_DUPLICATED))
+        return user_name
 
     def new_session(self):
         # TODO: 建立缓存之后，注意新增new cache和删掉old cache
@@ -84,14 +86,14 @@ class User(Base, BaseMixin):
         session = DBSession()
         _user = session.query(cls).filter(
             cls.uuid==_uuid,
-            cls.is_delete==cls.FIELD_STATUSES.FIELD_STATUS_NO_DELETE
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
         ).first()
         if _user:
             raise_error_json(
                 DatabaseError(msg='uuid has existed.'))
         passwd = kwargs.pop('password')
-        password = cls.passwd_hash(passwd)
-        user = User(password=password, uuid=_uuid, **kwargs)
+        password_hash = cls.passwd_hash(passwd)
+        user = User(password_hash=password_hash, uuid=_uuid, **kwargs)
         session.add(user)
         try:
             session.commit()
@@ -102,25 +104,37 @@ class User(Base, BaseMixin):
     @classmethod
     def get_by_uuid(cls, uuid):
         session = DBSession()
-        user = session.query(cls).filter(cls.uuid==uuid).first()
-        return user
-
-    def get_by_id(cls, id):
-        session = DBSession()
-        user = session.query(cls).filter(cls.id==id).first()
+        user = session.query(cls).filter(
+            cls.uuid==uuid,
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        ).first()
         return user
 
     @classmethod
-    def get_by_name(cls, name):
+    def get_by_id(cls, id):
         session = DBSession()
-        user = session.query(cls).filter(cls.name==name).first()
+        user = session.query(cls).filter(
+            cls.id==id,
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        ).first()
+        return user
+
+    @classmethod
+    def get_by_name(cls, user_name):
+        session = DBSession()
+        user = session.query(cls).filter(
+            cls.user_name==user_name,
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        ).first()
         return user
 
     @classmethod
     def get_by_customer_name(cls, customer_name):
         session = DBSession()
         user = session.query(cls).filter(
-            cls.customer_name==customer_name).first()
+            cls.customer_name==customer_name,
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        ).first()
         return user
 
     @classmethod
@@ -133,6 +147,23 @@ class User(Base, BaseMixin):
 
     @classmethod
     def update(cls, id, **kwargs):
-        DBSession().query(cls).filter(
-            cls.id==id
-        ).update(kwargs, synchronize_session=False)
+        """更新字段"""
+        session = DBSession()
+        user = session.query(cls).filter(
+            cls.id==id, 
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        ).first()
+        if user is None:
+            raise_error_json(ParameterError(args=(id,)))
+        for k, v in kwargs.iteritems():
+            if v is not None:
+                if k == 'password':
+                    v = cls.passwd_hash(v)
+                    k = 'password_hash'
+                setattr(user, k, v)
+        try:
+            session.merge(user)
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))

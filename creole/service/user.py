@@ -11,7 +11,7 @@ from ..exc import (
 
 class UserService(object):
     @classmethod
-    def create_user(cls, user_name, password, role=999, 
+    def create_user(cls, user_name, password, role=99, 
                     customer_name=None, address=None,
                     telephone=None, is_admin=False):
         """创建新用户"""
@@ -33,7 +33,7 @@ class UserService(object):
         if type_ == UserInfoParser.TYPE.uuid:
             user = User.get_by_uuid(key)
         elif type_ == UserInfoParser.TYPE.id:
-            user = User.get_by_id(key)
+            user = User.get_by_id(int(key))
         elif type_ == UserInfoParser.TYPE.name:
             user = User.get_by_name(key)
         elif type_ == UserInfoParser.TYPE.customer_name:
@@ -41,7 +41,7 @@ class UserService(object):
         if user is None:
             return {}
         user_dict = {}
-        for k, v in user.__dict__:
+        for k, v in user.__dict__.iteritems():
             if not k.startswith('_'):
                 user_dict[k] = v
         return user_dict
@@ -63,5 +63,4 @@ class UserService(object):
     @classmethod
     @gen_commit_deco
     def update_user(cls, key, **kwargs):
-        cls._get_user(key)
         User.update(key, **kwargs)

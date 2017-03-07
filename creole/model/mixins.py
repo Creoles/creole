@@ -17,7 +17,7 @@ from ..util import Enum
 
 
 class BaseMixin(object):
-    FIELD_STATUSES = Enum(
+    FIELD_STATUS = Enum(
         ('FIELD_STATUS_DELETED', 1, u'已删除'),
         ('FIELD_STATUS_NO_DELETE', 0, u'未删除'),
     )

@@ -1,8 +1,11 @@
 # coding: utf-8
-from flask import jsonify
-
-from ..req_param.user import UserInfoParser, UserInfoPostParser, UserInfoPutParser
-from ...util import Resource
+from ..req_param.user import (
+    UserInfoParser,
+    UserInfoPostParser,
+    UserInfoPutParser,
+)
+from ...util import Resource, api_response
+from creole.exc import ClientError
 from creole.service.user import UserService
 
 
@@ -16,27 +19,26 @@ class UserInfoApi(Resource):
 
     def get(self, info):
         """查询用户信息"""
-        if self.parsed_data['type'] == UserInfoParser.TYPE.id:
-            info = int(info)
-        return jsonify({
-            'result': 200,
-            'user': UserService.get_user(info, self.parsed_data['type'])
-        })
+        try:
+            user = UserService.get_user(info, self.parsed_data['type'])
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response(data=user)
 
-    def put(self, key):
+    def put(self, info):
         """更新用户资料"""
-        UserService.update_user(key, **self.parsed_data)
-        return jsonify({
-            'result': 200,
-            'message': 'ok'
-        })
+        try:
+            UserService.update_user(info, **self.parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
 
-    def delete(self, key):
-        UserService.delete_user(key)
-        return jsonify({
-            'result': 200,
-            'message': 'ok'
-        })
+    def delete(self, info):
+        try:
+            UserService.delete_user(info)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
 
 
 class CreateUserApi(Resource):
@@ -49,8 +51,8 @@ class CreateUserApi(Resource):
     def post(self):
         """添加新用户"""
         params = self.parsed_data
-        UserService.create_user(**params)
-        return jsonify({
-            'result': 200,
-            'message': 'ok'
-        })
+        try:
+            UserService.create_user(**params)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
