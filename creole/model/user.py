@@ -24,6 +24,7 @@ from ..exc import (
     ClientError,
     DatabaseError,
     CreoleErrCode,
+    ParameterError,
 )
 # from ..util import Enum
 
@@ -85,7 +86,7 @@ class User(Base, BaseMixin):
         session = DBSession()
         _user = session.query(cls).filter(
             cls.uuid==_uuid,
-            cls.is_delete==cls.FIELD_STATUSES.FIELD_STATUS_NO_DELETE
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
         ).first()
         if _user:
             raise_error_json(
@@ -103,26 +104,37 @@ class User(Base, BaseMixin):
     @classmethod
     def get_by_uuid(cls, uuid):
         session = DBSession()
-        user = session.query(cls).filter(cls.uuid==uuid).first()
+        user = session.query(cls).filter(
+            cls.uuid==uuid,
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        ).first()
         return user
 
     @classmethod
     def get_by_id(cls, id):
         session = DBSession()
-        user = session.query(cls).filter(cls.id==id).first()
+        user = session.query(cls).filter(
+            cls.id==id,
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        ).first()
         return user
 
     @classmethod
-    def get_by_name(cls, name):
+    def get_by_name(cls, user_name):
         session = DBSession()
-        user = session.query(cls).filter(cls.name==name).first()
+        user = session.query(cls).filter(
+            cls.user_name==user_name,
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        ).first()
         return user
 
     @classmethod
     def get_by_customer_name(cls, customer_name):
         session = DBSession()
         user = session.query(cls).filter(
-            cls.customer_name==customer_name).first()
+            cls.customer_name==customer_name,
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        ).first()
         return user
 
     @classmethod
@@ -135,6 +147,23 @@ class User(Base, BaseMixin):
 
     @classmethod
     def update(cls, id, **kwargs):
-        DBSession().query(cls).filter(
-            cls.id==id
-        ).update(kwargs, synchronize_session=False)
+        """更新字段"""
+        session = DBSession()
+        user = session.query(cls).filter(
+            cls.id==id, 
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        ).first()
+        if user is None:
+            raise_error_json(ParameterError(args=(id,)))
+        for k, v in kwargs.iteritems():
+            if v is not None:
+                if k == 'password':
+                    v = cls.passwd_hash(v)
+                    k = 'password_hash'
+                setattr(user, k, v)
+        try:
+            session.merge(user)
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))

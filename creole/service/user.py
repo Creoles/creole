@@ -63,5 +63,4 @@ class UserService(object):
     @classmethod
     @gen_commit_deco
     def update_user(cls, key, **kwargs):
-        cls._get_user(key)
         User.update(key, **kwargs)

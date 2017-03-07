@@ -25,17 +25,17 @@ class UserInfoApi(Resource):
             return api_response(code=e.errcode, message=e.msg)
         return api_response(data=user)
 
-    def put(self, key):
+    def put(self, info):
         """更新用户资料"""
         try:
-            UserService.update_user(key, **self.parsed_data)
+            UserService.update_user(info, **self.parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
 
-    def delete(self, key):
+    def delete(self, info):
         try:
-            UserService.delete_user(key)
+            UserService.delete_user(info)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
