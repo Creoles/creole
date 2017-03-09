@@ -48,8 +48,8 @@ class Resource(BaseResource):
                     ))
 
                     # self
-                    args[0].parsed_data = parsed_data
-                    return func(**kwargs)
+                    self.parsed_data = parsed_data
+                    return func(*args, **kwargs)
 
                 return decorated
             return wrapper
@@ -67,11 +67,13 @@ class Resource(BaseResource):
             meth = getattr(self, meth_name, None)
             if meth:
                 self._set_req_method_decorate(meth_name)
-                setattr(self, meth_name, self._req_method_decorate[meth_name][0](meth))
+                if self._req_method_decorate.get(meth_name, None):
+                    setattr(self, meth_name, self._req_method_decorate[meth_name][0](meth))
     
     def dispatch_request(self, *args, **kwargs):
         self._set_method_decorate()
-        return super(Resource, self).dispatch_request(self, *args, **kwargs)
+        logger.info(kwargs)
+        return super(Resource, self).dispatch_request(*args, **kwargs)
 
 
 def api_response(data=None, code=200, message=None, status_code=200):
