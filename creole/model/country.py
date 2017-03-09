@@ -119,6 +119,13 @@ class City(Base, BaseMixin):
                 ClientError(errcode=CreoleErrCode.CITY_NAME_DUPLICATED))
         return name_en
 
+    @validates('country_id')
+    def _validate_country_id(self, key, country_id):
+        country = Country.get(country_id)
+        if not country:
+            raise_error_json(ClientError(errcode=CreoleErrCode.COUNTRY_NOT_EXIST))
+        return country
+
     @classmethod
     def get(cls, id):
         city = DBSession().query(cls).filter(
@@ -159,9 +166,10 @@ class City(Base, BaseMixin):
             synchronize_session=False)
 
     @classmethod
-    def create(cls, name, name_en):
+    def create(cls, name, name_en, country_id):
         session = DBSession()
-        city = cls(name=name, name_en=name_en)
+        city = cls(
+            name=name, name_en=name_en, country_id=country_id)
         session.add(city)
         try:
             session.commit()

@@ -56,5 +56,5 @@ class CityService(object):
         City.delete(id)
 
     @classmethod
-    def create_city(cls, name, name_en):
-        City.create(name, name_en)
+    def create_city(cls, name, name_en, country_id):
+        City.create(name, name_en, country_id)

@@ -20,6 +20,7 @@ class BaseCreoleErrCode(object):
 
     COUNTRY_NAME_DUPLICATED = 3010
     CITY_NAME_DUPLICATED = 3011
+    COUNTRY_NOT_EXIST = 3012
 
 class CreoleErrCode(BaseCreoleErrCode):
     pass
@@ -42,6 +43,7 @@ TRANSLATIONS = {
 
     CreoleErrCode.COUNTRY_NAME_DUPLICATED: u'country name or name_en duplicated',
     CreoleErrCode.CITY_NAME_DUPLICATED: u'city name or name_en duplicated',
+    CreoleErrCode.COUNTRY_NOT_EXIST: u'country do not exist',
 
 }
 

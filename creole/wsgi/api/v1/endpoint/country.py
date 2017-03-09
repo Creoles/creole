@@ -1,7 +1,7 @@
 # coding: utf-8
 from ...util import Resource, api_response
 from .....service.country import CountryService, CityService
-from ..req_param.country import CountryApiParser
+from ..req_param.country import CountryApiParser, CityApiParser
 from creole.exc import ClientError
 
 
@@ -9,7 +9,6 @@ class CountryApi(Resource):
     meta = {
         'args_parser_dict': {
             'put': CountryApiParser,
-            'delete': CountryApiParser,
         }
     }
 
@@ -56,8 +55,7 @@ class CreateCountryApi(Resource):
 class CityApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CountryApiParser,
-            'delete': CountryApiParser,
+            'put': CityApiParser,
         }
     }
 
@@ -87,7 +85,7 @@ class CityApi(Resource):
 class CreateCityApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': CountryApiParser,
+            'post': CityApiParser,
         }
     }
 
@@ -95,7 +93,10 @@ class CreateCityApi(Resource):
         """添加国家"""
         try:
             CityService.create_city(
-                self.parsed_data['name'], self.parsed_data['name_en'])
+                self.parsed_data['name'],
+                self.parsed_data['name_en'],
+                self.parsed_data['country_id']
+            )
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
