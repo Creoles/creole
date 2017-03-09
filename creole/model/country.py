@@ -56,6 +56,11 @@ class Country(Base, BaseMixin):
         return country
 
     @classmethod
+    def get_all(cls):
+        country_list = DBSession().query(cls).all()
+        return country_list
+
+    @classmethod
     def update(cls, id, **kwargs):
         session = DBSession()
         country = cls.get(id)

@@ -21,6 +21,53 @@ class CountryService(object):
         return country_data
 
     @classmethod
+    def get_all_country(cls):
+        """获取全部国家信息
+        
+        :return a list object:
+
+            [
+                {
+                    'name': u'中国',
+                    'name_en': 'China',
+                    'city_data': [
+                        {
+                            'name': u'北京',
+                            'name_en': 'Beijing'
+                        }, {
+                            'name': u'上海',
+                            'name_en': 'Shanghai'
+                        }
+                    ]
+                }, {
+                    'name': u'美国',
+                    'name_en': 'America',
+                    'city_data': [
+                        {
+                            'name': u'纽约',
+                            'name_en': 'New York'
+                        }, {
+                            'name': u'旧金山',
+                            'name_en': 'San Francisco'
+                        }
+                    ]
+                },
+            ]
+        """
+        resp_data = []
+        country_list = Country.get_all()
+        for country in country_list:
+            country_dict = {'city_data': []}
+            country_dict['name'] = country.name
+            country_dict['name_en'] = country.name_en
+            city_list = City.get_by_country_id(country.id)
+            for city in city_list:
+                country_dict['city_data'].append(
+                    {'name': city.name, 'name_en': city.name_en})
+            resp_data.append(country_dict)
+        return resp_data
+
+    @classmethod
     def update_by_id(cls, id, **kwargs):
         return Country.update(id, **kwargs)
 

@@ -35,6 +35,13 @@ class CountryApi(Resource):
         return api_response()
 
 
+class AllCountryApi(Resource):
+    def get(self):
+        """获取全部国家信息"""
+        country_list = CountryService.get_all_country()
+        return api_response(data=country_list) 
+
+
 class CreateCountryApi(Resource):
     meta = {
         'args_parser_dict': {
