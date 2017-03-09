@@ -58,7 +58,10 @@ class User(Base, BaseMixin):
     def validate_user_name(self, key, user_name):
         """检验用户名"""
         session = DBSession()
-        user = session.query(User).filter(User.user_name == user_name).first()
+        user = session.query(User).filter(
+            User.user_name == user_name,
+            User.is_delete == User.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        ).first()
         if user is not None:
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.USER_NAME_DUPLICATED))
