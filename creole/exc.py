@@ -18,6 +18,9 @@ class BaseCreoleErrCode(object):
     USER_NAME_DUPLICATED = 3001
     USER_NOT_EXIST = 3002
 
+    COUNTRY_NAME_DUPLICATED = 3010
+    CITY_NAME_DUPLICATED = 3011
+    COUNTRY_NOT_EXIST = 3012
 
 class CreoleErrCode(BaseCreoleErrCode):
     pass
@@ -37,6 +40,11 @@ TRANSLATIONS = {
     # client error
     CreoleErrCode.USER_NAME_DUPLICATED: u'user name duplicated',
     CreoleErrCode.USER_NOT_EXIST: u'user not exist',
+
+    CreoleErrCode.COUNTRY_NAME_DUPLICATED: u'country name or name_en duplicated',
+    CreoleErrCode.CITY_NAME_DUPLICATED: u'city name or name_en duplicated',
+    CreoleErrCode.COUNTRY_NOT_EXIST: u'country do not exist',
+
 }
 
 def get_translation(code):
