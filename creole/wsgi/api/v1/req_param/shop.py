@@ -14,8 +14,8 @@ class CreateShopApiParser(BaseRequestParser):
     belong = Argument('belong')
     shop_type = Argument('shop_type', type=int, required=True)
     contact = Argument('contact', required=True)
-    fee_person = Argument('fee_person', required=True, type=int)
-    commission_ratio = Argument('commission_ratio', required=True, type=int)
+    fee_person = Argument('fee_person', required=True, type=float)
+    commission_ratio = Argument('commission_ratio', required=True, type=float)
     intro_cn = Argument('intro_cn')
     intro_en = Argument('intro_en')
 

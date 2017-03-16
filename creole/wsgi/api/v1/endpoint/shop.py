@@ -40,7 +40,9 @@ class ShopApi(Resource):
 
 class CreateShopApi(Resource):
     meta = {
-        'args_parser_dict': CreateShopApiParser,
+        'args_parser_dict': {
+            'post': CreateShopApiParser,
+        }
     }
 
     def post(self):

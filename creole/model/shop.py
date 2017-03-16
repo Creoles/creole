@@ -6,7 +6,7 @@ from sqlalchemy import (
     Integer,
     Float,
 )
-from SQLAlchemyError.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.dialects.mysql import (
     TINYINT,
 )
@@ -58,7 +58,7 @@ class ShopCompany(Base, BaseMixin):
     def get_by_id(cls, id):
         company = DBSession().query(cls).filter(
             cls.id==id,
-            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETED
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
         ).first()
         return company
 
