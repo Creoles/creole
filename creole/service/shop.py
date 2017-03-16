@@ -33,6 +33,26 @@ class ShopService(object):
     def update_shop_by_id(cls, id, **kwargs):
         return Shop.update(id, **kwargs)
 
+    @classmethod
+    def _get_shop_data_dict(cls, shop_obj):
+        _shop_dict = {}
+        for k, v in shop_obj.__dict__.iteritems():
+            if not k.startswith('_'):
+                _shop_dict[k] = v
+        return _shop_dict
+
+    @classmethod
+    def search_shop(cls, country_id=None, city_id=None,
+                    company_id=None, shop_type=None, page=1, number=20):
+        raw_data = []
+        shop_list = Shop.search(
+            country_id=country_id, city_id=city_id,
+            company_id=company_id, shop_type=shop_type,
+            page=page, number=number)
+        for shop in shop_list:
+            raw_data.append(cls._get_shop_data_dict(shop))
+        return raw_data
+
 
 class ShopCompanyService(object):
     @classmethod

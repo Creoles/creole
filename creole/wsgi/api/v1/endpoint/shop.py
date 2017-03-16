@@ -4,8 +4,10 @@ from .....service.shop import ShopService, ShopCompanyService
 from ..req_param.shop import (
     CreateShopApiParser,
     CreateShopCompanyApiParser,
+    ShopSearchApiParser,
 )
-from creole.exc import ClientError
+from creole.exc import ClientError, CreoleErrCode
+from creole.model.shop import Shop
 
 
 class ShopApi(Resource):
@@ -53,6 +55,19 @@ class CreateShopApi(Resource):
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
 
+
+class ShopSearchApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'get': ShopSearchApiParser,
+        }
+    }
+    def get(self):
+        shop_type = self.parsed_data.get('shop_type', None)
+        if shop_type and shop_type not in Shop.SHOP_TYPE.values():
+            return api_response(code=CreoleErrCode.PARAMETER_ERROR)
+        data = ShopService.search_shop(**self.parsed_data)
+        return api_response(data=data)
 
 class ShopCompanyApi(Resource):
     meta = {

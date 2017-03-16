@@ -14,6 +14,7 @@ from .endpoint.shop import (
     ShopApi,
     CreateShopApi,
     ShopCompanyApi,
+    ShopSearchApi,
     CreateShopCompanyApi,
 )
 
@@ -34,6 +35,7 @@ app.add_resource(CreateCityApi, '/city/create', endpoint='create-city')
 
 # 购物店
 app.add_resource(ShopApi, '/shop/<int:id>', endpoint='get-shop')
-app.add_resource(CreateShopApi, '/shop/create_shop', endpoint='shop-create')
+app.add_resource(ShopSearchApi, '/shop/search', endpoint='search-shop')
+app.add_resource(CreateShopApi, '/shop/create_shop', endpoint='create-shop')
 app.add_resource(ShopCompanyApi, '/shop_company/<int:id>', endpoint='get-shop-company')
-app.add_resource(CreateShopCompanyApi, '/shop_company/create_company', endpoint='shop-company-create')
+app.add_resource(CreateShopCompanyApi, '/shop_company/create_company', endpoint='create-shop-company')

@@ -184,6 +184,24 @@ class Shop(Base, BaseMixin):
         return shop
 
     @classmethod
+    def search(cls, country_id=None, city_id=None, company_id=None,
+               shop_type=None, page=1, number=20):
+        session = DBSession()
+        query = session.query(cls).filter(
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        )
+        if country_id:
+            query = query.filter(cls.country_id==country_id)
+        if city_id:
+            query = query.filter(cls.city_id==city_id)
+        if company_id:
+            query = query.filter(cls.belong==company_id)
+        if shop_type:
+            query = query.filter(cls.shop_type==shop_type)
+        shop_list = query.offset((page - 1) * number).limit(number).all()
+        return shop_list
+
+    @classmethod
     def create(cls, name, name_en, address, telephone, country_id,
                city_id, belong, shop_type, contact, fee_person,
                commission_ratio, intro_cn='', intro_en=''):
