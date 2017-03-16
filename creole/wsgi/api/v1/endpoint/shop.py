@@ -66,7 +66,11 @@ class ShopSearchApi(Resource):
         shop_type = self.parsed_data.get('shop_type', None)
         if shop_type and shop_type not in Shop.SHOP_TYPE.values():
             return api_response(code=CreoleErrCode.PARAMETER_ERROR)
-        data = ShopService.search_shop(**self.parsed_data)
+        shop_data, total = ShopService.search_shop(**self.parsed_data)
+        if self.parsed_data['page'] == 1:
+            data = {'shop_data': shop_data, 'total': total}
+        else:
+            data = {'shop_data': shop_data}
         return api_response(data=data)
 
 class ShopCompanyApi(Resource):

@@ -190,6 +190,7 @@ class Shop(Base, BaseMixin):
         query = session.query(cls).filter(
             cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
         )
+        total = None
         if country_id:
             query = query.filter(cls.country_id==country_id)
         if city_id:
@@ -198,8 +199,10 @@ class Shop(Base, BaseMixin):
             query = query.filter(cls.belong==company_id)
         if shop_type:
             query = query.filter(cls.shop_type==shop_type)
+        if page == 1:
+            total = query.count()
         shop_list = query.offset((page - 1) * number).limit(number).all()
-        return shop_list
+        return shop_list, total
 
     @classmethod
     def create(cls, name, name_en, address, telephone, country_id,

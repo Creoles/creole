@@ -45,13 +45,13 @@ class ShopService(object):
     def search_shop(cls, country_id=None, city_id=None,
                     company_id=None, shop_type=None, page=1, number=20):
         raw_data = []
-        shop_list = Shop.search(
+        shop_list, total = Shop.search(
             country_id=country_id, city_id=city_id,
             company_id=company_id, shop_type=shop_type,
             page=page, number=number)
         for shop in shop_list:
             raw_data.append(cls._get_shop_data_dict(shop))
-        return raw_data
+        return raw_data, total
 
 
 class ShopCompanyService(object):
