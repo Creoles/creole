@@ -18,7 +18,7 @@ class CountryService(object):
             city_dict = {}
             city_dict['name'] = getattr(city, 'name', '')
             city_dict['name_en'] = getattr(city, 'name_en', '')
-            city_dict['city_id'] = city.id
+            city_dict['id'] = city.id
             country_data['city_data'].append(city_dict)
         return country_data
 
@@ -35,11 +35,11 @@ class CountryService(object):
                     'name_en': 'China',
                     'city_data': [
                         {
-                            'city_id': 1,
+                            'id': 1,
                             'name': u'北京',
                             'name_en': 'Beijing'
                         }, {
-                            'city_id': 2,
+                            'id': 2,
                             'name': u'上海',
                             'name_en': 'Shanghai'
                         }
@@ -50,11 +50,11 @@ class CountryService(object):
                     'name_en': 'America',
                     'city_data': [
                         {
-                            'city_id': 1,
+                            'id': 1,
                             'name': u'纽约',
                             'name_en': 'New York'
                         }, {
-                            'city_id': 2,
+                            'id': 2,
                             'name': u'旧金山',
                             'name_en': 'San Francisco'
                         }
@@ -74,7 +74,7 @@ class CountryService(object):
                 country_dict['city_data'].append({
                     'name': city.name,
                     'name_en': city.name_en,
-                    'city_id': city.id
+                    'id': city.id
                 })
             resp_data.append(country_dict)
         return resp_data
@@ -107,7 +107,7 @@ class CityService(object):
         city_data['country'] = {
             'name': country.name,
             'name_en': country.name_en,
-            'country_id': country.id
+            'id': country.id
         }
         return city_data
 
