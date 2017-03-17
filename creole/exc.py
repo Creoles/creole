@@ -1,7 +1,4 @@
 # coding: utf-8
-from flask import jsonify
-
-
 class BaseCreoleErrCode(object):
     """Some general error code."""
     # unknown error
@@ -21,6 +18,11 @@ class BaseCreoleErrCode(object):
     COUNTRY_NAME_DUPLICATED = 3010
     CITY_NAME_DUPLICATED = 3011
     COUNTRY_NOT_EXIST = 3012
+    CITY_NOT_EXIST = 3013
+
+    SHOP_NOT_EXIST = 3020
+    SHOP_COMPANY_DUPLICATED = 3021
+    SHOP_COMPANY_NOT_EXIST = 3022
 
 class CreoleErrCode(BaseCreoleErrCode):
     pass
@@ -44,6 +46,11 @@ TRANSLATIONS = {
     CreoleErrCode.COUNTRY_NAME_DUPLICATED: u'country name or name_en duplicated',
     CreoleErrCode.CITY_NAME_DUPLICATED: u'city name or name_en duplicated',
     CreoleErrCode.COUNTRY_NOT_EXIST: u'country do not exist',
+    CreoleErrCode.CITY_NOT_EXIST: u'city do not exist',
+
+    CreoleErrCode.SHOP_NOT_EXIST: u'shop do not exist',
+    CreoleErrCode.SHOP_COMPANY_DUPLICATED: u'shop company name or name_en duplicated',
+    CreoleErrCode.SHOP_COMPANY_NOT_EXIST: u'shop company do not exist',
 
 }
 
