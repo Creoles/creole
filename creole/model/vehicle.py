@@ -15,6 +15,7 @@ from sqlalchemy.orm import validates
 from . import Base, DBSession
 from .mixins import BaseMixin
 from .country import Country, City
+from ..wsgi.api.v1.req_param.vehicle import VehicleSearchApiParser
 from ..exc import (
     raise_error_json,
     InvalidateError,
@@ -108,12 +109,12 @@ class Vehicle(Base, BaseMixin):
     @validates('company_id')
     def _validate_company_id(self, key, company_id):
         company = DBSession().query(VehicleCompany).filter(
-            VehicleCompany.id==country_id,
+            VehicleCompany.id==company_id,
             VehicleCompany.is_delete==VehicleCompany.FIELD_STATUS.FIELD_STATUS_NO_DELETE
         ).first()
         if not company:
-            raise_error_json(InvalidateError(args=(country_id,)))
-        return country_id
+            raise_error_json(InvalidateError(args=(company_id,)))
+        return company_id
 
     @validates('country_id')
     def _validate_country_id(self, key, country_id):
@@ -144,10 +145,6 @@ class Vehicle(Base, BaseMixin):
             cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
         ).first()
         return vehicle
-
-    @classmethod
-    def search(cls):
-        pass
 
     @classmethod
     def create(cls, company_id, country_id, city_id, vehicle_type,
@@ -190,6 +187,31 @@ class Vehicle(Base, BaseMixin):
         ).update(
             {'is_delete': cls.FIELD_STATUS.FIELD_STATUS_DELETED},
             synchronize_session=False)
+
+    @classmethod
+    def search(cls, country_id=None, city_id=None, company_id=None,
+               operation=None, seat=None, page=1, number=20):
+        query = DBSession().query(cls).filter(
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        )
+        total = None
+        if country_id:
+            query = query.filter(cls.country_id==country_id)
+        if city_id:
+            query = query.filter(cls.city_id==city_id)
+        if company_id:
+            query = query.filter(cls.company_id==company_id)
+        if operation and seat:
+            if operation == VehicleSearchApiParser.OPERATIONS.GREATER:
+                query = query.filter(cls.seat>seat)
+            elif operation == VehicleSearchApiParser.OPERATIONS.EQUAL:
+                query = query.filter(cls.seat==seat)
+            elif operation == VehicleSearchApiParser.OPERATIONS.LESS:
+                query = query.filter(cls.seat<seat)
+        if page == 1:
+            total = query.count()
+        vehicle_list = query.offset((page - 1) * number).limit(number).all()
+        return vehicle_list, total
 
 
 class VehicleImage(Base, BaseMixin):
