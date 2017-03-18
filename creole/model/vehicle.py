@@ -12,10 +12,10 @@ from sqlalchemy.dialects.mysql import (
 )
 from sqlalchemy.orm import validates
 
+from ..util import Enum
 from . import Base, DBSession
 from .mixins import BaseMixin
 from .country import Country, City
-from ..wsgi.api.v1.req_param.vehicle import VehicleSearchApiParser
 from ..exc import (
     raise_error_json,
     InvalidateError,
@@ -53,6 +53,15 @@ class VehicleCompany(Base, BaseMixin):
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_DUPLICATED))
         return name_en
+
+    @classmethod
+    def get_by_id(cls, id):
+        session = DBSession()
+        company = session.query(cls).filter(
+            cls.id==id,
+            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
+        ).first()
+        return company
 
     @classmethod
     def delete(cls, id):
@@ -94,6 +103,13 @@ class Vehicle(Base, BaseMixin):
     """车辆"""
     __tablename__ = 'vehicle'
 
+    # 由于循环引用, 从VehicleSearchApiParser中copy一份
+    OPERATIONS = Enum(
+        ('GREATER', 1, u'大于'),
+        ('EQUAL', 2, u'等于'),
+        ('LESS', 3, u'小于'),
+    )
+
     company_id = Column(Integer, nullable=True, doc=u'所属车辆公司')
     country_id = Column(Integer, nullable=False, doc=u'国家名')
     city_id = Column(Integer, nullable=False, doc=u'城市名')
@@ -113,7 +129,7 @@ class Vehicle(Base, BaseMixin):
             VehicleCompany.is_delete==VehicleCompany.FIELD_STATUS.FIELD_STATUS_NO_DELETE
         ).first()
         if not company:
-            raise_error_json(InvalidateError(args=(company_id,)))
+            raise_error_json(InvalidateError(args=('company_id', company_id)))
         return company_id
 
     @validates('country_id')
@@ -202,11 +218,11 @@ class Vehicle(Base, BaseMixin):
         if company_id:
             query = query.filter(cls.company_id==company_id)
         if operation and seat:
-            if operation == VehicleSearchApiParser.OPERATIONS.GREATER:
+            if operation == cls.OPERATIONS.GREATER:
                 query = query.filter(cls.seat>seat)
-            elif operation == VehicleSearchApiParser.OPERATIONS.EQUAL:
+            elif operation == cls.OPERATIONS.EQUAL:
                 query = query.filter(cls.seat==seat)
-            elif operation == VehicleSearchApiParser.OPERATIONS.LESS:
+            elif operation == cls.OPERATIONS.LESS:
                 query = query.filter(cls.seat<seat)
         if page == 1:
             total = query.count()

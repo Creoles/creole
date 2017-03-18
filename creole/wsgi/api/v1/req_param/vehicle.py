@@ -33,7 +33,7 @@ class VehicleSearchApiParser(BaseRequestParser):
     country_id = Argument('country_id', type=int, required=False)
     city_id = Argument('city_id', type=int, required=False)
     company_id = Argument('company_id', type=int, required=False)
-    operation = Argument('operation', choices=OPERATIONS.values(), required=False)
+    operation = Argument('operation', type=int, choices=OPERATIONS.values(), required=False)
     seat = Argument('seat', type=int, required=False)
     page = Argument('page', type=int, default=1, required=False)
     number = Argument('number', type=int, default=20, required=False)

@@ -19,6 +19,7 @@ from .endpoint.shop import (
 )
 from .endpoint.vehicle import (
     VehicleApi,
+    SearchVehicleApi,
     CreateVehicleApi,
     VehicleCompanyApi,
     CreateVehicleCompanyApi,
@@ -49,5 +50,6 @@ app.add_resource(CreateShopCompanyApi, '/shop_company/create_company', endpoint=
 # 车辆
 app.add_resource(VehicleApi, '/vehicle/<int:id>', endpoint='get-vehicle')
 app.add_resource(CreateVehicleApi, '/vehicle/create_vehicle', endpoint='create-vehicle')
+app.add_resource(SearchVehicleApi, '/vehicle/search', endpoint='search-vehicle')
 app.add_resource(VehicleCompanyApi, '/vehicle_company/<int:id>', endpoint='get-vehicle-company')
-app.add_resource(CreateVehicleCompanyApi, '/vehicle_compnay/create_vehicle', endpoint='create-vehicle-company')
+app.add_resource(CreateVehicleCompanyApi, '/vehicle_company/create_company', endpoint='create-vehicle-company')

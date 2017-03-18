@@ -65,8 +65,11 @@ class SearchVehicleApi(Resource):
         operation = self.parsed_data.get('operation', None)
         seat = self.parsed_data.get('seat', None)
         if (seat and operation is None) or (seat is None and operation):
-            api_response(code=CreoleErrCode.PARAMETER_ERROR)
-        vehicle_list, total = VehicleService.search_vehicle(**self.parsed_data)
+            return api_response(code=CreoleErrCode.PARAMETER_ERROR)
+        try:
+            vehicle_list, total = VehicleService.search_vehicle(**self.parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
         if self.parsed_data['page'] == 1:
             data = {'vehicle_data': vehicle_list, 'total': total}
         else:
@@ -95,7 +98,7 @@ class VehicleCompanyApi(Resource):
 
     def delete(self, id):
         try:
-            VehicleCompanyService.delete_shop_company_by_id(id)
+            VehicleCompanyService.delete_vehicle_company_by_id(id)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
@@ -112,7 +115,7 @@ class CreateVehicleCompanyApi(Resource):
     def post(self):
         parsed_data = self.parsed_data
         try:
-            VehicleCompanyService.create_shop_company(**parsed_data)
+            VehicleCompanyService.create_vehicle_company(**parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()

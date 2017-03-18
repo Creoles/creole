@@ -6,7 +6,7 @@ from flask_restful import Resource as BaseResource
 from flask_restful.reqparse import RequestParser, Argument
 from werkzeug.exceptions import BadRequest
 
-from ...exc import raise_error_json, ParameterError, get_translation
+from ...exc import get_translation, CreoleErrCode
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,9 @@ class Resource(BaseResource):
                     try:
                         parsed_data = parser_cls().parse_args()
                     except BadRequest as e:
-                        raise_error_json(ParameterError(msg=e.data['message']))
+                        return api_response(
+                            code=CreoleErrCode.PARAMETER_ERROR,
+                            message=e.data['message'])
                     # method:url:validated_data
                     logger.info(u'{}:{}:{}'.format(
                         request.method, request.url, parsed_data
