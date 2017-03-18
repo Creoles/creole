@@ -15,14 +15,21 @@ class BaseCreoleErrCode(object):
     USER_NAME_DUPLICATED = 3001
     USER_NOT_EXIST = 3002
 
+    # 国家和城市
     COUNTRY_NAME_DUPLICATED = 3010
     CITY_NAME_DUPLICATED = 3011
     COUNTRY_NOT_EXIST = 3012
     CITY_NOT_EXIST = 3013
 
+    # 购物店
     SHOP_NOT_EXIST = 3020
     SHOP_COMPANY_DUPLICATED = 3021
     SHOP_COMPANY_NOT_EXIST = 3022
+
+    # 车辆
+    VEHICLE_COMPANY_DUPLICATED = 3030
+    VEHICLE_COMPANY_NOT_EXIST = 3031
+    VEHICLE_NOT_EXIST = 3032
 
 class CreoleErrCode(BaseCreoleErrCode):
     pass
@@ -52,6 +59,9 @@ TRANSLATIONS = {
     CreoleErrCode.SHOP_COMPANY_DUPLICATED: u'shop company name or name_en duplicated',
     CreoleErrCode.SHOP_COMPANY_NOT_EXIST: u'shop company do not exist',
 
+    CreoleErrCode.VEHICLE_COMPANY_DUPLICATED: u'vehicle company name or name_en duplicated',
+    CreoleErrCode.VEHICLE_COMPANY_NOT_EXIST: u'vehicle company do not exist',
+    CreoleErrCode.VEHICLE_NOT_EXIST: u'vehicle do not exist',
 }
 
 def get_translation(code):

@@ -17,6 +17,13 @@ from .endpoint.shop import (
     ShopSearchApi,
     CreateShopCompanyApi,
 )
+from .endpoint.vehicle import (
+    VehicleApi,
+    SearchVehicleApi,
+    CreateVehicleApi,
+    VehicleCompanyApi,
+    CreateVehicleCompanyApi,
+)
 
 
 blue_print = Blueprint('api_v1', __name__)
@@ -39,3 +46,10 @@ app.add_resource(ShopSearchApi, '/shop/search', endpoint='search-shop')
 app.add_resource(CreateShopApi, '/shop/create_shop', endpoint='create-shop')
 app.add_resource(ShopCompanyApi, '/shop_company/<int:id>', endpoint='get-shop-company')
 app.add_resource(CreateShopCompanyApi, '/shop_company/create_company', endpoint='create-shop-company')
+
+# 车辆
+app.add_resource(VehicleApi, '/vehicle/<int:id>', endpoint='get-vehicle')
+app.add_resource(CreateVehicleApi, '/vehicle/create_vehicle', endpoint='create-vehicle')
+app.add_resource(SearchVehicleApi, '/vehicle/search', endpoint='search-vehicle')
+app.add_resource(VehicleCompanyApi, '/vehicle_company/<int:id>', endpoint='get-vehicle-company')
+app.add_resource(CreateVehicleCompanyApi, '/vehicle_company/create_company', endpoint='create-vehicle-company')
