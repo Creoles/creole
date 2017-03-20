@@ -1,10 +1,17 @@
 # coding: utf-8
 from ...util import Resource, api_response
-from .....service.vehicle import VehicleService, VehicleCompanyService
+from .....service.vehicle import (
+    VehicleService,
+    VehicleCompanyService,
+    VehicleAccountService,
+)
 from ..req_param.vehicle import (
     CreateVehicleApiParser,
     CreateVehicleCompanyApiParser,
     VehicleSearchApiParser,
+    CreateVehicleAccountApiParser,
+    DeleteVehicleAccountApiParser,
+    GetVehicleAccountApiParser,
 )
 from creole.exc import ClientError, CreoleErrCode
 
@@ -116,6 +123,89 @@ class CreateVehicleCompanyApi(Resource):
         parsed_data = self.parsed_data
         try:
             VehicleCompanyService.create_vehicle_company(**parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
+
+
+class GetVehicleAccountApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'get': GetVehicleAccountApiParser,
+        }
+    }
+
+    def get(self):
+        parsed_data = self.parsed_data
+        company_id = parsed_data.pop('company_id',None)
+        user_id = parsed_data.pop('user_id',None)
+        if (not company_id) and (not user_id):
+            return api_response(code=CreoleErrCode.PARAMETER_ERROR)
+        if company_id:
+            data = VehicleAccountService.get_by_company_id(company_id)
+        elif user_id:
+            data = VehicleAccountService.get_by_user_id(user_id)
+        return api_response(data=data)
+
+
+class UpdateVehicleAccountApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'put': CreateVehicleAccountApiParser,
+            'delete': DeleteVehicleAccountApiParser,
+        }
+    }
+
+    def put(self, id):
+        parsed_data = self.parsed_data
+        company_id = parsed_data.pop('company_id',None)
+        user_id = parsed_data.pop('user_id',None)
+        if (not company_id) and (not user_id):
+            return api_response(code=CreoleErrCode.PARAMETER_ERROR)
+        try:
+            if company_id:
+                VehicleAccountService.update_company_account_by_id(
+                    company_id=company_id, **parsed_data)
+            else:
+                VehicleAccountService.update_user_account_by_id(
+                    user_id=user_id, **parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
+
+
+    def delete(self, id):
+        parsed_data = self.parsed_data
+        is_company = parsed_data.get('is_company')
+        try:
+            if is_company:
+                VehicleAccountService.delete_company_account_by_id(id)
+            else:
+                VehicleAccountService.delete_user_account_by_id(id)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
+
+
+class CreateVehicleAccountApi(Resource):
+    """创建车辆账号信息"""
+    meta = {
+        'args_parser_dict': {
+            'post': CreateVehicleAccountApiParser,
+        }
+    }
+
+    def post(self):
+        parsed_data = self.parsed_data
+        company_id = parsed_data.pop('company_id',None)
+        user_id = parsed_data.pop('user_id',None)
+        if (not company_id) and (not user_id):
+            return api_response(code=CreoleErrCode.PARAMETER_ERROR)
+        try:
+            if company_id:  # 公司车辆
+                VehicleAccountService.create_company_account(company_id, **parsed_data)
+            else:   # 个人车辆
+                VehicleAccountService.create_user_account(user_id, **parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()

@@ -39,3 +39,29 @@ class VehicleSearchApiParser(BaseRequestParser):
     seat = Argument('seat', type=int, required=False)
     page = Argument('page', type=int, default=1, required=False)
     number = Argument('number', type=int, default=20, required=False)
+
+
+class CreateVehicleAccountApiParser(BaseRequestParser):
+    CURRENCY = Enum(
+        ('USD', 1, u'美元'),
+        ('CNY', 2, u'人民币'),
+        ('LKR', 3, u'斯里兰卡卢布'),
+    )
+    company_id = Argument('company_id', type=int, required=False)
+    user_id = Argument('user_id', type=int, required=False)
+    currency = Argument(
+        'currency', choices=CURRENCY.values(), type=int, required=True)
+    bank_name = Argument('bank_name', required=True)
+    deposit_bank = Argument('deposit_bank', required=True)
+    payee = Argument('payee', required=True)
+    account = Argument('account', required=True)
+    note = Argument('note', required=False)
+
+
+class DeleteVehicleAccountApiParser(BaseRequestParser):
+    is_company = Argument('is_company', type=bool, required=True)
+
+
+class GetVehicleAccountApiParser(BaseRequestParser):
+    company_id = Argument('company_id', type=int, required=False)
+    user_id = Argument('user_id', type=int, required=False)
