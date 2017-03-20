@@ -43,12 +43,12 @@ class VehicleService(object):
     @classmethod
     def search_vehicle(
             cls, country_id=None, city_id=None, company_id=None,
-            operation=None, seat=None, page=1, number=20):
+            vehicle_type=None, operation=None, seat=None, page=1, number=20):
         raw_data = []
         vehicle_list, total = Vehicle.search(
             country_id=country_id, city_id=city_id,
-            company_id=company_id, operation=operation,
-            seat=seat, page=page, number=number)
+            company_id=company_id, vehicle_type=vehicle_type,
+            operation=operation, seat=seat, page=page, number=number)
         for vehicle in vehicle_list:
             raw_data.append(cls._get_vehicle_data_dict(vehicle))
         return raw_data, total
