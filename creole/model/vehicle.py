@@ -18,6 +18,7 @@ from ..util import Enum
 from . import Base, DBSession
 from .mixins import BaseMixin
 from .country import Country, City
+from .user import User
 from ..exc import (
     raise_error_json,
     InvalidateError,
@@ -94,6 +95,169 @@ class VehicleCompany(Base, BaseMixin):
             session.rollback()
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_DUPLICATED))
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+
+class AccountMixin(BaseMixin):
+    CURRENCY = Enum(
+        ('USD', 1, u'美元'),
+        ('CNY', 2, u'人民币'),
+        ('LKR', 3, u'斯里兰卡卢布'),
+    )
+
+    currency = Column(TINYINT, nullable=False, doc=u'结算币种')
+    bank_name = Column(String(30), nullable=False, doc=u'银行名称')
+    deposit_bank = Column(String(30), nullable=False, doc=u'开户行')
+    payee = Column(String(20), nullable=False, doc=u'收款人')
+    account = Column(String(20), unique=True, nullable=False, doc=u'账号')
+    note = Column(String(40), nullable=False, doc=u'备注')
+
+
+class VehicleCompanyAccount(Base, AccountMixin):
+    """车辆公司账单结算账号"""
+    __tablename__ = 'vehicle_company_account'
+
+    company_id = Column(Integer, nullable=False, doc=u'公司id')
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('idx_company_id_account', 'company_id', 'account'),
+        )
+        return table_args + BaseMixin.__table_args__
+
+    @validates('company_id')
+    def _validate_company_id(self, key, company_id):
+        company = VehicleCompany.get_by_id(company_id)
+        if not company:
+            raise_error_json(InvalidateError(args=('company_id', company_id)))
+        return company_id
+
+    @classmethod
+    def create(cls, company_id, currency, bank_name,
+               deposit_bank, payee, account, note=None):
+        session = DBSession()
+        account = cls(
+            company_id=company_id, currency=currency,
+            bank_name=bank_name, deposit_bank=deposit_bank,
+            payee=payee, account=account, note=note)
+        try:
+            session.add(account)
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def get_by_company_id(cls, company_id):
+        return DBSession().query(cls).filter(cls.company_id==company_id).all()
+
+    @classmethod
+    def get_by_id(cls, id):
+        return DBSession().query(cls).filter(cls.id==id).first()
+
+    @classmethod
+    def delete(cls, id):
+        session = DBSession()
+        account = session.query(cls).filter(cls.id==id).first()
+        if not account:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_ACCOUNT_NOT_EXIST))
+        session.delete(account)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        account = cls.get_by_id(id)
+        if not account:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_ACCOUNT_NOT_EXIST))
+        for k, v in kwargs.iteritems():
+            setattr(account, k, v)
+        session = DBSession()
+        try:
+            session.merge(account)
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+
+class VehicleUserAccount(Base, AccountMixin):
+    """车辆所有者账单结算账号, 仅在非公司车辆使用"""
+    __tablename__ = 'vehicle_user_account'
+
+    user_id = Column(Integer, nullable=False, doc=u'用户id')
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('idx_user_id_account', 'user_id', 'account'),
+        )
+        return table_args + BaseMixin.__table_args__
+
+    @validates('user_id')
+    def _validate_user_id(self, key, user_id):
+        company = User.get_by_id(user_id)
+        if not company:
+            raise_error_json(InvalidateError(args=('user_id', user_id)))
+        return user_id
+
+    @classmethod
+    def create(cls, user_id, currency, bank_name,
+               deposit_bank, payee, account, note=None):
+        session = DBSession()
+        account = cls(
+            user_id=user_id, currency=currency,
+            bank_name=bank_name, deposit_bank=deposit_bank,
+            payee=payee, account=account, note=note)
+        try:
+            session.add(account)
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def get_by_user_id(cls, user_id):
+        return DBSession().query(cls).filter(cls.user_id==user_id).all()
+
+    @classmethod
+    def get_by_id(cls, id):
+        return DBSession().query(cls).filter(cls.id==id).first()
+
+    @classmethod
+    def delete(cls, id):
+        session = DBSession()
+        account = session.query(cls).filter(cls.id==id).first()
+        if not account:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_ACCOUNT_NOT_EXIST))
+        session.delete(account)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        account = cls.get_by_id(id)
+        if not account:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_ACCOUNT_NOT_EXIST))
+        for k, v in kwargs.iteritems():
+            setattr(account, k, v)
+        session = DBSession()
+        try:
+            session.merge(account)
+            session.commit()
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
