@@ -88,8 +88,8 @@ class VehicleAccountService(object):
     @classmethod
     def _get_account_data_dict(cls, account):
         _dict = {}
-        for k ,v in account.__table__.columns._data.iteritems():
-            _dict[k] = v
+        for k in account.__table__.columns._data:
+            _dict[k] = getattr(account, k, None)
         return _dict
 
     @classmethod
@@ -119,7 +119,7 @@ class VehicleAccountService(object):
     @classmethod
     def get_by_company_id(cls, company_id):
         raw_data = []
-        account_list = VehicleUserAccount.get_by_company_id(company_id)
+        account_list = VehicleCompanyAccount.get_by_company_id(company_id)
         for account in account_list:
             raw_data.append(cls._get_account_data_dict(account))
         return raw_data

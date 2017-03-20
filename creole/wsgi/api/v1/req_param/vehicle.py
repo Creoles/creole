@@ -47,15 +47,16 @@ class CreateVehicleAccountApiParser(BaseRequestParser):
         ('CNY', 2, u'人民币'),
         ('LKR', 3, u'斯里兰卡卢布'),
     )
-    company_id = Argument('company_id', type=int, required=False)
-    user_id = Argument('user_id', type=int, required=False)
+    company_id = Argument('company_id', type=int, required=False, location=('json', 'form'))
+    user_id = Argument('user_id', type=int, required=False, location=('json', 'form'))
     currency = Argument(
-        'currency', choices=CURRENCY.values(), type=int, required=True)
-    bank_name = Argument('bank_name', required=True)
-    deposit_bank = Argument('deposit_bank', required=True)
-    payee = Argument('payee', required=True)
-    account = Argument('account', required=True)
-    note = Argument('note', required=False)
+        'currency', choices=CURRENCY.values(), type=int,
+        required=True, location=('json', 'form'))
+    bank_name = Argument('bank_name', required=True, location=('json', 'form'))
+    deposit_bank = Argument('deposit_bank', required=True, location=('json', 'form'))
+    payee = Argument('payee', required=True, location=('json', 'form'))
+    account = Argument('account', required=True, location=('json', 'form'))
+    note = Argument('note', required=False, location=('json', 'form'))
 
 
 class DeleteVehicleAccountApiParser(BaseRequestParser):

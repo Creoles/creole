@@ -165,10 +165,10 @@ class UpdateVehicleAccountApi(Resource):
         try:
             if company_id:
                 VehicleAccountService.update_company_account_by_id(
-                    company_id=company_id, **parsed_data)
+                    id, company_id=company_id, **parsed_data)
             else:
                 VehicleAccountService.update_user_account_by_id(
-                    user_id=user_id, **parsed_data)
+                    id, user_id=user_id, **parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
