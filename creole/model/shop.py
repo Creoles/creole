@@ -5,12 +5,14 @@ from sqlalchemy import (
     String,
     Integer,
     Float,
+    Index,
 )
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.dialects.mysql import (
     TINYINT,
 )
 from sqlalchemy.orm import validates
+from sqlalchemy.ext.declarative import declared_attr
 
 from . import Base, DBSession
 from .country import Country, City
@@ -29,46 +31,36 @@ class ShopCompany(Base, BaseMixin):
     """购物集团"""
     __tablename__ = 'shop_company'
 
-    name = Column(Unicode(40), nullable=False, doc=u'中文集团名')
-    name_en = Column(String(60), nullable=False, doc=u'英文集团名')
+    name = Column(Unicode(40), unique=True, nullable=False, doc=u'中文集团名')
+    name_en = Column(String(60), unique=True, nullable=False, doc=u'英文集团名')
 
-    @validates('name')
-    def _validate_name(self, key, name):
-        company = DBSession().query(ShopCompany).filter(
-            ShopCompany.name==name,
-            ShopCompany.is_delete==ShopCompany.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
-        if company:
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.SHOP_COMPANY_DUPLICATED))
-        return name
-
-    @validates('name_en')
-    def _validate_name_en(self, key, name_en):
-        company = DBSession().query(ShopCompany).filter(
-            ShopCompany.name_en==name_en,
-            ShopCompany.is_delete==ShopCompany.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
-        if company:
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.SHOP_COMPANY_DUPLICATED))
-        return name_en
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('idx_name_name_en', 'name', 'name_en', unique=True),
+            Index('ix_name', 'name'),
+            Index('ix_name_en', 'name_en'),
+        )
+        return table_args + BaseMixin.__table_args__
 
     @classmethod
     def get_by_id(cls, id):
-        company = DBSession().query(cls).filter(
-            cls.id==id,
-            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+        company = DBSession().query(cls).filter(cls.id==id).first()
         return company
 
     @classmethod
     def delete(cls, id):
-        DBSession().query(cls).filter(
-            cls.id==id
-        ).update(
-            {'is_delete': cls.FIELD_STATUS.FIELD_STATUS_DELETED},
-            synchronize_session=False)
+        session = DBSession()
+        company = session.query(cls).filter(cls.id==id).first()
+        if not company:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.SHOP_COMPANY_NOT_EXIST))
+        session.delete(company)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def create(cls, name, name_en):
@@ -77,6 +69,10 @@ class ShopCompany(Base, BaseMixin):
         session.add(company)
         try:
             session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.SHOP_COMPANY_DUPLICATED))
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
@@ -93,6 +89,10 @@ class ShopCompany(Base, BaseMixin):
         try:
             session.merge(company)
             session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.SHOP_COMPANY_DUPLICATED))
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
@@ -114,7 +114,7 @@ class Shop(Base, BaseMixin):
     telephone = Column(String(20), nullable=False, doc=u'联系电话')
     country_id = Column(Integer, nullable=False, doc=u'国家名')
     city_id = Column(Integer, nullable=False, doc=u'城市名')
-    belong = Column(Integer, nullable=True, doc=u'所属购物集团')
+    company_id = Column(Integer, nullable=True, doc=u'所属购物集团')
     shop_type = Column(TINYINT, nullable=False, doc=u'购物类型')
 
     contact = Column(Unicode(16), nullable=False, doc=u'联系人')
@@ -125,15 +125,27 @@ class Shop(Base, BaseMixin):
     intro_cn = Column(Unicode(160), doc=u'中文介绍')
     intro_en = Column(String(160), doc=u'英文介绍')
 
-    @validates('belong')
-    def _validate_belong(self, key, belong):
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('idx_name_name_en', 'name', 'name_en'),
+            Index('idx_country_id_city_id_company_id_shop_type',
+                  'country_id', 'city_id', 'company_id', 'shop_type'),
+            Index('ix_average_score', 'average_score'),
+            Index('ix_company_id', 'company_id'),
+            Index('ix_country_id', 'country_id'),
+            Index('ix_city_id', 'city_id'),
+            Index('ix_shop_type', 'shop_type'),
+        )
+        return table_args + BaseMixin.__table_args__
+
+    @validates('company_id')
+    def _validate_company_id(self, key, company_id):
         shop_company = DBSession().query(ShopCompany).filter(
-            ShopCompany.id==belong,
-            ShopCompany.is_delete==ShopCompany.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+            ShopCompany.id==company_id).first()
         if not shop_company:
-            raise_error_json(InvalidateError(args=(belong,)))
-        return belong
+            raise_error_json(InvalidateError(args=('company_id' ,company_id,)))
+        return company_id
 
     @validates('average_score')
     def _validate_average_score(self, key, average_score):
@@ -144,31 +156,28 @@ class Shop(Base, BaseMixin):
     @validates('shop_type')
     def _validate_shop_type(self, key, shop_type):
         if shop_type not in self.SHOP_TYPE.values():
-            raise_error_json(InvalidateError(args=(shop_type,)))
+            raise_error_json(InvalidateError(args=('shop_type', shop_type,)))
         return shop_type
 
     @validates('commission_ratio')
     def _validate_commission_ratio(self, key, commission_ratio):
         if commission_ratio > 100 or commission_ratio < 0:
-            raise_error_json(InvalidateError(args=(commission_ratio,)))
+            raise_error_json(
+                InvalidateError(args=('commission_ratio', commission_ratio,)))
         return commission_ratio
 
     @validates('country_id')
     def _validate_country_id(self, key, country_id):
         country = DBSession().query(Country).filter(
-            Country.id==country_id,
-            Country.is_delete==Country.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+            Country.id==country_id).first()
         if not country:
-            raise_error_json(InvalidateError(args=(country_id,)))
+            raise_error_json(InvalidateError(args=('country_id', country_id,)))
         return country_id
 
     @classmethod
     def _validate_country_and_city(cls, country_id, city_id):
         city = DBSession().query(City).filter(
-            City.id==city_id,
-            City.is_delete==City.FIELD_STATUS.FIELD_STATUS_NO_DELETE 
-        ).first()
+            City.id==city_id).first()
         if not city:
             raise_error_json(ClientError(errcode=CreoleErrCode.CITY_NOT_EXIST))
         elif city.country_id != country_id:
@@ -177,19 +186,14 @@ class Shop(Base, BaseMixin):
     @classmethod
     def get_by_id(cls, id):
         session = DBSession()
-        shop = session.query(cls).filter(
-            cls.id==id,
-            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+        shop = session.query(cls).filter(cls.id==id).first()
         return shop
 
     @classmethod
     def search(cls, country_id=None, city_id=None, company_id=None,
                shop_type=None, page=1, number=20):
         session = DBSession()
-        query = session.query(cls).filter(
-            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        )
+        query = session.query(cls)
         total = None
         if country_id:
             query = query.filter(cls.country_id==country_id)
@@ -226,9 +230,9 @@ class Shop(Base, BaseMixin):
     @classmethod
     def update(cls, id, **kwargs):
         shop = cls.get_by_id(id)
-        session = DBSession()
         if not shop:
             raise_error_json(ClientError(errcode=CreoleErrCode.SHOP_NOT_EXIST))
+        session = DBSession()
         for k, v in kwargs.iteritems():
             setattr(shop, k, v)
         try:
@@ -240,11 +244,17 @@ class Shop(Base, BaseMixin):
 
     @classmethod
     def delete(cls, id):
-        DBSession().query(cls).filter(
-            cls.id==id
-        ).update(
-            {'is_delete': cls.FIELD_STATUS.FIELD_STATUS_DELETED},
-            synchronize_session=False)
+        session = DBSession()
+        shop = session.query(cls).filter(cls.id==id).first()
+        if not shop:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.SHOP_NOT_EXIST))
+        session.delete(shop)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
 
 class ShopImage(Base, BaseMixin):

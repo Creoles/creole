@@ -153,7 +153,8 @@ class City(Base, BaseMixin):
         session = DBSession()
         country = session.query(cls).filter(cls.id==id).first()
         if not country:
-            raise_error_json(ClientError(errcode=CreoleErrCode.COUNTRY_NOT_EXIST))
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.COUNTRY_NOT_EXIST))
         session.delete(country)
         try:
             session.commit()
