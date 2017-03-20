@@ -10,12 +10,13 @@ from sqlalchemy import (
     Unicode,
     String,
     DateTime,
+    Index,
 )
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.dialects.mysql import (
     TINYINT,
 )
-from sqlalchemy.orm import validates
+from sqlalchemy.ext.declarative import declared_attr
 
 from . import Base, DBSession
 from .mixins import BaseMixin
@@ -54,18 +55,16 @@ class User(Base, BaseMixin):
     address = Column(Unicode(256), nullable=False, doc=u'地址')
     telephone = Column(String(20), nullable=False, doc=u'联系电话')
 
-    @validates('user_name')
-    def validate_user_name(self, key, user_name):
-        """检验用户名"""
-        session = DBSession()
-        user = session.query(User).filter(
-            User.user_name == user_name,
-            User.is_delete == User.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
-        if user is not None:
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.USER_NAME_DUPLICATED))
-        return user_name
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_user_name', 'user_name'),
+            Index('ix_session_id', 'session_id'),
+            Index('ix_role', 'role'),
+            Index('ix_customer_name', 'customer_name'),
+            Index('ix_uuid', 'uuid'),
+        )
+        return table_args + BaseMixin.__table_args__
 
     def new_session(self):
         # TODO: 建立缓存之后，注意新增new cache和删掉old cache
@@ -87,10 +86,7 @@ class User(Base, BaseMixin):
     def add_new_user(cls, **kwargs):
         _uuid = str(uuid.uuid4())
         session = DBSession()
-        _user = session.query(cls).filter(
-            cls.uuid==_uuid,
-            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+        _user = session.query(cls).filter(cls.uuid==_uuid).first()
         if _user:
             raise_error_json(
                 DatabaseError(msg='uuid has existed.'))
@@ -100,6 +96,10 @@ class User(Base, BaseMixin):
         session.add(user)
         try:
             session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.USER_NAME_DUPLICATED))
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
@@ -107,55 +107,46 @@ class User(Base, BaseMixin):
     @classmethod
     def get_by_uuid(cls, uuid):
         session = DBSession()
-        user = session.query(cls).filter(
-            cls.uuid==uuid,
-            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+        user = session.query(cls).filter(cls.uuid==uuid).first()
         return user
 
     @classmethod
     def get_by_id(cls, id):
         session = DBSession()
-        user = session.query(cls).filter(
-            cls.id==id,
-            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+        user = session.query(cls).filter(cls.id==id).first()
         return user
 
     @classmethod
     def get_by_name(cls, user_name):
         session = DBSession()
-        user = session.query(cls).filter(
-            cls.user_name==user_name,
-            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+        user = session.query(cls).filter(cls.user_name==user_name).first()
         return user
 
     @classmethod
     def get_by_customer_name(cls, customer_name):
         session = DBSession()
         user = session.query(cls).filter(
-            cls.customer_name==customer_name,
-            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+            cls.customer_name==customer_name).first()
         return user
 
     @classmethod
     def delete(cls, id):
-        DBSession().query(cls).filter(
-            cls.id==id
-        ).update(
-            {'is_delete': cls.FIELD_STATUS.FIELD_STATUS_DELETED},
-            synchronize_session=False)
+        session = DBSession()
+        country = session.query(cls).filter(cls.id==id).first()
+        if not country:
+            raise_error_json(ClientError(errcode=CreoleErrCode.USER_NOT_EXIST))
+        session.delete(country)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def update(cls, id, **kwargs):
         """更新字段"""
         session = DBSession()
-        user = session.query(cls).filter(
-            cls.id==id, 
-            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+        user = session.query(cls).filter(cls.id==id).first()
         if user is None:
             raise_error_json(ParameterError(args=(id,)))
         for k, v in kwargs.iteritems():
@@ -167,6 +158,10 @@ class User(Base, BaseMixin):
         try:
             session.merge(user)
             session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.USER_NAME_DUPLICATED))
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
