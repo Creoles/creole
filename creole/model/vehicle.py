@@ -5,12 +5,14 @@ from sqlalchemy import (
     String,
     Integer,
     Float,
+    Index,
 )
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.dialects.mysql import (
     TINYINT,
 )
 from sqlalchemy.orm import validates
+from sqlalchemy.ext.declarative import declared_attr
 
 from ..util import Enum
 from . import Base, DBSession
@@ -29,47 +31,37 @@ class VehicleCompany(Base, BaseMixin):
     """车辆公司"""
     __tablename__ = 'vehicle_company'
 
-    name = Column(Unicode(40), nullable=False, doc=u'中文集团名')
-    name_en = Column(String(60), nullable=False, doc=u'英文集团名')
+    name = Column(Unicode(40), unique=True, nullable=False, doc=u'中文集团名')
+    name_en = Column(String(60), unique=True, nullable=False, doc=u'英文集团名')
 
-    @validates('name')
-    def _validate_name(self, key, name):
-        company = DBSession().query(VehicleCompany).filter(
-            VehicleCompany.name==name,
-            VehicleCompany.is_delete==VehicleCompany.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
-        if company:
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_DUPLICATED))
-        return name
-
-    @validates('name_en')
-    def _validate_name_en(self, key, name_en):
-        company = DBSession().query(VehicleCompany).filter(
-            VehicleCompany.name_en==name_en,
-            VehicleCompany.is_delete==VehicleCompany.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
-        if company:
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_DUPLICATED))
-        return name_en
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('idx_name_name_en', 'name', 'name_en', unique=True),
+            Index('ix_name', 'name'),
+            Index('ix_name_en', 'name_en'),
+        )
+        return table_args + BaseMixin.__table_args__
 
     @classmethod
     def get_by_id(cls, id):
         session = DBSession()
-        company = session.query(cls).filter(
-            cls.id==id,
-            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+        company = session.query(cls).filter(cls.id==id).first()
         return company
 
     @classmethod
     def delete(cls, id):
-        DBSession().query(cls).filter(
-            cls.id==id
-        ).update(
-            {'is_delete': cls.FIELD_STATUS.FIELD_STATUS_DELETED},
-            synchronize_session=False)
+        session = DBSession()
+        company = session.query(cls).filter(cls.id==id).first()
+        if not company:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_NOT_EXIST))
+        session.delete(company)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def create(cls, name, name_en):
@@ -78,6 +70,10 @@ class VehicleCompany(Base, BaseMixin):
         session.add(company)
         try:
             session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_DUPLICATED))
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
@@ -94,6 +90,10 @@ class VehicleCompany(Base, BaseMixin):
         try:
             session.merge(company)
             session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_DUPLICATED))
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
@@ -122,12 +122,22 @@ class Vehicle(Base, BaseMixin):
     telephone = Column(String(20), nullable=False, doc=u'联系电话')
     unit_price = Column(Float(precision=3), nullable=False, doc=u'每公里单价')
 
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('idx_country_id_city_id_company_id_vehicle_type_seat',
+                  'country_id', 'city_id', 'company_id', 'vehicle_type', 'seat'),
+            Index('ix_company_id', 'company_id'),
+            Index('ix_country_id', 'country_id'),
+            Index('ix_city_id', 'city_id'),
+            Index('ix_vehicle_type', 'vehicle_type'),
+        )
+        return table_args + BaseMixin.__table_args__
+
     @validates('company_id')
     def _validate_company_id(self, key, company_id):
         company = DBSession().query(VehicleCompany).filter(
-            VehicleCompany.id==company_id,
-            VehicleCompany.is_delete==VehicleCompany.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+            VehicleCompany.id==company_id).first()
         if not company:
             raise_error_json(InvalidateError(args=('company_id', company_id)))
         return company_id
@@ -135,19 +145,14 @@ class Vehicle(Base, BaseMixin):
     @validates('country_id')
     def _validate_country_id(self, key, country_id):
         country = DBSession().query(Country).filter(
-            Country.id==country_id,
-            Country.is_delete==Country.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+            Country.id==country_id).first()
         if not country:
-            raise_error_json(InvalidateError(args=(country_id,)))
+            raise_error_json(InvalidateError(args=('country_id', country_id,)))
         return country_id
 
     @classmethod
     def _validate_country_and_city(cls, country_id, city_id):
-        city = DBSession().query(City).filter(
-            City.id==city_id,
-            City.is_delete==City.FIELD_STATUS.FIELD_STATUS_NO_DELETE 
-        ).first()
+        city = DBSession().query(City).filter(City.id==city_id).first()
         if not city:
             raise_error_json(ClientError(errcode=CreoleErrCode.CITY_NOT_EXIST))
         elif city.country_id != country_id:
@@ -156,10 +161,7 @@ class Vehicle(Base, BaseMixin):
     @classmethod
     def get_by_id(cls, id):
         session = DBSession()
-        vehicle = session.query(cls).filter(
-            cls.id==id,
-            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        ).first()
+        vehicle = session.query(cls).filter(cls.id==id).first()
         return vehicle
 
     @classmethod
@@ -185,7 +187,8 @@ class Vehicle(Base, BaseMixin):
     def update(cls, id, **kwargs):
         vehicle = cls.get_by_id(id)
         if not vehicle:
-            raise_error_json(ClientError(errcode=CreoleErrCode.VEHICLE_NOT_EXIST))
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_NOT_EXIST))
         for k, v in kwargs.iteritems():
             setattr(vehicle, k, v)
         session = DBSession()
@@ -198,18 +201,22 @@ class Vehicle(Base, BaseMixin):
 
     @classmethod
     def delete(cls, id):
-        DBSession().query(cls).filter(
-            cls.id==id
-        ).update(
-            {'is_delete': cls.FIELD_STATUS.FIELD_STATUS_DELETED},
-            synchronize_session=False)
+        session = DBSession()
+        vehicle = session.query(cls).filter(cls.id==id).first()
+        if not vehicle:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.SHOP_NOT_EXIST))
+        session.delete(vehicle)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def search(cls, country_id=None, city_id=None, company_id=None,
-               operation=None, seat=None, page=1, number=20):
-        query = DBSession().query(cls).filter(
-            cls.is_delete==cls.FIELD_STATUS.FIELD_STATUS_NO_DELETE
-        )
+               vehicle_type=None, operation=None, seat=None, page=1, number=20):
+        query = DBSession().query(cls)
         total = None
         if country_id:
             query = query.filter(cls.country_id==country_id)
@@ -217,6 +224,8 @@ class Vehicle(Base, BaseMixin):
             query = query.filter(cls.city_id==city_id)
         if company_id:
             query = query.filter(cls.company_id==company_id)
+        if vehicle_type:
+            query = query.filter(cls.vehicle_type==vehicle_type)
         if operation and seat:
             if operation == cls.OPERATIONS.GREATER:
                 query = query.filter(cls.seat>seat)
