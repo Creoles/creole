@@ -133,7 +133,8 @@ class VehicleAccountApi(Resource):
         }
     }
 
-    def get(self, owner_id):
+    def get(self, id):
+        owner_id = id
         data = VehicleAccountService.get_by_owner_id(owner_id)
         return api_response(data=data)
 
