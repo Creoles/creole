@@ -100,11 +100,17 @@ class VehicleCompany(Base, BaseMixin):
             raise_error_json(DatabaseError(msg=repr(e)))
 
 
-class AccountMixin(BaseMixin):
+class VehicleAccount(Base, BaseMixin):
+    """车辆公司账单结算账号"""
+    __tablename__ = 'vehicle_company_account'
     CURRENCY = Enum(
         ('USD', 1, u'美元'),
         ('CNY', 2, u'人民币'),
         ('LKR', 3, u'斯里兰卡卢布'),
+    )
+    ACCOUNT_TYPE = Enum(
+        ('COMPANY', 1, u'公司账号'),
+        ('PERSSON', 2, u'个人账号'),
     )
 
     currency = Column(TINYINT, nullable=False, doc=u'结算币种')
@@ -114,35 +120,46 @@ class AccountMixin(BaseMixin):
     account = Column(String(20), unique=True, nullable=False, doc=u'账号')
     note = Column(String(40), nullable=False, doc=u'备注')
 
-
-class VehicleCompanyAccount(Base, AccountMixin):
-    """车辆公司账单结算账号"""
-    __tablename__ = 'vehicle_company_account'
-
-    company_id = Column(Integer, nullable=False, doc=u'公司id')
+    account_type = Column(
+        TINYINT, nullable=False, default=ACCOUNT_TYPE.COMPANY, doc=u'账号类型')
+    owner_id = Column(
+        Integer, nullable=False,
+        doc=u'所属人id, 当account_type为公司的时候,表示company_id, 为个人的时候,表示user_id')
 
     @declared_attr
     def __table_args__(self):
         table_args = (
-            Index('idx_company_id_account', 'company_id', 'account'),
+            Index(
+                'idx_owner_id_account_type_account',
+                'owner_id', 'account_type', 'account'),
         )
         return table_args + BaseMixin.__table_args__
 
-    @validates('company_id')
-    def _validate_company_id(self, key, company_id):
-        company = VehicleCompany.get_by_id(company_id)
-        if not company:
-            raise_error_json(InvalidateError(args=('company_id', company_id)))
-        return company_id
+    @validates('account_type')
+    def _validate_account_type(self, key, account_type):
+        if account_type not in self.ACCOUNT_TYPE.values():
+            raise_error_json(InvalidateError(args=('account_type', account_type)))
+        return account_type
 
     @classmethod
-    def create(cls, company_id, currency, bank_name,
+    def _validate_owner_id_account_type(cls, owner_id, account_type):
+        if account_type == cls.ACCOUNT_TYPE.COMPANY:
+            obj = VehicleCompany.get_by_id(owner_id)
+        elif account_type == cls.ACCOUNT_TYPE.PERSON:
+            obj = User.get_by_id(owner_id)
+        if not obj:
+            raise_error_json(InvalidateError(args=('owner_id', owner_id)))
+
+    @classmethod
+    def create(cls, owner_id, account_type, currency, bank_name,
                deposit_bank, payee, account, note=None):
+        cls._validate_owner_id_account_type(owner_id, account_type)
         session = DBSession()
         account = cls(
-            company_id=company_id, currency=currency,
-            bank_name=bank_name, deposit_bank=deposit_bank,
-            payee=payee, account=account, note=note)
+            owner_id=owner_id, account_type=account_type,
+            currency=currency, bank_name=bank_name,
+            deposit_bank=deposit_bank, payee=payee,
+            account=account, note=note)
         try:
             session.add(account)
             session.commit()
@@ -152,8 +169,8 @@ class VehicleCompanyAccount(Base, AccountMixin):
             raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def get_by_company_id(cls, company_id):
-        return DBSession().query(cls).filter(cls.company_id==company_id).all()
+    def get_by_owner_id(cls, owner_id):
+        return DBSession().query(cls).filter(cls.owner_id==owner_id).all()
 
     @classmethod
     def get_by_id(cls, id):
@@ -175,81 +192,8 @@ class VehicleCompanyAccount(Base, AccountMixin):
 
     @classmethod
     def update(cls, id, **kwargs):
-        account = cls.get_by_id(id)
-        if not account:
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.VEHICLE_ACCOUNT_NOT_EXIST))
-        for k, v in kwargs.iteritems():
-            setattr(account, k, v)
-        session = DBSession()
-        try:
-            session.merge(account)
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
-
-
-class VehicleUserAccount(Base, AccountMixin):
-    """车辆所有者账单结算账号, 仅在非公司车辆使用"""
-    __tablename__ = 'vehicle_user_account'
-
-    user_id = Column(Integer, nullable=False, doc=u'用户id')
-
-    @declared_attr
-    def __table_args__(self):
-        table_args = (
-            Index('idx_user_id_account', 'user_id', 'account'),
-        )
-        return table_args + BaseMixin.__table_args__
-
-    @validates('user_id')
-    def _validate_user_id(self, key, user_id):
-        company = User.get_by_id(user_id)
-        if not company:
-            raise_error_json(InvalidateError(args=('user_id', user_id)))
-        return user_id
-
-    @classmethod
-    def create(cls, user_id, currency, bank_name,
-               deposit_bank, payee, account, note=None):
-        session = DBSession()
-        account = cls(
-            user_id=user_id, currency=currency,
-            bank_name=bank_name, deposit_bank=deposit_bank,
-            payee=payee, account=account, note=note)
-        try:
-            session.add(account)
-            session.commit()
-            return account.id
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
-
-    @classmethod
-    def get_by_user_id(cls, user_id):
-        return DBSession().query(cls).filter(cls.user_id==user_id).all()
-
-    @classmethod
-    def get_by_id(cls, id):
-        return DBSession().query(cls).filter(cls.id==id).first()
-
-    @classmethod
-    def delete(cls, id):
-        session = DBSession()
-        account = session.query(cls).filter(cls.id==id).first()
-        if not account:
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.VEHICLE_ACCOUNT_NOT_EXIST))
-        session.delete(account)
-        try:
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
-
-    @classmethod
-    def update(cls, id, **kwargs):
+        cls._validate_owner_id_account_type(
+            kwargs['owner_id'], kwargs['account_type'])
         account = cls.get_by_id(id)
         if not account:
             raise_error_json(
@@ -276,13 +220,7 @@ class Vehicle(Base, BaseMixin):
         ('LESS', 3, u'小于'),
     )
 
-    TYPE = Enum(
-        ('COMPANY', 1, u'公司账号'),
-        ('PERSSON', 2, u'个人账号'),
-    )
-
-    account_id = Column(Integer, nullable=False, doc=u'结算账号Id')
-    account_type = Column(TINYINT, nullable=False, default=TYPE.COMPANY, doc=u'账号类型')
+    account_id = Column(Integer, nullable=False, doc=u'结算账号id')
     company_id = Column(Integer, nullable=True, doc=u'所属车辆公司')
     country_id = Column(Integer, nullable=False, doc=u'国家名')
     city_id = Column(Integer, nullable=False, doc=u'城市名')
@@ -306,12 +244,6 @@ class Vehicle(Base, BaseMixin):
             Index('ix_vehicle_type', 'vehicle_type'),
         )
         return table_args + BaseMixin.__table_args__
-
-    @validates('account_type')
-    def _validate_account_type(self, key, account_type):
-        if account_type not in self.TYPE.values():
-            raise_error_json(InvalidateError(args=('account_type', account_type)))
-        return account_type
 
     @validates('company_id')
     def _validate_company_id(self, key, company_id):
@@ -344,7 +276,7 @@ class Vehicle(Base, BaseMixin):
         return vehicle
 
     @classmethod
-    def create(cls, account_id, account_type, company_id, country_id, city_id,
+    def create(cls, account_id, company_id, country_id, city_id,
                vehicle_type, seat, start_use, license, register_number,
                contact, telephone, unit_price):
         cls._validate_country_and_city(country_id, city_id)
@@ -353,8 +285,7 @@ class Vehicle(Base, BaseMixin):
             company_id=company_id, country_id=country_id, city_id=city_id,
             vehicle_type=vehicle_type, seat=seat, start_use=start_use,
             license=license, register_number=register_number, contact=contact,
-            telephone=telephone, unit_price=unit_price, account_type=account_type,
-            account_id=account_id
+            telephone=telephone, unit_price=unit_price, account_id=account_id
         )
         session.add(vehicle)
         try:

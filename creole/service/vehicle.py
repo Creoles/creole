@@ -2,8 +2,7 @@
 from ..model.vehicle import (
     Vehicle,
     VehicleCompany,
-    VehicleUserAccount,
-    VehicleCompanyAccount,
+    VehicleAccount,
 )
 
 
@@ -95,49 +94,25 @@ class VehicleAccountService(object):
         return _dict
 
     @classmethod
-    def create_user_account(cls, user_id, currency, bank_name, deposit_bank,
-                            payee, account, note=None):
-        return VehicleUserAccount.create(
-            user_id=user_id, currency=currency, bank_name=bank_name,
+    def create_account(cls, owner_id, account_type, currency, bank_name,
+                       deposit_bank, payee, account, note=None):
+        return VehicleAccount.create(
+            owner_id=owner_id, currency=currency, bank_name=bank_name,
             deposit_bank=deposit_bank, payee=payee, account=account,
-            note=note)
+            note=note, account_type=account_type)
 
     @classmethod
-    def create_company_account(cls, company_id, currency, bank_name,
-                               deposit_bank, payee, account, note=None):
-        return VehicleCompanyAccount.create(
-            company_id=company_id, currency=currency, bank_name=bank_name,
-            deposit_bank=deposit_bank, payee=payee, account=account,
-            note=note)
-
-    @classmethod
-    def get_by_user_id(cls, user_id):
+    def get_by_owner_id(cls, owner_id):
         raw_data = []
-        account_list = VehicleUserAccount.get_by_user_id(user_id)
+        account_list = VehicleAccount.get_by_owner_id(owner_id)
         for account in account_list:
             raw_data.append(cls._get_account_data_dict(account))
         return raw_data
 
     @classmethod
-    def get_by_company_id(cls, company_id):
-        raw_data = []
-        account_list = VehicleCompanyAccount.get_by_company_id(company_id)
-        for account in account_list:
-            raw_data.append(cls._get_account_data_dict(account))
-        return raw_data
+    def delete_account_by_id(cls, id):
+        return VehicleAccount.delete(id)
 
     @classmethod
-    def delete_user_account_by_id(cls, id):
-        return VehicleUserAccount.delete(id)
-
-    @classmethod
-    def delete_company_account_by_id(cls, id):
-        return VehicleCompanyAccount.delete(id)
-
-    @classmethod
-    def update_user_account_by_id(cls, id, **kwargs):
-        return VehicleUserAccount.update(id, **kwargs)
-
-    @classmethod
-    def update_company_account_by_id(cls, id, **kwargs):
-        return VehicleCompanyAccount.update(id, **kwargs)
+    def update_account_by_id(cls, id, **kwargs):
+        return VehicleAccount.update(id, **kwargs)
