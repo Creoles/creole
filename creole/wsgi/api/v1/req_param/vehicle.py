@@ -6,6 +6,13 @@ from creole.util import Enum
 
 
 class CreateVehicleApiParser(BaseRequestParser):
+    TYPE = Enum(
+        ('COMPANY', 1, u'公司账号'),
+        ('PERSSON', 2, u'个人账号'),
+    )
+    account_id = Argument('account_id', type=int, required=True)
+    account_type = Argument(
+        'account_type', type=int, choices=TYPE.values(), required=True)
     company_id = Argument('company_id', type=int, required=True)
     country_id = Argument('country_id', type=int, required=True)
     city_id = Argument('city_id', type=int, required=True)

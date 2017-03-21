@@ -146,6 +146,7 @@ class VehicleCompanyAccount(Base, AccountMixin):
         try:
             session.add(account)
             session.commit()
+            return account.id
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
@@ -220,6 +221,7 @@ class VehicleUserAccount(Base, AccountMixin):
         try:
             session.add(account)
             session.commit()
+            return account.id
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
@@ -274,6 +276,13 @@ class Vehicle(Base, BaseMixin):
         ('LESS', 3, u'小于'),
     )
 
+    TYPE = Enum(
+        ('COMPANY', 1, u'公司账号'),
+        ('PERSSON', 2, u'个人账号'),
+    )
+
+    account_id = Column(Integer, nullable=False, doc=u'结算账号Id')
+    account_type = Column(TINYINT, nullable=False, default=TYPE.COMPANY, doc=u'账号类型')
     company_id = Column(Integer, nullable=True, doc=u'所属车辆公司')
     country_id = Column(Integer, nullable=False, doc=u'国家名')
     city_id = Column(Integer, nullable=False, doc=u'城市名')
@@ -297,6 +306,12 @@ class Vehicle(Base, BaseMixin):
             Index('ix_vehicle_type', 'vehicle_type'),
         )
         return table_args + BaseMixin.__table_args__
+
+    @validates('account_type')
+    def _validate_account_type(self, key, account_type):
+        if account_type not in self.TYPE.values():
+            raise_error_json(InvalidateError(args=('account_type', account_type)))
+        return account_type
 
     @validates('company_id')
     def _validate_company_id(self, key, company_id):
@@ -329,16 +344,17 @@ class Vehicle(Base, BaseMixin):
         return vehicle
 
     @classmethod
-    def create(cls, company_id, country_id, city_id, vehicle_type,
-               seat, start_use, license, register_number, contact,
-               telephone, unit_price):
+    def create(cls, account_id, account_type, company_id, country_id, city_id,
+               vehicle_type, seat, start_use, license, register_number,
+               contact, telephone, unit_price):
         cls._validate_country_and_city(country_id, city_id)
         session = DBSession()
         vehicle = cls(
             company_id=company_id, country_id=country_id, city_id=city_id,
             vehicle_type=vehicle_type, seat=seat, start_use=start_use,
             license=license, register_number=register_number, contact=contact,
-            telephone=telephone, unit_price=unit_price
+            telephone=telephone, unit_price=unit_price, account_type=account_type,
+            account_id=account_id
         )
         session.add(vehicle)
         try:

@@ -203,9 +203,11 @@ class CreateVehicleAccountApi(Resource):
             return api_response(code=CreoleErrCode.PARAMETER_ERROR)
         try:
             if company_id:  # 公司车辆
-                VehicleAccountService.create_company_account(company_id, **parsed_data)
+                account_id = \
+                    VehicleAccountService.create_company_account(company_id, **parsed_data)
             else:   # 个人车辆
-                VehicleAccountService.create_user_account(user_id, **parsed_data)
+                account_id = \
+                    VehicleAccountService.create_user_account(user_id, **parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
-        return api_response()
+        return api_response(data={'account_id': account_id})

@@ -20,14 +20,16 @@ class VehicleService(object):
         return vehicle_info
 
     @classmethod
-    def create_vehicle(cls, company_id, country_id, city_id, vehicle_type,
-               seat, start_use, license, register_number, contact,
-               telephone, unit_price):
+    def create_vehicle(cls, account_id, account_type, company_id, country_id,
+                       city_id, vehicle_type, seat, start_use, license,
+                       register_number, contact, telephone, unit_price):
         return Vehicle.create(
             company_id=company_id, country_id=country_id, city_id=city_id,
             vehicle_type=vehicle_type, seat=seat, start_use=start_use,
             license=license, register_number=register_number, contact=contact,
-            telephone=telephone, unit_price=unit_price)
+            telephone=telephone, unit_price=unit_price, account_type=account_type,
+            account_id=account_id
+        )
 
     @classmethod
     def delete_vehicle_by_id(cls, id):
