@@ -1,10 +1,15 @@
 # coding: utf-8
 from ...util import Resource, api_response
-from .....service.vehicle import VehicleService, VehicleCompanyService
+from .....service.vehicle import (
+    VehicleService,
+    VehicleCompanyService,
+    VehicleAccountService,
+)
 from ..req_param.vehicle import (
     CreateVehicleApiParser,
     CreateVehicleCompanyApiParser,
     VehicleSearchApiParser,
+    CreateVehicleAccountApiParser,
 )
 from creole.exc import ClientError, CreoleErrCode
 
@@ -119,3 +124,49 @@ class CreateVehicleCompanyApi(Resource):
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
+
+
+class VehicleAccountApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'put': CreateVehicleAccountApiParser,
+        }
+    }
+
+    def get(self, id):
+        owner_id = id
+        data = VehicleAccountService.get_by_owner_id(owner_id)
+        return api_response(data=data)
+
+    def put(self, id):
+        parsed_data = self.parsed_data
+        try:
+            VehicleAccountService.\
+                update_account_by_id(id, **parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
+
+    def delete(self, id):
+        try:
+            VehicleAccountService.delete_account_by_id(id)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
+
+
+class CreateVehicleAccountApi(Resource):
+    """创建车辆账号信息"""
+    meta = {
+        'args_parser_dict': {
+            'post': CreateVehicleAccountApiParser,
+        }
+    }
+
+    def post(self):
+        parsed_data = self.parsed_data
+        try:
+            account_id = VehicleAccountService.create_account(**parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response(data={'account_id': account_id})

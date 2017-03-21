@@ -6,6 +6,7 @@ from creole.util import Enum
 
 
 class CreateVehicleApiParser(BaseRequestParser):
+    account_id = Argument('account_id', type=int, required=True)
     company_id = Argument('company_id', type=int, required=True)
     country_id = Argument('country_id', type=int, required=True)
     city_id = Argument('city_id', type=int, required=True)
@@ -39,3 +40,26 @@ class VehicleSearchApiParser(BaseRequestParser):
     seat = Argument('seat', type=int, required=False)
     page = Argument('page', type=int, default=1, required=False)
     number = Argument('number', type=int, default=20, required=False)
+
+
+class CreateVehicleAccountApiParser(BaseRequestParser):
+    CURRENCY = Enum(
+        ('USD', 1, u'美元'),
+        ('CNY', 2, u'人民币'),
+        ('LKR', 3, u'斯里兰卡卢布'),
+    )
+    TYPE = Enum(
+        ('COMPANY', 1, u'公司账号'),
+        ('PERSSON', 2, u'个人账号'),
+    )
+    owner_id = Argument('owner_id', type=int, required=False, location=('json', 'form'))
+    account_type = Argument(
+        'account_type', type=int, choices=TYPE.values(), required=True)
+    currency = Argument(
+        'currency', choices=CURRENCY.values(), type=int,
+        required=True, location=('json', 'form'))
+    bank_name = Argument('bank_name', required=True, location=('json', 'form'))
+    deposit_bank = Argument('deposit_bank', required=True, location=('json', 'form'))
+    payee = Argument('payee', required=True, location=('json', 'form'))
+    account = Argument('account', required=True, location=('json', 'form'))
+    note = Argument('note', required=False, location=('json', 'form'))

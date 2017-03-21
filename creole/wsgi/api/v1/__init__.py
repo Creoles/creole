@@ -23,6 +23,8 @@ from .endpoint.vehicle import (
     CreateVehicleApi,
     VehicleCompanyApi,
     CreateVehicleCompanyApi,
+    VehicleAccountApi,
+    CreateVehicleAccountApi,
 )
 
 
@@ -53,3 +55,5 @@ app.add_resource(CreateVehicleApi, '/vehicle/create_vehicle', endpoint='create-v
 app.add_resource(SearchVehicleApi, '/vehicle/search', endpoint='search-vehicle')
 app.add_resource(VehicleCompanyApi, '/vehicle_company/<int:id>', endpoint='get-vehicle-company')
 app.add_resource(CreateVehicleCompanyApi, '/vehicle_company/create_company', endpoint='create-vehicle-company')
+app.add_resource(VehicleAccountApi, '/vehicle_account/<int:id>', endpoint='get-vehicle-account')
+app.add_resource(CreateVehicleAccountApi, '/vehicle_account/create_account', endpoint='create-account')
