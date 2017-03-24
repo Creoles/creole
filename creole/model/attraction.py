@@ -76,7 +76,7 @@ class Attraction(Base, BaseMixin):
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
-            
+
 
     @classmethod
     def update(cls, id, **kwargs):
