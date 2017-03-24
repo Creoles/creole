@@ -26,6 +26,11 @@ from .endpoint.vehicle import (
     VehicleAccountApi,
     CreateVehicleAccountApi,
 )
+from .endpoint.attraction import (
+    AttractionApi,
+    CreateAttractionApi,
+    SearchAttractionApi,
+)
 
 
 blue_print = Blueprint('api_v1', __name__)
@@ -57,3 +62,8 @@ app.add_resource(VehicleCompanyApi, '/vehicle_company/<int:id>', endpoint='get-v
 app.add_resource(CreateVehicleCompanyApi, '/vehicle_company/create_company', endpoint='create-vehicle-company')
 app.add_resource(VehicleAccountApi, '/vehicle_account/<int:id>', endpoint='get-vehicle-account')
 app.add_resource(CreateVehicleAccountApi, '/vehicle_account/create_account', endpoint='create-account')
+
+# 景点
+app.add_resource(AttractionApi, '/attraction/<int:id>', endpoint='get-attraction')
+app.add_resource(CreateAttractionApi, '/attraction/create_attraction', endpoint='create-attraction')
+app.add_resource(SearchAttractionApi, '/attraction/search', endpoint='search-attraction')

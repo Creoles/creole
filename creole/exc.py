@@ -33,6 +33,9 @@ class BaseCreoleErrCode(object):
     # 车辆结算
     VEHICLE_ACCOUNT_NOT_EXIST = 3033
 
+    # 景点
+    ATTRACTION_NOT_EXIST = 3040
+
 class CreoleErrCode(BaseCreoleErrCode):
     pass
 
@@ -65,6 +68,8 @@ TRANSLATIONS = {
     CreoleErrCode.VEHICLE_COMPANY_NOT_EXIST: u'vehicle company do not exist',
     CreoleErrCode.VEHICLE_NOT_EXIST: u'vehicle do not exist',
     CreoleErrCode.VEHICLE_ACCOUNT_NOT_EXIST: u'vehicle account do not exist',
+
+    CreoleErrCode.ATTRACTION_NOT_EXIST: u'attraction do not exist',
 }
 
 
