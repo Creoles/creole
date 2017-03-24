@@ -195,10 +195,10 @@ class Shop(Base, BaseMixin):
         session = DBSession()
         query = session.query(cls)
         total = None
-        if country_id:
-            query = query.filter(cls.country_id==country_id)
         if city_id:
             query = query.filter(cls.city_id==city_id)
+        elif country_id:
+            query = query.filter(cls.country_id==country_id)
         if company_id:
             query = query.filter(cls.belong==company_id)
         if shop_type:
