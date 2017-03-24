@@ -300,6 +300,9 @@ class Vehicle(Base, BaseMixin):
         if not vehicle:
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.VEHICLE_NOT_EXIST))
+        if vehicle.country_id != kwargs['country_id'] \
+                or vehicle.city_id != kwargs['city_id']:
+            cls._validate_country_and_city(kwargs['country_id'], kwargs['city_id'])
         for k, v in kwargs.iteritems():
             setattr(vehicle, k, v)
         session = DBSession()
@@ -329,10 +332,10 @@ class Vehicle(Base, BaseMixin):
                vehicle_type=None, operation=None, seat=None, page=1, number=20):
         query = DBSession().query(cls)
         total = None
-        if country_id:
-            query = query.filter(cls.country_id==country_id)
         if city_id:
             query = query.filter(cls.city_id==city_id)
+        elif country_id:
+            query = query.filter(cls.country_id==country_id)
         if company_id:
             query = query.filter(cls.company_id==company_id)
         if vehicle_type:

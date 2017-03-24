@@ -195,10 +195,10 @@ class Shop(Base, BaseMixin):
         session = DBSession()
         query = session.query(cls)
         total = None
-        if country_id:
-            query = query.filter(cls.country_id==country_id)
         if city_id:
             query = query.filter(cls.city_id==city_id)
+        elif country_id:
+            query = query.filter(cls.country_id==country_id)
         if company_id:
             query = query.filter(cls.belong==company_id)
         if shop_type:
@@ -232,6 +232,9 @@ class Shop(Base, BaseMixin):
         shop = cls.get_by_id(id)
         if not shop:
             raise_error_json(ClientError(errcode=CreoleErrCode.SHOP_NOT_EXIST))
+        if shop.country_id != kwargs['country_id'] \
+                or shop.city_id != kwargs['city_id']:
+            cls._validate_country_and_city(kwargs['country_id'], kwargs['city_id'])
         session = DBSession()
         for k, v in kwargs.iteritems():
             setattr(shop, k, v)
