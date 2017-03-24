@@ -34,7 +34,7 @@ class Attraction(Base, BaseMixin):
     adult_fee = Column(Float(precision=3), nullable=False, doc=u'成人门票')
     child_fee = Column(Float(precision=3), nullable=False, doc=u'儿童门票')
     intro_cn = Column(Unicode(128), nullable=True, doc=u'中文简介')
-    intro_cn = Column(String(128), nullable=True, doc=u'英文简介')
+    intro_en = Column(String(128), nullable=True, doc=u'英文简介')
 
     @declared_attr
     def __table_args__(self):
@@ -122,11 +122,11 @@ class Attraction(Base, BaseMixin):
         """根据国家或者城市id查找"""
         query = DBSession().query(cls)
         total = None
-        if country_id:
-            query = query.filter(cls.country_id==country_id)
-        elif city_id:
+        if city_id:
             query = query.filter(cls.city_id==city_id)
-        elif name:
+        elif country_id:
+            query = query.filter(cls.country_id==country_id)
+        if name:
             query = query.filter(cls.name==name)
         if page == 1:
             total = query.count()

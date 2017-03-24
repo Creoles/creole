@@ -8,6 +8,8 @@ class SearchAttractionApiParser(BaseRequestParser):
     country_id = Argument('country_id', type=int, required=False)
     city_id = Argument('city_id', type=int, required=False)
     name = Argument('name', required=False)
+    page = Argument('page', type=int, default=1, required=False)
+    number = Argument('number', type=int, default=20, required=False)
 
 
 class CreateAttractionApiParser(BaseRequestParser):

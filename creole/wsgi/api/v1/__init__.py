@@ -66,4 +66,4 @@ app.add_resource(CreateVehicleAccountApi, '/vehicle_account/create_account', end
 # 景点
 app.add_resource(AttractionApi, '/attraction/<int:id>', endpoint='get-attraction')
 app.add_resource(CreateAttractionApi, '/attraction/create_attraction', endpoint='create-attraction')
-app.add_resource(SearchAttractionApi, '/attraction/saerch', endpoint='search-attraction')
+app.add_resource(SearchAttractionApi, '/attraction/search', endpoint='search-attraction')

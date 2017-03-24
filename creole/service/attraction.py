@@ -28,7 +28,8 @@ class AttractionService(object):
         return Attraction.delete(id)
 
     @classmethod
-    def search_attraction(cls, country_id=None, city_id=None, name=None):
+    def search_attraction(cls, country_id=None, city_id=None,
+                          name=None, page=1, number=20):
         raw_data = []
         attraction_list, total = Attraction.search(
             country_id=country_id, city_id=city_id, name=None)
