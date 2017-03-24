@@ -29,8 +29,8 @@ class Attraction(Base, BaseMixin):
     country_id = Column(Integer, nullable=False, doc=u'国家id')
     city_id = Column(Integer, nullable=False, doc=u'城市id')
     address = Column(String(80), nullable=False, doc=u'景点地址')
-    name = Column(Unicode(30), nullable=False, doc=u'中文名称')
-    name_en = Column(String(30), nullable=False, doc=u'英文名称')
+    name = Column(Unicode(30), unique=True, nullable=False, doc=u'中文名称')
+    name_en = Column(String(30), unique=True, nullable=False, doc=u'英文名称')
     adult_fee = Column(Float(precision=3), nullable=False, doc=u'成人门票')
     child_fee = Column(Float(precision=3), nullable=False, doc=u'儿童门票')
     intro_cn = Column(Unicode(128), nullable=True, doc=u'中文简介')
@@ -118,7 +118,7 @@ class Attraction(Base, BaseMixin):
             raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def search(cls, country_id=None, city_id=None, page=1, number=20):
+    def search(cls, country_id=None, city_id=None, name=None, page=1, number=20):
         """根据国家或者城市id查找"""
         query = DBSession().query(cls)
         total = None
@@ -126,6 +126,8 @@ class Attraction(Base, BaseMixin):
             query = query.filter(cls.country_id==country_id)
         elif city_id:
             query = query.filter(cls.city_id==city_id)
+        elif name:
+            query = query.filter(cls.name==name)
         if page == 1:
             total = query.count()
         attraction_list = query.offset((page - 1) * number).limit(number).all()

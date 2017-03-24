@@ -7,6 +7,7 @@ from ...util import BaseRequestParser
 class SearchAttractionApiParser(BaseRequestParser):
     country_id = Argument('country_id', type=int, required=False)
     city_id = Argument('city_id', type=int, required=False)
+    name = Argument('name', required=False)
 
 
 class CreateAttractionApiParser(BaseRequestParser):
