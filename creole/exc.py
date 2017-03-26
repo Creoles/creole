@@ -36,6 +36,10 @@ class BaseCreoleErrCode(object):
     # 景点
     ATTRACTION_NOT_EXIST = 3040
 
+    # 餐饮
+    RESTAURANT_COMPANY_NOT_EXIST = 3050
+    RESTAURANT_COMPANY_DUPLICATED = 3051
+
 class CreoleErrCode(BaseCreoleErrCode):
     pass
 
@@ -70,6 +74,9 @@ TRANSLATIONS = {
     CreoleErrCode.VEHICLE_ACCOUNT_NOT_EXIST: u'vehicle account do not exist',
 
     CreoleErrCode.ATTRACTION_NOT_EXIST: u'attraction do not exist',
+
+    CreoleErrCode.RESTAURANT_COMPANY_NOT_EXIST: u'restaurant company do not exist',
+    CreoleErrCode.RESTAURANT_COMPANY_DUPLICATED: u'restaurant company name or name_en duplicated',
 }
 
 
