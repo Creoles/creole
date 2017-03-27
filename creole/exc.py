@@ -39,6 +39,7 @@ class BaseCreoleErrCode(object):
     # 餐饮
     RESTAURANT_COMPANY_NOT_EXIST = 3050
     RESTAURANT_COMPANY_DUPLICATED = 3051
+    RESTAURANT_NOT_EXIST = 3052
 
 class CreoleErrCode(BaseCreoleErrCode):
     pass
@@ -77,6 +78,7 @@ TRANSLATIONS = {
 
     CreoleErrCode.RESTAURANT_COMPANY_NOT_EXIST: u'restaurant company do not exist',
     CreoleErrCode.RESTAURANT_COMPANY_DUPLICATED: u'restaurant company name or name_en duplicated',
+    CreoleErrCode.RESTAURANT_NOT_EXIST: u'restaurant do not exist',
 }
 
 
