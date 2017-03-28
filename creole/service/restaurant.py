@@ -1,5 +1,16 @@
 # coding: utf-8
-from ..model.restaurant import RestaurantCompany, Restaurant
+from .base import BaseService
+from ..model import DBSession
+from ..model.restaurant import (
+    RestaurantCompany,
+    Restaurant,
+    Meal,
+)
+from ..exc import (
+    raise_error_json,
+    ClientError,
+    CreoleErrCode,
+)
 
 
 class RestaurantCompanyService(object):
@@ -27,18 +38,11 @@ class RestaurantCompanyService(object):
         return RestaurantCompany.create(name=name, name_en=name_en)
 
 
-class RestaurantService(object):
-    @classmethod
-    def _get_restaurant_data_dict(cls, restaurant_obj):
-        _dict = {}
-        for k in restaurant_obj.__table__.columns._data:
-            _dict[k] = getattr(restaurant_obj, k, None)
-        return _dict
-
+class RestaurantService(BaseService):
     @classmethod
     def get_by_id(cls, id):
         restaurant = Restaurant.get_by_id(id)
-        return cls._get_restaurant_data_dict(restaurant)
+        return cls._get_db_obj_data_dict(restaurant)
 
     @classmethod
     def delete_restaurant_by_id(cls, id):
@@ -58,3 +62,38 @@ class RestaurantService(object):
             address=address, contact=contact, telephone=telephone,
             intro_cn=intro_cn, intro_en=intro_en
         )
+
+
+class MealService(BaseService):
+    @classmethod
+    def get_by_restaurant_id(cls, restaurant_id):
+        _dict = {}
+        restaurant_list = Meal.get_by_restaurant_id(restaurant_id)
+        for item in restaurant_list:
+            _dict[item.meal_type] = cls._get_db_obj_data_dict(item)
+        return _dict
+
+    @classmethod
+    def create_meal(cls, restaurant_id, meal_type, adult_fee, adult_cost,
+                    child_fee, child_cost):
+        session = DBSession()
+        meal = session.query(Meal).filter(
+            Meal.restaurant_id==restaurant_id, Meal.meal_type==meal_type).first()
+        if meal:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.RESTAURANT_MEAL_REACH_LIMIT))
+        return Meal.create(
+            restaurant_id=restaurant_id, meal_type=meal_type,
+            adult_fee=adult_fee, adult_cost=adult_cost,
+            child_fee=child_fee, child_cost=child_cost)
+
+    @classmethod
+    def update_meal_by_id(cls, id, adult_fee=None, adult_cost=None,
+                     child_fee=None, child_cost=None):
+        return Meal.updated(
+            adult_fee=adult_fee, adult_cost=adult_cost,
+            child_fee=child_fee, child_cost=child_cost)
+
+    @classmethod
+    def delete_meal_by_id(cls, id):
+        return Meal.delete(id)

@@ -30,3 +30,25 @@ class CreateRestaurantApiParser(BaseRequestParser):
     telephone = Argument('telephone', required=True)
     intro_cn = Argument('intro_cn', required=False)
     intro_en = Argument('intro_en', required=False)
+
+
+class CreateMealApiParser(BaseRequestParser):
+    TYPE = Enum(
+        ('STANDARD', 1, u'标准餐'),
+        ('UPGRADE', 2, u'升级餐'),
+        ('LUXURY', 3, u'豪华餐'),
+    )
+
+    restaurant_id = Argument('restaurant_id', type=int, required=True)
+    meal_type = Argument('meal_type', type=int, required=True, choices=TYPE.values())
+    adult_fee = Argument('adult_fee', type=float, required=True)
+    adult_cost = Argument('adult_cost', type=float, required=True)
+    child_fee = Argument('child_fee', type=float, required=True)
+    child_cost = Argument('child_cost', type=float, required=True)
+
+
+class PutMealApiParser(BaseRequestParser):
+    adult_fee = Argument('adult_fee', type=float, required=False)
+    adult_cost = Argument('adult_cost', type=float, required=False)
+    child_fee = Argument('child_fee', type=float, required=False)
+    child_cost = Argument('child_cost', type=float, required=False)

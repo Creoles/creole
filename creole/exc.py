@@ -40,6 +40,8 @@ class BaseCreoleErrCode(object):
     RESTAURANT_COMPANY_NOT_EXIST = 3050
     RESTAURANT_COMPANY_DUPLICATED = 3051
     RESTAURANT_NOT_EXIST = 3052
+    RESTAURANT_MEAL_REACH_LIMIT = 3053
+    RESTAURANT_MEAL_TYPE_NOT_EXIST = 3054
 
 class CreoleErrCode(BaseCreoleErrCode):
     pass
@@ -79,6 +81,8 @@ TRANSLATIONS = {
     CreoleErrCode.RESTAURANT_COMPANY_NOT_EXIST: u'restaurant company do not exist',
     CreoleErrCode.RESTAURANT_COMPANY_DUPLICATED: u'restaurant company name or name_en duplicated',
     CreoleErrCode.RESTAURANT_NOT_EXIST: u'restaurant do not exist',
+    CreoleErrCode.RESTAURANT_MEAL_REACH_LIMIT: u'the meal type of the restaurant has reach the limit.',
+    CreoleErrCode.RESTAURANT_MEAL_TYPE_NOT_EXIST: u'the type of the meal dose not exist',
 }
 
 
