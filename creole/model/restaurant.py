@@ -44,6 +44,27 @@ class Meal(Base, BaseMixin):
     child_fee = Column(Float, nullable=False, doc=u'儿童报价')
     child_cost = Column(Float, nullable=False, doc=u'儿童成本')
 
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_restaurant_id', 'restaurant_id'),
+            Index('idx_restaurant_id_meal_type', 'restaurant_id', 'meal_type'),
+        )
+        return table_args + BaseMixin.__table_args__
+
+    @validates('meal_type')
+    def _validate_restaurant_type(self, key, meal_type):
+        if meal_type not in self.TYPE.values():
+            raise_error_json(InvalidateError(args=('meal_type', meal_type)))
+        return meal_type
+
+    @validates('restaurant_id')
+    def _validate_restaurant_id(self, key, restaurant_id):
+        restaurant = Restaurant.get_by_id(restaurant_id)
+        if not restaurant:
+            raise_error_json(InvalidateError(args=('restaurant_id', restaurant_id)))
+        return restaurant_id
+
     @classmethod
     def get_by_id(cls, id):
         session = DBSession()
@@ -57,16 +78,47 @@ class Meal(Base, BaseMixin):
     @classmethod
     def delete(cls, id):
         session = DBSession()
-        restaurant = session.query(cls).filter(cls.id==id).first()
-        if not restaurant:
+        meal = session.query(cls).filter(cls.id==id).first()
+        if not meal:
             raise_error_json(
-                ClientError(errcode=CreoleErrCode.RESTAURANT_COMPANY_NOT_EXIST))
-        session.delete(restaurant)
+                ClientError(errcode=CreoleErrCode.RESTAURANT_MEAL_TYPE_NOT_EXIST))
+        session.delete(meal)
         try:
             session.commit()
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def create(cls, restaurant_id, meal_type, adult_fee, adult_cost,
+               child_fee, child_cost):
+        session = DBSession()
+        meal = cls(
+            restaurant_id=restaurant_id, meal_type=meal_type,
+            adult_fee=adult_fee, adult_cost=adult_cost,
+            child_fee=child_fee, child_cost=child_cost)
+        try:
+            session.add(meal)
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def update(cls, id, adult_fee=None, adult_cost=None,
+               child_fee=None, child_cost=None):
+        _dict = dict()
+        if adult_fee:
+            _dict['adult_fee'] = adult_fee
+        if adult_cost:
+            _dict['adult_cost'] = adult_cost
+        if child_fee:
+            _dict['child_fee'] = child_fee
+        if child_cost:
+            _dict['child_cost'] = child_cost
+        DBSession().query(cls).filter(
+            cls.id == id
+        ).update(_dict, synchronize_session=False)
 
 
 class RestaurantCompany(Base, BaseMixin):
@@ -173,6 +225,7 @@ class Restaurant(Base, BaseMixin):
     def _validate_restaurant_type(self, key, restaurant_type):
         if restaurant_type not in self.TYPE.values():
             raise_error_json(InvalidateError(args=('restaurant_type', restaurant_type)))
+        return restaurant_type
 
     @validates('company_id')
     def _validate_company_id(self, key, company_id):
