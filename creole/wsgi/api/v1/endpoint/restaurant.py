@@ -8,6 +8,7 @@ from .....service.restaurant import (
 from ..req_param.restaurant import (
     CreateRestaurantCompanyApiParser,
     CreateRestaurantApiParser,
+    SearchRestaurantApiParser,
     CreateMealApiParser,
     PutMealApiParser,
 )
@@ -100,6 +101,23 @@ class CreateRestaurantApi(Resource):
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
+
+
+class SearchRestaurantApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'get': SearchRestaurantApiParser,
+        }
+    }
+
+    def get(self):
+        restaurant_data, total = \
+            RestaurantService.search_restaurant(**self.parsed_data)
+        if self.parsed_data['page'] == 1:
+            data = {'restaurant_data': restaurant_data, 'total': total}
+        else:
+            data = {'restaurant_data': restaurant_data}
+        return api_response(data=data)
 
 
 class CreateMealApi(Resource):

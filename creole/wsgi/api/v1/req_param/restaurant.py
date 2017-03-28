@@ -32,6 +32,12 @@ class CreateRestaurantApiParser(BaseRequestParser):
     intro_en = Argument('intro_en', required=False)
 
 
+class SearchRestaurantApiParser(BaseRequestParser):
+    country_id = Argument('country_id', type=int, required=False)
+    city_id = Argument('city_id', type=int, required=False)
+    company_id = Argument('company_id', type=int, required=False)
+
+
 class CreateMealApiParser(BaseRequestParser):
     TYPE = Enum(
         ('STANDARD', 1, u'标准餐'),

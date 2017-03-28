@@ -40,6 +40,15 @@ class RestaurantCompanyService(object):
 
 class RestaurantService(BaseService):
     @classmethod
+    def _get_db_obj_data_dict(cls, restaurant_obj):
+        _dict = super(RestaurantService, cls).\
+            _get_db_obj_data_dict(restaurant_obj)
+        # 拉取餐厅对应的套餐类型
+        meal_list = MealService.get_by_restaurant_id(restaurant_obj.id)
+        _dict['meal_type'] = meal_list
+        return _dict
+
+    @classmethod
     def get_by_id(cls, id):
         restaurant = Restaurant.get_by_id(id)
         return cls._get_db_obj_data_dict(restaurant)
@@ -62,6 +71,17 @@ class RestaurantService(BaseService):
             address=address, contact=contact, telephone=telephone,
             intro_cn=intro_cn, intro_en=intro_en
         )
+
+    @classmethod
+    def search_restaurant(cls, country_id=None, city_id=None,
+                          company_id=None, page=1, number=20):
+        raw_data = []
+        restaurant_list, total = Restaurant.search(
+            country_id=country_id, city_id=city_id,
+            company_id=company_id, page=page, number=number)
+        for restaurant in restaurant_list:
+            raw_data.append(cls._get_db_obj_data_dict(restaurant))
+        return raw_data, total
 
 
 class MealService(BaseService):

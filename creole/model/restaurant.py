@@ -303,3 +303,20 @@ class Restaurant(Base, BaseMixin):
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def search(cls, country_id=None, city_id=None,
+               company_id=None, page=1, number=20):
+        session = DBSession()
+        query = session.query(cls)
+        total = None
+        if city_id:
+            query = query.filter(cls.city_id==city_id)
+        elif country_id:
+            query = query.filter(cls.country_id==country_id)
+        if company_id:
+            query = query.filter(cls.company_id==company_id)
+        if page == 1:
+            total = query.count()
+        shop_list = query.offset((page - 1) * number).limit(number).all()
+        return shop_list, total
