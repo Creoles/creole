@@ -4,9 +4,10 @@ from ..model.vehicle import (
     VehicleCompany,
     VehicleAccount,
 )
+from .base import BaseService
 
 
-class VehicleService(object):
+class VehicleService(BaseService):
     @classmethod
     def get_by_id(cls, id):
         vehicle_info = {}
@@ -38,14 +39,6 @@ class VehicleService(object):
         return Vehicle.update(id, **kwargs)
 
     @classmethod
-    def _get_vehicle_data_dict(cls, vehicle_obj):
-        _vehicle_dict = {}
-        for k, v in vehicle_obj.__dict__.iteritems():
-            if not k.startswith('_'):
-                _vehicle_dict[k] = v
-        return _vehicle_dict
-
-    @classmethod
     def search_vehicle(
             cls, country_id=None, city_id=None, company_id=None,
             vehicle_type=None, operation=None, seat=None, page=1, number=20):
@@ -55,7 +48,7 @@ class VehicleService(object):
             company_id=company_id, vehicle_type=vehicle_type,
             operation=operation, seat=seat, page=page, number=number)
         for vehicle in vehicle_list:
-            raw_data.append(cls._get_vehicle_data_dict(vehicle))
+            raw_data.append(cls._get_db_obj_data_dict(vehicle))
         return raw_data, total
 
 
