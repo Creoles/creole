@@ -11,7 +11,7 @@ class CreateShopApiParser(BaseRequestParser):
     telephone = Argument('telephone', required=True)
     country_id = Argument('country_id', type=int, required=True)
     city_id = Argument('city_id', type=int, required=True)
-    belong = Argument('belong')
+    company_id = Argument('company_id')
     shop_type = Argument('shop_type', type=int, required=True)
     contact = Argument('contact', required=True)
     fee_person = Argument('fee_person', required=True, type=float)

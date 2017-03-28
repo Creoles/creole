@@ -17,12 +17,12 @@ class ShopService(BaseService):
 
     @classmethod
     def create_shop(cls, name, name_en, address, telephone, country_id,
-                    city_id, belong, shop_type, contact, fee_person,
+                    city_id, company_id, shop_type, contact, fee_person,
                     commission_ratio, intro_cn='', intro_en=''):
         return Shop.create(
             name=name, name_en=name_en, address=address,
             telephone=telephone, country_id=country_id,
-            city_id=city_id, belong=belong, shop_type=shop_type,
+            city_id=city_id, company_id=company_id, shop_type=shop_type,
             contact=contact, fee_person=fee_person, intro_cn=intro_cn,
             intro_en=intro_en, commission_ratio=commission_ratio)
 
