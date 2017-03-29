@@ -5,6 +5,14 @@ from ...util import BaseRequestParser
 from creole.util import Enum
 
 
+class GetVehicleAccountApiParser(BaseRequestParser):
+    ACCOUNT_TYPE = Enum(
+        ('COMPANY', 1, u'公司账号'),
+        ('PERSSON', 2, u'个人账号'),
+    )
+    account_type = Argument(
+        'account_type', type=int, choices=ACCOUNT_TYPE.values(), required=True)
+
 class CreateVehicleApiParser(BaseRequestParser):
     account_id = Argument('account_id', type=int, required=True)
     company_id = Argument('company_id', type=int, required=True)

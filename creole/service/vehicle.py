@@ -70,11 +70,22 @@ class VehicleCompanyService(BaseService):
 
     @classmethod
     def delete_vehicle_company_by_id(cls, id):
+        """删除车辆公司, 有三个步骤:
+        1. 删除公司
+        2. 删除公司名下所有商店
+        3. 删除公司的结算账号
+        """
         session = DBSession()
-        VehicleCompany.delete(id)
+        VehicleCompany.delete(id)   # 删除公司
         vehicle_list = Vehicle.get_by_company_id(id)
+        # 删除公司下的车辆
         for vehicle in vehicle_list:
             session.delete(vehicle)
+        # 删除公司结算账号
+        account_list = VehicleAccount.get_by_owner_id(
+            id, account_type=VehicleAccount.ACCOUNT_TYPE.COMPANY)
+        for account in account_list:
+            session.delete(account)
         try:
             session.flush()
             session.commit()
@@ -108,9 +119,9 @@ class VehicleAccountService(object):
             note=note, account_type=account_type)
 
     @classmethod
-    def get_by_owner_id(cls, owner_id):
+    def get_by_owner_id(cls, owner_id, account_type):
         raw_data = []
-        account_list = VehicleAccount.get_by_owner_id(owner_id)
+        account_list = VehicleAccount.get_by_owner_id(owner_id, account_type)
         for account in account_list:
             raw_data.append(cls._get_account_data_dict(account))
         return raw_data

@@ -128,6 +128,8 @@ class VehicleAccount(Base, BaseMixin):
             Index(
                 'idx_owner_id_account_type_account',
                 'owner_id', 'account_type', 'account'),
+            Index(
+                'idx_owner_id_account_type', 'owner_id', 'account_type'),
         )
         return table_args + BaseMixin.__table_args__
 
@@ -165,8 +167,10 @@ class VehicleAccount(Base, BaseMixin):
             raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def get_by_owner_id(cls, owner_id):
-        return DBSession().query(cls).filter(cls.owner_id==owner_id).all()
+    def get_by_owner_id(cls, owner_id, account_type):
+        return DBSession().query(cls).filter(
+            cls.owner_id==owner_id,
+            cls.account_type==account_type).all()
 
     @classmethod
     def get_by_id(cls, id):

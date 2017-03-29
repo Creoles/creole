@@ -6,6 +6,7 @@ from .....service.vehicle import (
     VehicleAccountService,
 )
 from ..req_param.vehicle import (
+    GetVehicleAccountApiParser,
     CreateVehicleApiParser,
     CreateVehicleCompanyApiParser,
     VehicleSearchApiParser,
@@ -129,13 +130,15 @@ class CreateVehicleCompanyApi(Resource):
 class VehicleAccountApi(Resource):
     meta = {
         'args_parser_dict': {
+            'get': GetVehicleAccountApiParser,
             'put': CreateVehicleAccountApiParser,
         }
     }
 
     def get(self, id):
         owner_id = id
-        data = VehicleAccountService.get_by_owner_id(owner_id)
+        data = VehicleAccountService.get_by_owner_id(
+            owner_id, self.parsed_data['account_type'])
         return api_response(data=data)
 
     def put(self, id):
