@@ -188,9 +188,9 @@ class RestaurantCompany(Base, BaseMixin):
         restaurant_company = None
         query = session.query(cls)
         if name:
-            restaurant_company = query.filter(cls.name==name)
+            restaurant_company = query.filter(cls.name==name).first()
         elif name_en:
-            restaurant_company = query.filter(cls.name_en==name_en)
+            restaurant_company = query.filter(cls.name_en==name_en).first()
         return restaurant_company
 
 

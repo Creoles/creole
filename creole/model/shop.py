@@ -99,9 +99,9 @@ class ShopCompany(Base, BaseMixin):
         shop_company = None
         query = session.query(cls)
         if name:
-            shop_company = query.filter(cls.name==name)
+            shop_company = query.filter(cls.name==name).first()
         elif name_en:
-            shop_company = query.filter(cls.name_en==name_en)
+            shop_company = query.filter(cls.name_en==name_en).first()
         return shop_company
 
 

@@ -101,9 +101,9 @@ class VehicleCompany(Base, BaseMixin):
         vehicle_company = None
         query = session.query(cls)
         if name:
-            vehicle_company = query.filter(cls.name==name)
+            vehicle_company = query.filter(cls.name==name).first()
         elif name_en:
-            vehicle_company = query.filter(cls.name_en==name_en)
+            vehicle_company = query.filter(cls.name_en==name_en).first()
         return vehicle_company
 
 
