@@ -97,12 +97,8 @@ class Meal(Base, BaseMixin):
             restaurant_id=restaurant_id, meal_type=meal_type,
             adult_fee=adult_fee, adult_cost=adult_cost,
             child_fee=child_fee, child_cost=child_cost)
-        try:
-            session.add(meal)
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
+        session.add(meal)
+        session.flush()
 
     @classmethod
     def update(cls, id, adult_fee=None, adult_cost=None,
@@ -201,6 +197,12 @@ class Restaurant(Base, BaseMixin):
         ('GENERAL', 4, u'综合'),
     )
 
+    CURRENCY = Enum(
+        ('USD', 1, u'美元'),
+        ('CNY', 2, u'人民币'),
+        ('LKR', 3, u'斯里兰卡卢布'),
+    )
+
     name = Column(Unicode(30), unique=True, nullable=False, doc=u'中文名称')
     name_en = Column(String(30), unique=True, nullable=False, doc=u'英文名称')
     restaurant_type = Column(TINYINT, nullable=False, doc=u'餐厅类型')
@@ -212,6 +214,14 @@ class Restaurant(Base, BaseMixin):
     telephone = Column(String(20), nullable=False, doc=u'联系电话')
     intro_cn = Column(Unicode(128), nullable=True, doc=u'中文介绍')
     intro_en = Column(String(128), nullable=True, doc=u'英文介绍')
+
+    # 收款
+    currency = Column(TINYINT, nullable=False, doc=u'结算币种')
+    bank_name = Column(String(30), nullable=False, doc=u'银行名称')
+    deposit_bank = Column(String(30), nullable=False, doc=u'开户行')
+    payee = Column(String(20), nullable=False, doc=u'收款人')
+    account = Column(String(20), unique=True, nullable=False, doc=u'账号')
+    note = Column(String(40), nullable=False, doc=u'备注')
 
     @validates('country_id')
     def _validate_country_id(self, key, country_id):
@@ -226,6 +236,12 @@ class Restaurant(Base, BaseMixin):
         if restaurant_type not in self.TYPE.values():
             raise_error_json(InvalidateError(args=('restaurant_type', restaurant_type)))
         return restaurant_type
+
+    @validates('currency')
+    def _validate_currency(self, key, currency):
+        if currency not in self.CURRENCY.values():
+            raise_error_json(InvalidateError(args=('currency', currency)))
+        return currency
 
     @validates('company_id')
     def _validate_company_id(self, key, company_id):
@@ -269,13 +285,17 @@ class Restaurant(Base, BaseMixin):
     @classmethod
     def create(cls, name, name_en, restaurant_type,
                country_id, city_id, company_id, address,
-               contact, telephone, intro_cn=None, intro_en=None):
+               contact, telephone, currency, bank_name,
+               deposit_bank, payee, account, note=None,
+               intro_cn=None, intro_en=None):
         cls._validate_country_and_city(country_id, city_id)
         session = DBSession()
         restaurant = cls(
             name=name, name_en=name_en, restaurant_type=restaurant_type,
             country_id=country_id, city_id=city_id, company_id=company_id,
             address=address, contact=contact, telephone=telephone,
+            currency=currency, bank_name=bank_name, deposit_bank=deposit_bank,
+            payee=payee, account=account, note=note,
             intro_cn=intro_cn, intro_en=intro_en
         )
         try:
