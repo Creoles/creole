@@ -64,6 +64,12 @@ class RestaurantCompanyService(BaseService):
     def create_restaurant_company(cls, name, name_en):
         return RestaurantCompany.create(name=name, name_en=name_en)
 
+    @classmethod
+    def search_company(cls, name=None, name_en=None):
+        restaurant_company = \
+            RestaurantCompany.search(name=name, name_en=name_en)
+        return cls._get_db_obj_data_dict(restaurant_company)
+
 
 class RestaurantService(BaseService):
     @classmethod

@@ -93,6 +93,17 @@ class ShopCompany(Base, BaseMixin):
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
 
+    @classmethod
+    def search(cls, name=None, name_en=None):
+        session = DBSession()
+        shop_company = None
+        query = session.query(cls)
+        if name:
+            shop_company = query.filter(cls.name==name)
+        elif name_en:
+            shop_company = query.filter(cls.name_en==name_en)
+        return shop_company
+
 
 class Shop(Base, BaseMixin):
     """购物店"""

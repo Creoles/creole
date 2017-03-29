@@ -88,3 +88,9 @@ class ShopCompanyService(BaseService):
     @classmethod
     def create_shop_company(cls, name, name_en):
         return ShopCompany.create(name=name, name_en=name_en)
+
+    @classmethod
+    def search_company(cls, name=None, name_en=None):
+        shop_company = \
+            ShopCompany.search(name=name, name_en=name_en)
+        return cls._get_db_obj_data_dict(shop_company)

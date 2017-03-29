@@ -4,6 +4,7 @@ from .....service.shop import ShopService, ShopCompanyService
 from ..req_param.shop import (
     CreateShopApiParser,
     CreateShopCompanyApiParser,
+    SearchShopCompanyApiParser,
     ShopSearchApiParser,
 )
 from creole.exc import ClientError, CreoleErrCode
@@ -117,3 +118,16 @@ class CreateShopCompanyApi(Resource):
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
+
+
+class SearchShopCompanyApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'get': SearchShopCompanyApiParser,
+        }
+    }
+
+    def get(self):
+        shop_company = \
+            ShopCompanyService.search_company(**self.parsed_data)
+        return api_response(data=shop_company)

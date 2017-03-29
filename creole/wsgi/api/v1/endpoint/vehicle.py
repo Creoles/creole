@@ -9,6 +9,7 @@ from ..req_param.vehicle import (
     GetVehicleAccountApiParser,
     CreateVehicleApiParser,
     CreateVehicleCompanyApiParser,
+    SearchVehicleCompanyApiParser,
     VehicleSearchApiParser,
     CreateVehicleAccountApiParser,
 )
@@ -125,6 +126,19 @@ class CreateVehicleCompanyApi(Resource):
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
+
+
+class SearchVehicleCompanyApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'get': SearchVehicleCompanyApiParser,
+        }
+    }
+
+    def get(self):
+        vehicle_company = \
+            VehicleCompanyService.search_company(**self.parsed_data)
+        return api_response(data=vehicle_company)
 
 
 class VehicleAccountApi(Resource):
