@@ -1,15 +1,9 @@
 # coding: utf-8
 from ..model.attraction import Attraction
+from .base import BaseService
 
 
-class AttractionService(object):
-    @classmethod
-    def _get_attraction_data_dict(cls, attraction_obj):
-        _dict = {}
-        for k in attraction_obj.__table__.columns._data:
-            _dict[k] = getattr(attraction_obj, k, None)
-        return _dict
-
+class AttractionService(BaseService):
     @classmethod
     def create_attraction(cls, country_id, city_id, address, name,
                           name_en, adult_fee, child_fee, intro_cn, intro_en):
@@ -32,12 +26,13 @@ class AttractionService(object):
                           name=None, page=1, number=20):
         raw_data = []
         attraction_list, total = Attraction.search(
-            country_id=country_id, city_id=city_id, name=None)
+            country_id=country_id, city_id=city_id,
+            name=None, page=page, number=number)
         for attraction in attraction_list:
-            raw_data.append(cls._get_attraction_data_dict(attraction))
+            raw_data.append(cls._get_db_obj_data_dict(attraction))
         return raw_data, total
 
     @classmethod
     def get_by_id(cls, id):
         attraction = Attraction.get_by_id(id)
-        return cls._get_attraction_data_dict(attraction)
+        return cls._get_db_obj_data_dict(attraction)

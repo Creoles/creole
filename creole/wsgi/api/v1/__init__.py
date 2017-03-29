@@ -31,6 +31,15 @@ from .endpoint.attraction import (
     CreateAttractionApi,
     SearchAttractionApi,
 )
+from .endpoint.restaurant import (
+    RestaurantApi,
+    CreateRestaurantApi,
+    SearchRestaurantApi,
+    RestaurantCompanyApi,
+    CreateRestaurantCompanyApi,
+    MealApi,
+    CreateMealApi,
+)
 
 
 blue_print = Blueprint('api_v1', __name__)
@@ -67,3 +76,12 @@ app.add_resource(CreateVehicleAccountApi, '/vehicle_account/create_account', end
 app.add_resource(AttractionApi, '/attraction/<int:id>', endpoint='get-attraction')
 app.add_resource(CreateAttractionApi, '/attraction/create_attraction', endpoint='create-attraction')
 app.add_resource(SearchAttractionApi, '/attraction/search', endpoint='search-attraction')
+
+# 餐饮
+app.add_resource(RestaurantApi, '/restaurant/<int:id>', endpoint='get-restaurant')
+app.add_resource(CreateRestaurantApi, '/restaurant/create_restaurant', endpoint='create-restaurant')
+app.add_resource(SearchRestaurantApi, '/restaurant/search', endpoint='search-restaurant')
+app.add_resource(RestaurantCompanyApi, '/restaurant_company/<int:id>', endpoint='get-restaurant-company')
+app.add_resource(CreateRestaurantCompanyApi, '/restaurant_company/create_company', endpoint='create-restaurant-company')
+app.add_resource(MealApi, '/restaurant/meal/<int:id>', endpoint='get-restaurant-meal')
+app.add_resource(CreateMealApi, '/restaurant/meal/create_meal', endpoint='create-restaurant-meal')

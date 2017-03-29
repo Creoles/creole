@@ -200,7 +200,7 @@ class Shop(Base, BaseMixin):
         elif country_id:
             query = query.filter(cls.country_id==country_id)
         if company_id:
-            query = query.filter(cls.belong==company_id)
+            query = query.filter(cls.company_id==company_id)
         if shop_type:
             query = query.filter(cls.shop_type==shop_type)
         if page == 1:
@@ -210,14 +210,14 @@ class Shop(Base, BaseMixin):
 
     @classmethod
     def create(cls, name, name_en, address, telephone, country_id,
-               city_id, belong, shop_type, contact, fee_person,
+               city_id, company_id, shop_type, contact, fee_person,
                commission_ratio, intro_cn='', intro_en=''):
         cls._validate_country_and_city(country_id, city_id)
         session = DBSession()
         shop = cls(
             name=name, name_en=name_en, address=address,
             telephone=telephone, country_id=country_id,
-            city_id=city_id, belong=belong, shop_type=shop_type,
+            city_id=city_id, company_id=company_id, shop_type=shop_type,
             contact=contact, fee_person=fee_person, intro_cn=intro_cn,
             intro_en=intro_en, commission_ratio=commission_ratio)
         session.add(shop)
