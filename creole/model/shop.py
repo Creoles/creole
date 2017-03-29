@@ -56,11 +56,7 @@ class ShopCompany(Base, BaseMixin):
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.SHOP_COMPANY_NOT_EXIST))
         session.delete(company)
-        try:
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
+        session.flush()
 
     @classmethod
     def create(cls, name, name_en):
@@ -188,6 +184,13 @@ class Shop(Base, BaseMixin):
         session = DBSession()
         shop = session.query(cls).filter(cls.id==id).first()
         return shop
+
+    @classmethod
+    def get_by_company_id(cls, company_id):
+        session = DBSession()
+        shop_list = session.query(cls).filter(
+            cls.company_id==company_id).all()
+        return shop_list
 
     @classmethod
     def search(cls, country_id=None, city_id=None, company_id=None,
