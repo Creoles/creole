@@ -72,11 +72,7 @@ class Country(Base, BaseMixin):
         if not country:
             raise_error_json(ClientError(errcode=CreoleErrCode.COUNTRY_NOT_EXIST))
         session.delete(country)
-        try:
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
+        session.flush()
 
     @classmethod
     def create(cls, name, name_en):
