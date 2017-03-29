@@ -1,23 +1,24 @@
 # coding: utf-8
+from sqlalchemy.exc import SQLAlchemyError
+
+from ..model import DBSession
 from ..model.vehicle import (
     Vehicle,
     VehicleCompany,
     VehicleAccount,
 )
 from .base import BaseService
+from ..exc import (
+    raise_error_json,
+    DatabaseError,
+)
 
 
 class VehicleService(BaseService):
     @classmethod
     def get_by_id(cls, id):
-        vehicle_info = {}
         vehicle = Vehicle.get_by_id(id)
-        if not vehicle:
-            return vehicle_info
-        for k, v in vehicle.__dict__.iteritems():
-            if not k.startswith('_'):
-                vehicle_info[k] = v
-        return vehicle_info
+        return cls._get_db_obj_data_dict(vehicle)
 
     @classmethod
     def create_vehicle(cls, account_id, company_id, country_id,
@@ -52,21 +53,45 @@ class VehicleService(BaseService):
         return raw_data, total
 
 
-class VehicleCompanyService(object):
+class VehicleCompanyService(BaseService):
     @classmethod
     def get_by_id(cls, id):
         company_info = {}
         company = VehicleCompany.get_by_id(id)
+        vehicle_list = Vehicle.get_by_company_id(id)
         if not company:
             return company_info
         company_info['id'] = company.id
         company_info['name'] = company.name
         company_info['name_en'] = company.name_en
+        company_info['vehicle_list'] = \
+            [cls._get_db_obj_data_dict(item) for item in vehicle_list]
         return company_info
 
     @classmethod
     def delete_vehicle_company_by_id(cls, id):
-        return VehicleCompany.delete(id)
+        """删除车辆公司, 有三个步骤:
+        1. 删除公司
+        2. 删除公司名下所有商店
+        3. 删除公司的结算账号
+        """
+        session = DBSession()
+        VehicleCompany.delete(id)   # 删除公司
+        vehicle_list = Vehicle.get_by_company_id(id)
+        # 删除公司下的车辆
+        for vehicle in vehicle_list:
+            session.delete(vehicle)
+        # 删除公司结算账号
+        account_list = VehicleAccount.get_by_owner_id(
+            id, account_type=VehicleAccount.ACCOUNT_TYPE.COMPANY)
+        for account in account_list:
+            session.delete(account)
+        try:
+            session.flush()
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def update_vehicle_company_by_id(cls, id, **kwargs):
@@ -94,9 +119,9 @@ class VehicleAccountService(object):
             note=note, account_type=account_type)
 
     @classmethod
-    def get_by_owner_id(cls, owner_id):
+    def get_by_owner_id(cls, owner_id, account_type):
         raw_data = []
-        account_list = VehicleAccount.get_by_owner_id(owner_id)
+        account_list = VehicleAccount.get_by_owner_id(owner_id, account_type)
         for account in account_list:
             raw_data.append(cls._get_account_data_dict(account))
         return raw_data

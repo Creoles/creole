@@ -1,19 +1,20 @@
 # coding: utf-8
+from sqlalchemy.exc import SQLAlchemyError
+
+from ..model import DBSession
 from ..model.shop import Shop, ShopCompany
 from .base import BaseService
+from ..exc import (
+    raise_error_json,
+    DatabaseError,
+)
 
 
 class ShopService(BaseService):
     @classmethod
     def get_by_id(cls, id):
-        shop_info = {}
         shop = Shop.get_by_id(id)
-        if not shop:
-            return shop_info
-        for k, v in shop.__dict__.iteritems():
-            if not k.startswith('_'):
-                shop_info[k] = v
-        return shop_info
+        return cls._get_db_obj_data_dict(shop)
 
     @classmethod
     def create_shop(cls, name, name_en, address, telephone, country_id,
@@ -47,21 +48,38 @@ class ShopService(BaseService):
         return raw_data, total
 
 
-class ShopCompanyService(object):
+class ShopCompanyService(BaseService):
     @classmethod
     def get_by_id(cls, id):
         company_info = {}
         company = ShopCompany.get_by_id(id)
+        shop_list = Shop.get_by_company_id(id)
         if not company:
             return company_info
         company_info['id'] = company.id
         company_info['name'] = company.name
         company_info['name_en'] = company.name_en
+        company_info['shop_list'] = \
+            [cls._get_db_obj_data_dict(item) for item in shop_list]
         return company_info
 
     @classmethod
     def delete_shop_company_by_id(cls, id):
-        return ShopCompany.delete(id)
+        """删除商店公司, 有两个步骤:
+        1. 删除公司
+        2. 删除公司名下所有商店
+        """
+        session = DBSession()
+        ShopCompany.delete(id)
+        shop_list = Shop.get_by_company_id(id)
+        for shop in shop_list:
+            session.delete(shop)
+        try:
+            session.flush()
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def update_shop_company_by_id(cls, id, **kwargs):

@@ -1,6 +1,13 @@
 # coding: utf-8
+from sqlalchemy.exc import SQLAlchemyError
+
+from ..model import DBSession
 from ..model.country import Country, City
 from ..model import gen_commit_deco
+from ..exc import (
+    raise_error_json,
+    DatabaseError,
+)
 
 
 class CountryService(object):
@@ -86,7 +93,17 @@ class CountryService(object):
     @classmethod
     @gen_commit_deco
     def delete_by_id(cls, id):
+        session = DBSession()
         Country.delete(id)
+        city_list = City.get_by_country_id(id)
+        for city in city_list:
+            session.delete(city)
+        try:
+            session.flush()
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def create_country(cls, name, name_en):

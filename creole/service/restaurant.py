@@ -16,21 +16,45 @@ from ..exc import (
 )
 
 
-class RestaurantCompanyService(object):
+class RestaurantCompanyService(BaseService):
     @classmethod
     def get_by_id(cls, id):
         company_info = {}
         company = RestaurantCompany.get_by_id(id)
+        restaurant_list = Restaurant.get_by_company_id(id)
         if not company:
             return company_info
         company_info['id'] = company.id
         company_info['name'] = company.name
         company_info['name_en'] = company.name_en
+        company_info['restaurant_list'] = \
+            [cls._get_db_obj_data_dict(item) for item in restaurant_list]
         return company_info
 
     @classmethod
     def delete_restaurant_company_by_id(cls, id):
-        return RestaurantCompany.delete(id)
+        """删除餐饮公司, 有三个步骤:
+        1. 删除公司
+        2. 删除公司名下的所有餐厅
+        3. 删除所有餐厅对应的套餐
+        """
+        session = DBSession()
+        # 删除公司
+        RestaurantCompany.delete(id)
+        restaurant_list = Restaurant.get_by_company_id(id)
+        for restaurant in restaurant_list:
+            # 删除餐厅对应的套餐
+            meal_list = Meal.get_by_restaurant_id(restaurant.id)
+            for meal in meal_list:
+                session.delete(meal)
+            # 删除公司下的餐厅
+            session.delete(restaurant)
+        try:
+            session.flush()
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def update_restaurant_company_by_id(cls, id, **kwargs):
@@ -59,7 +83,13 @@ class RestaurantService(BaseService):
 
     @classmethod
     def delete_restaurant_by_id(cls, id):
-        return Restaurant.delete(id)
+        session = DBSession()
+        Restaurant.delete(id)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def update_restaurant_by_id(cls, id, **kwargs):

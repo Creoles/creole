@@ -145,11 +145,7 @@ class RestaurantCompany(Base, BaseMixin):
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.RESTAURANT_COMPANY_NOT_EXIST))
         session.delete(company)
-        try:
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
+        session.flush()
 
     @classmethod
     def create(cls, name, name_en):
@@ -223,6 +219,19 @@ class Restaurant(Base, BaseMixin):
     account = Column(String(20), unique=True, nullable=False, doc=u'账号')
     note = Column(String(40), nullable=False, doc=u'备注')
 
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_name', 'name'),
+            Index('ix_name_en', 'name_en'),
+            Index('ix_company_id', 'company_id'),
+            Index('ix_country_id', 'country_id'),
+            Index('ix_city_id', 'city_id'),
+            Index('idx_city_id_company_id', 'city_id', 'company_id'),
+            Index('idx_country_id_company_id', 'country_id', 'company_id'),
+        )
+        return table_args + BaseMixin.__table_args__
+
     @validates('country_id')
     def _validate_country_id(self, key, country_id):
         country = DBSession().query(Country).filter(
@@ -265,6 +274,13 @@ class Restaurant(Base, BaseMixin):
         return restaurant
 
     @classmethod
+    def get_by_company_id(cls, company_id):
+        session = DBSession()
+        restaurant_list = session.query(cls).filter(
+            cls.company_id==company_id).all()
+        return restaurant_list
+
+    @classmethod
     def delete(cls, id):
         session = DBSession()
         restaurant = session.query(cls).filter(cls.id==id).first()
@@ -272,15 +288,7 @@ class Restaurant(Base, BaseMixin):
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.RESTAURANT_NOT_EXIST))
         session.delete(restaurant)
-        # 删除餐厅对应的套餐
-        meal_list = Meal.get_by_restaurant_id(restaurant.id)
-        for meal in meal_list:
-            session.delete(meal)
-        try:
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
+        session.flush()
 
     @classmethod
     def create(cls, name, name_en, restaurant_type,
