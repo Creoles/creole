@@ -13,14 +13,8 @@ from ..exc import (
 class ShopService(BaseService):
     @classmethod
     def get_by_id(cls, id):
-        shop_info = {}
         shop = Shop.get_by_id(id)
-        if not shop:
-            return shop_info
-        for k, v in shop.__dict__.iteritems():
-            if not k.startswith('_'):
-                shop_info[k] = v
-        return shop_info
+        return cls._get_db_obj_data_dict(shop)
 
     @classmethod
     def create_shop(cls, name, name_en, address, telephone, country_id,

@@ -1,23 +1,24 @@
 # coding: utf-8
+from sqlalchemy.exc import SQLAlchemyError
+
+from ..model import DBSession
 from ..model.vehicle import (
     Vehicle,
     VehicleCompany,
     VehicleAccount,
 )
 from .base import BaseService
+from ..exc import (
+    raise_error_json,
+    DatabaseError,
+)
 
 
 class VehicleService(BaseService):
     @classmethod
     def get_by_id(cls, id):
-        vehicle_info = {}
         vehicle = Vehicle.get_by_id(id)
-        if not vehicle:
-            return vehicle_info
-        for k, v in vehicle.__dict__.iteritems():
-            if not k.startswith('_'):
-                vehicle_info[k] = v
-        return vehicle_info
+        return cls._get_db_obj_data_dict(vehicle)
 
     @classmethod
     def create_vehicle(cls, account_id, company_id, country_id,
@@ -52,21 +53,34 @@ class VehicleService(BaseService):
         return raw_data, total
 
 
-class VehicleCompanyService(object):
+class VehicleCompanyService(BaseService):
     @classmethod
     def get_by_id(cls, id):
         company_info = {}
         company = VehicleCompany.get_by_id(id)
+        vehicle_list = Vehicle.get_by_company_id(id)
         if not company:
             return company_info
         company_info['id'] = company.id
         company_info['name'] = company.name
         company_info['name_en'] = company.name_en
+        company_info['vehicle_list'] = \
+            [cls._get_db_obj_data_dict(item) for item in vehicle_list]
         return company_info
 
     @classmethod
     def delete_vehicle_company_by_id(cls, id):
-        return VehicleCompany.delete(id)
+        session = DBSession()
+        VehicleCompany.delete(id)
+        vehicle_list = Vehicle.get_by_company_id(id)
+        for vehicle in vehicle_list:
+            session.delete(vehicle)
+        try:
+            session.flush()
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def update_vehicle_company_by_id(cls, id, **kwargs):

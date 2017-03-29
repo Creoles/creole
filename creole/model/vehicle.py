@@ -58,11 +58,7 @@ class VehicleCompany(Base, BaseMixin):
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_NOT_EXIST))
         session.delete(company)
-        try:
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
+        session.flush()
 
     @classmethod
     def create(cls, name, name_en):
@@ -274,6 +270,13 @@ class Vehicle(Base, BaseMixin):
         session = DBSession()
         vehicle = session.query(cls).filter(cls.id==id).first()
         return vehicle
+
+    @classmethod
+    def get_by_company_id(cls, company_id):
+        session = DBSession()
+        vehicle_list = session.query(cls).filter(
+            cls.company_id==company_id).all()
+        return vehicle_list
 
     @classmethod
     def create(cls, account_id, company_id, country_id, city_id,
