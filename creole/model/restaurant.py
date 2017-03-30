@@ -345,7 +345,8 @@ class Restaurant(Base, BaseMixin):
 
     @classmethod
     def search(cls, country_id=None, city_id=None,
-               company_id=None, page=1, number=20):
+               company_id=None, restaurant_type=None,
+               page=1, number=20):
         session = DBSession()
         query = session.query(cls)
         total = None
@@ -355,6 +356,8 @@ class Restaurant(Base, BaseMixin):
             query = query.filter(cls.country_id==country_id)
         if company_id:
             query = query.filter(cls.company_id==company_id)
+        if restaurant_type:
+            query = query.filter(cls.restaurant_type==restaurant_type)
         if page == 1:
             total = query.count()
         shop_list = query.offset((page - 1) * number).limit(number).all()

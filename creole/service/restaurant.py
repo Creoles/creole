@@ -118,11 +118,13 @@ class RestaurantService(BaseService):
 
     @classmethod
     def search_restaurant(cls, country_id=None, city_id=None,
-                          company_id=None, page=1, number=20):
+                          company_id=None, restaurant_type=None,
+                          page=1, number=20):
         raw_data = []
         restaurant_list, total = Restaurant.search(
             country_id=country_id, city_id=city_id,
-            company_id=company_id, page=page, number=number)
+            company_id=company_id, restaurant_type=restaurant_type,
+            page=page, number=number)
         for restaurant in restaurant_list:
             raw_data.append(cls._get_db_obj_data_dict(restaurant))
         return raw_data, total

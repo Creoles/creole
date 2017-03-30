@@ -5,6 +5,15 @@ from ...util import BaseRequestParser
 from creole.util import Enum
 
 
+# 餐厅类型
+RESTAURANT_TYPE = Enum(
+    ('CHINESE', 1, u'中餐'),
+    ('WESTERN', 2, u'西餐'),
+    ('SPECIAL', 3, u'特色'),
+    ('GENERAL', 4, u'综合'),
+)
+
+
 class CreateRestaurantCompanyApiParser(BaseRequestParser):
     name = Argument('name', required=True)
     name_en = Argument('name_en', required=True)
@@ -15,12 +24,6 @@ class SearchRestaurantCompanyApiParser(BaseRequestParser):
 
 
 class CreateRestaurantApiParser(BaseRequestParser):
-    TYPE = Enum(
-        ('CHINESE', 1, u'中餐'),
-        ('WESTERN', 2, u'西餐'),
-        ('SPECIAL', 3, u'特色'),
-        ('GENERAL', 4, u'综合'),
-    )
     CURRENCY = Enum(
         ('USD', 1, u'美元'),
         ('CNY', 2, u'人民币'),
@@ -30,7 +33,8 @@ class CreateRestaurantApiParser(BaseRequestParser):
     name = Argument('name', required=True)
     name_en = Argument('name_en', required=True)
     restaurant_type = Argument(
-        'restaurant_type', required=True, type=int, choices=TYPE.values())
+        'restaurant_type', required=True, type=int,
+        choices=RESTAURANT_TYPE.values())
     country_id = Argument('country_id', type=int, required=True)
     city_id = Argument('city_id', type=int, required=True)
     company_id = Argument('company_id', type=int, required=True)
@@ -55,6 +59,9 @@ class SearchRestaurantApiParser(BaseRequestParser):
     country_id = Argument('country_id', type=int, required=False)
     city_id = Argument('city_id', type=int, required=False)
     company_id = Argument('company_id', type=int, required=False)
+    restaurant_type = Argument(
+        'restaurant_type', required=False, type=int,
+        choices=RESTAURANT_TYPE.values())
     page = Argument('page', type=int, default=1, required=False)
     number = Argument('number', type=int, default=20, required=False)
 
