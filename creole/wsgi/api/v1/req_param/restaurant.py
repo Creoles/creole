@@ -1,6 +1,4 @@
 # coding: utf-8
-import json
-
 from flask_restful.reqparse import Argument
 
 from ...util import BaseRequestParser
@@ -10,6 +8,10 @@ from creole.util import Enum
 class CreateRestaurantCompanyApiParser(BaseRequestParser):
     name = Argument('name', required=True)
     name_en = Argument('name_en', required=True)
+
+class SearchRestaurantCompanyApiParser(BaseRequestParser):
+    name = Argument('name', required=False)
+    name_en = Argument('name_en', required=False)
 
 
 class CreateRestaurantApiParser(BaseRequestParser):

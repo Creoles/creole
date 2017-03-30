@@ -16,6 +16,7 @@ from .endpoint.shop import (
     ShopCompanyApi,
     ShopSearchApi,
     CreateShopCompanyApi,
+    SearchShopCompanyApi,
 )
 from .endpoint.vehicle import (
     VehicleApi,
@@ -23,6 +24,7 @@ from .endpoint.vehicle import (
     CreateVehicleApi,
     VehicleCompanyApi,
     CreateVehicleCompanyApi,
+    SearchVehicleCompanyApi,
     VehicleAccountApi,
     CreateVehicleAccountApi,
 )
@@ -37,6 +39,7 @@ from .endpoint.restaurant import (
     SearchRestaurantApi,
     RestaurantCompanyApi,
     CreateRestaurantCompanyApi,
+    SearchRestaurantCompanyApi,
     MealApi,
     CreateMealApi,
 )
@@ -62,6 +65,7 @@ app.add_resource(ShopSearchApi, '/shop/search', endpoint='search-shop')
 app.add_resource(CreateShopApi, '/shop/create_shop', endpoint='create-shop')
 app.add_resource(ShopCompanyApi, '/shop_company/<int:id>', endpoint='get-shop-company')
 app.add_resource(CreateShopCompanyApi, '/shop_company/create_company', endpoint='create-shop-company')
+app.add_resource(SearchShopCompanyApi, '/shop_company/search', endpoint='search-shop-company')
 
 # 车辆
 app.add_resource(VehicleApi, '/vehicle/<int:id>', endpoint='get-vehicle')
@@ -69,6 +73,7 @@ app.add_resource(CreateVehicleApi, '/vehicle/create_vehicle', endpoint='create-v
 app.add_resource(SearchVehicleApi, '/vehicle/search', endpoint='search-vehicle')
 app.add_resource(VehicleCompanyApi, '/vehicle_company/<int:id>', endpoint='get-vehicle-company')
 app.add_resource(CreateVehicleCompanyApi, '/vehicle_company/create_company', endpoint='create-vehicle-company')
+app.add_resource(SearchVehicleCompanyApi, '/vehicle_company/search', endpoint='search-vehicle-company')
 app.add_resource(VehicleAccountApi, '/vehicle_account/<int:id>', endpoint='get-vehicle-account')
 app.add_resource(CreateVehicleAccountApi, '/vehicle_account/create_account', endpoint='create-account')
 
@@ -83,5 +88,6 @@ app.add_resource(CreateRestaurantApi, '/restaurant/create_restaurant', endpoint=
 app.add_resource(SearchRestaurantApi, '/restaurant/search', endpoint='search-restaurant')
 app.add_resource(RestaurantCompanyApi, '/restaurant_company/<int:id>', endpoint='get-restaurant-company')
 app.add_resource(CreateRestaurantCompanyApi, '/restaurant_company/create_company', endpoint='create-restaurant-company')
+app.add_resource(SearchRestaurantCompanyApi, '/restaurant_company/search', endpoint='search-restaurant-company')
 app.add_resource(MealApi, '/restaurant/meal/<int:id>', endpoint='get-restaurant-meal')
 app.add_resource(CreateMealApi, '/restaurant/meal/create_meal', endpoint='create-restaurant-meal')

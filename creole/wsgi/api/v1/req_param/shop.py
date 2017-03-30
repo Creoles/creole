@@ -31,3 +31,8 @@ class ShopSearchApiParser(BaseRequestParser):
 class CreateShopCompanyApiParser(BaseRequestParser):
     name = Argument('name', required=True)
     name_en = Argument('name_en', required=True)
+
+
+class SearchShopCompanyApiParser(BaseRequestParser):
+    name = Argument('name', required=False)
+    name_en = Argument('name_en', required=False)

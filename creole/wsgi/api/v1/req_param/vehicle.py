@@ -33,6 +33,11 @@ class CreateVehicleCompanyApiParser(BaseRequestParser):
     name_en = Argument('name_en', required=True)
 
 
+class SearchVehicleCompanyApiParser(BaseRequestParser):
+    name = Argument('name', required=False)
+    name_en = Argument('name_en', required=False)
+
+
 class VehicleSearchApiParser(BaseRequestParser):
     OPERATIONS = Enum(
         ('GREATER', 1, u'大于'),

@@ -95,6 +95,17 @@ class VehicleCompany(Base, BaseMixin):
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
 
+    @classmethod
+    def search(cls, name=None, name_en=None):
+        session = DBSession()
+        vehicle_company = None
+        query = session.query(cls)
+        if name:
+            vehicle_company = query.filter(cls.name==name).first()
+        elif name_en:
+            vehicle_company = query.filter(cls.name_en==name_en).first()
+        return vehicle_company
+
 
 class VehicleAccount(Base, BaseMixin):
     """车辆公司账单结算账号"""
