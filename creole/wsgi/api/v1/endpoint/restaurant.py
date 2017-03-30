@@ -6,12 +6,11 @@ from .....service.restaurant import (
     MealService,
 )
 from ..req_param.restaurant import (
+    EditMealApiParser,
     CreateRestaurantCompanyApiParser,
     SearchRestaurantCompanyApiParser,
     CreateRestaurantApiParser,
     SearchRestaurantApiParser,
-    CreateMealApiParser,
-    PutMealApiParser,
 )
 from creole.exc import ClientError
 
@@ -134,30 +133,7 @@ class SearchRestaurantApi(Resource):
         return api_response(data=data)
 
 
-class CreateMealApi(Resource):
-    """创建套餐Api"""
-    meta = {
-        'args_parser_dict': {
-            'post': CreateMealApiParser,
-        }
-    }
-
-    def post(self):
-        parsed_data = self.parsed_data
-        try:
-            MealService.create_meal(**parsed_data)
-        except ClientError as e:
-            return api_response(code=e.errcode, message=e.msg)
-        return api_response()
-
-
 class MealApi(Resource):
-    meta = {
-        'args_parser_dict': {
-            'put': PutMealApiParser,
-        }
-    }
-
     def get(self, id):
         """根据restaurant_id获取餐厅下的套餐类型
         这里的id是restaurant_id"""
@@ -165,17 +141,22 @@ class MealApi(Resource):
         meal_list = MealService.get_by_restaurant_id(restaurant_id)
         return api_response(data=meal_list)
 
-    def put(self, id):
-        parsed_data = self.parsed_data
-        try:
-            MealService.update_meal_by_id(id, **parsed_data)
-        except ClientError as e:
-            return api_response(code=e.errcode, message=e.msg)
-        return api_response()
 
-    def delete(self, id):
+class EditMealApi(Resource):
+    meta = {
+        'args_parser_dict': EditMealApiParser(),
+    }
+
+    def post(self):
+        parsed_data = self.parsed_data
+        delete_id_list = parsed_data.get('delete_id_list', None)
+        update_list = parsed_data.get('update_meal_list', None)
+        create_list = parsed_data.get('create_meal_list', None)
         try:
-            MealService.delete_meal_by_id(id)
+            MealService.edit_meal(
+                create_list=create_list,
+                update_list=update_list,
+                delete_id_list=delete_id_list)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()

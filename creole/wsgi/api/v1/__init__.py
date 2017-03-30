@@ -41,7 +41,7 @@ from .endpoint.restaurant import (
     CreateRestaurantCompanyApi,
     SearchRestaurantCompanyApi,
     MealApi,
-    CreateMealApi,
+    EditMealApi,
 )
 
 
@@ -90,4 +90,4 @@ app.add_resource(RestaurantCompanyApi, '/restaurant_company/<int:id>', endpoint=
 app.add_resource(CreateRestaurantCompanyApi, '/restaurant_company/create_company', endpoint='create-restaurant-company')
 app.add_resource(SearchRestaurantCompanyApi, '/restaurant_company/search', endpoint='search-restaurant-company')
 app.add_resource(MealApi, '/restaurant/meal/<int:id>', endpoint='get-restaurant-meal')
-app.add_resource(CreateMealApi, '/restaurant/meal/create_meal', endpoint='create-restaurant-meal')
+app.add_resource(EditMealApi, '/restaurant/meal/edit_meal', endpoint='edit-restaurant-meal')
