@@ -5,6 +5,15 @@ from ...util import BaseRequestParser
 from creole.util import Enum
 
 
+# 餐厅类型
+RESTAURANT_TYPE = Enum(
+    ('CHINESE', 1, u'中餐'),
+    ('WESTERN', 2, u'西餐'),
+    ('SPECIAL', 3, u'特色'),
+    ('GENERAL', 4, u'综合'),
+)
+
+
 class CreateRestaurantCompanyApiParser(BaseRequestParser):
     name = Argument('name', required=True)
     name_en = Argument('name_en', required=True)
@@ -15,12 +24,6 @@ class SearchRestaurantCompanyApiParser(BaseRequestParser):
 
 
 class CreateRestaurantApiParser(BaseRequestParser):
-    TYPE = Enum(
-        ('CHINESE', 1, u'中餐'),
-        ('WESTERN', 2, u'西餐'),
-        ('SPECIAL', 3, u'特色'),
-        ('GENERAL', 4, u'综合'),
-    )
     CURRENCY = Enum(
         ('USD', 1, u'美元'),
         ('CNY', 2, u'人民币'),
@@ -30,7 +33,8 @@ class CreateRestaurantApiParser(BaseRequestParser):
     name = Argument('name', required=True)
     name_en = Argument('name_en', required=True)
     restaurant_type = Argument(
-        'restaurant_type', required=True, type=int, choices=TYPE.values())
+        'restaurant_type', required=True, type=int,
+        choices=RESTAURANT_TYPE.values())
     country_id = Argument('country_id', type=int, required=True)
     city_id = Argument('city_id', type=int, required=True)
     company_id = Argument('company_id', type=int, required=True)
@@ -55,15 +59,24 @@ class SearchRestaurantApiParser(BaseRequestParser):
     country_id = Argument('country_id', type=int, required=False)
     city_id = Argument('city_id', type=int, required=False)
     company_id = Argument('company_id', type=int, required=False)
+    restaurant_type = Argument(
+        'restaurant_type', required=False, type=int,
+        choices=RESTAURANT_TYPE.values())
     page = Argument('page', type=int, default=1, required=False)
     number = Argument('number', type=int, default=20, required=False)
 
 
-def meal_list_parser(meal_dict):
-    for k, v in meal_dict.iteritems():
-        _type = CreateMealApiParser._RESERVED_DICT.get(k, None)
-        if not _type:
-            raise ValueError('Invalid key: {!r}'.format(k))
+def create_meal_dict_parser(meal_dict):
+    """相当于做下面这几个参数的验证:
+    restaurant_id = Argument('restaurant_id', type=int, required=True)
+    meal_type = Argument('meal_type', type=int, required=True, choices=TYPE.values())
+    adult_fee = Argument('adult_fee', type=float, required=True)
+    adult_cost = Argument('adult_cost', type=float, required=True)
+    child_fee = Argument('child_fee', type=float, required=True)
+    child_cost = Argument('child_cost', type=float, required=True)
+    """
+    for k, _type in EditMealApiParser._CREATE_PARAM_MAPPING.iteritems():
+        v = meal_dict.get(k, None)
         try:
             meal_dict[k] = _type(v)
         except Exception:
@@ -71,13 +84,32 @@ def meal_list_parser(meal_dict):
     return meal_dict
 
 
-class CreateMealApiParser(BaseRequestParser):
+def update_meal_dict_parser(meal_dict):
+    """
+    id = Argument('id', type=int, required=True)
+    adult_fee = Argument('adult_fee', type=float, required=False)
+    adult_cost = Argument('adult_cost', type=float, required=False)
+    child_fee = Argument('child_fee', type=float, required=False)
+    child_cost = Argument('child_cost', type=float, required=False)
+    """
+    for k, _type in EditMealApiParser._UPDATE_PARAM_MAPPING.iteritems():
+        v = meal_dict.get(k, None)
+        if k == 'id' and v is None:
+            raise ValueError('Invalid value: {!r}'.format(k))
+        try:
+            meal_dict[k] = _type(v)
+        except Exception:
+            raise ValueError('Invalid value: {!r}'.format(v))
+    return meal_dict
+
+
+class EditMealApiParser(BaseRequestParser):
     TYPE = Enum(
         ('STANDARD', 1, u'标准餐'),
         ('UPGRADE', 2, u'升级餐'),
         ('LUXURY', 3, u'豪华餐'),
     )
-    _RESERVED_DICT = {
+    _CREATE_PARAM_MAPPING = {
         'restaurant_id': int,
         'meal_type': int,
         'adult_fee': float,
@@ -85,19 +117,17 @@ class CreateMealApiParser(BaseRequestParser):
         'child_fee': float,
         'child_cost': float,
     }
+    _UPDATE_PARAM_MAPPING = {
+        'id': float,
+        'adult_fee': float,
+        'adult_cost': float,
+        'child_fee': float,
+        'child_cost': float,
+    }
 
-
-    meal_list = Argument('meal_list', type=meal_list_parser, required=True, action='append')
-    #  restaurant_id = Argument('restaurant_id', type=int, required=True)
-    #  meal_type = Argument('meal_type', type=int, required=True, choices=TYPE.values())
-    #  adult_fee = Argument('adult_fee', type=float, required=True)
-    #  adult_cost = Argument('adult_cost', type=float, required=True)
-    #  child_fee = Argument('child_fee', type=float, required=True)
-    #  child_cost = Argument('child_cost', type=float, required=True)
-
-
-class PutMealApiParser(BaseRequestParser):
-    adult_fee = Argument('adult_fee', type=float, required=False)
-    adult_cost = Argument('adult_cost', type=float, required=False)
-    child_fee = Argument('child_fee', type=float, required=False)
-    child_cost = Argument('child_cost', type=float, required=False)
+    create_meal_list = Argument(
+        'create_meal_list', type=create_meal_dict_parser, required=False, action='append')
+    update_meal_list = Argument(
+        'update_meal_list', type=update_meal_dict_parser, required=False, action='append')
+    delete_id_list = Argument(
+        'delete_id_list', type=int, required=False, action='append')

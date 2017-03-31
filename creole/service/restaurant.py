@@ -13,6 +13,7 @@ from ..exc import (
     ClientError,
     DatabaseError,
     CreoleErrCode,
+    ParameterError,
 )
 
 
@@ -118,11 +119,13 @@ class RestaurantService(BaseService):
 
     @classmethod
     def search_restaurant(cls, country_id=None, city_id=None,
-                          company_id=None, page=1, number=20):
+                          company_id=None, restaurant_type=None,
+                          page=1, number=20):
         raw_data = []
         restaurant_list, total = Restaurant.search(
             country_id=country_id, city_id=city_id,
-            company_id=company_id, page=page, number=number)
+            company_id=company_id, restaurant_type=restaurant_type,
+            page=page, number=number)
         for restaurant in restaurant_list:
             raw_data.append(cls._get_db_obj_data_dict(restaurant))
         return raw_data, total
@@ -136,6 +139,34 @@ class MealService(BaseService):
         for item in restaurant_list:
             _list.append(cls._get_db_obj_data_dict(item))
         return _list
+
+    @classmethod
+    def edit_meal(cls, create_list=None,
+                  update_list=None, delete_id_list=None):
+        """编辑套餐类型:
+        
+        :param create_list: 需要创建的套餐列表, 元素为dict
+        :param update_list: 需要更新的套餐列表, 元素为dict
+        :param delete_id_list: 需要删除的套餐Id列表
+        """
+        session = DBSession()
+        if create_list:
+            if len(create_list) > 3:
+                raise_error_json(ParameterError())
+            cls.create_meal(create_list)
+        if update_list:
+            if len(update_list) > 3:
+                raise_error_json(ParameterError())
+            cls.update_meal_list(update_list)
+        if delete_id_list:
+            if len(delete_id_list) > 3:
+                raise_error_json(ParameterError())
+            cls.multi_delete_meal(delete_id_list)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def create_meal(cls, meal_list):
@@ -157,19 +188,17 @@ class MealService(BaseService):
                 restaurant_id=restaurant_id, meal_type=meal_type,
                 adult_fee=adult_fee, adult_cost=adult_cost,
                 child_fee=child_fee, child_cost=child_cost)
-        try:
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def update_meal_by_id(cls, id, adult_fee=None, adult_cost=None,
-                     child_fee=None, child_cost=None):
-        return Meal.update(
-            id=id, adult_fee=adult_fee, adult_cost=adult_cost,
-            child_fee=child_fee, child_cost=child_cost)
+    def update_meal_list(cls, update_list):
+        for meal_dict in update_list:
+            Meal.update(
+                id=meal_dict['id'], adult_fee=meal_dict['adult_fee'],
+                adult_cost=meal_dict['adult_cost'],
+                child_fee=meal_dict['child_fee'],
+                child_cost=meal_dict['child_cost'])
 
     @classmethod
-    def delete_meal_by_id(cls, id):
-        return Meal.delete(id)
+    def multi_delete_meal(cls, delete_id_list):
+        for id in delete_id_list:
+            Meal.delete(id)

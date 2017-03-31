@@ -83,11 +83,7 @@ class Meal(Base, BaseMixin):
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.RESTAURANT_MEAL_TYPE_NOT_EXIST))
         session.delete(meal)
-        try:
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
+        session.flush()
 
     @classmethod
     def create(cls, restaurant_id, meal_type, adult_fee, adult_cost,
@@ -103,18 +99,21 @@ class Meal(Base, BaseMixin):
     @classmethod
     def update(cls, id, adult_fee=None, adult_cost=None,
                child_fee=None, child_cost=None):
-        _dict = dict()
+        meal = cls.get_by_id(id)
+        if not meal:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.RESTAURANT_MEAL_TYPE_NOT_EXIST))
+        session = DBSession()
         if adult_fee:
-            _dict['adult_fee'] = adult_fee
+            meal.adult_fee = adult_fee
         if adult_cost:
-            _dict['adult_cost'] = adult_cost
+            meal.adult_cost = adult_cost
         if child_fee:
-            _dict['child_fee'] = child_fee
+            meal.child_fee = child_fee
         if child_cost:
-            _dict['child_cost'] = child_cost
-        DBSession().query(cls).filter(
-            cls.id == id
-        ).update(_dict, synchronize_session=False)
+            meal.child_cost = child_cost
+        session.merge(meal)
+        session.flush()
 
 
 class RestaurantCompany(Base, BaseMixin):
@@ -345,7 +344,8 @@ class Restaurant(Base, BaseMixin):
 
     @classmethod
     def search(cls, country_id=None, city_id=None,
-               company_id=None, page=1, number=20):
+               company_id=None, restaurant_type=None,
+               page=1, number=20):
         session = DBSession()
         query = session.query(cls)
         total = None
@@ -355,6 +355,8 @@ class Restaurant(Base, BaseMixin):
             query = query.filter(cls.country_id==country_id)
         if company_id:
             query = query.filter(cls.company_id==company_id)
+        if restaurant_type:
+            query = query.filter(cls.restaurant_type==restaurant_type)
         if page == 1:
             total = query.count()
         shop_list = query.offset((page - 1) * number).limit(number).all()
