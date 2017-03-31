@@ -144,7 +144,9 @@ class MealApi(Resource):
 
 class EditMealApi(Resource):
     meta = {
-        'args_parser_dict': EditMealApiParser(),
+        'args_parser_dict': {
+            'post': EditMealApiParser,
+        }
     }
 
     def post(self):
