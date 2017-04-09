@@ -10,7 +10,6 @@ from sqlalchemy import (
     Float,
     DateTime,
 )
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.dialects.mysql import (
     TINYINT,
     SMALLINT,
@@ -25,7 +24,6 @@ from ..exc import (
     raise_error_json,
     InvalidateError,
     CreoleErrCode,
-    DatabaseError,
     ClientError,
 )
 from ..util import Enum
@@ -63,7 +61,7 @@ class TourGuide(Base, BaseMixin):
     tour_guide_numer = Column(String(20), nullable=False, doc=u'导游证编号')
     passport_country = Column(String(30), nullable=True, doc=u'签证国别')
     telephone = Column(String(20), nullable=False, doc=u'电话')
-    intro = Column(String(256), nullable=False, doc=u'自我介绍')
+    intro = Column(String(256), nullable=True, doc=u'自我介绍')
     image_hash = Column(String(128), nullable=False, doc=u'护照/身份证照片')
 
     @declared_attr
@@ -120,7 +118,8 @@ class TourGuide(Base, BaseMixin):
     @classmethod
     def create(cls, guide_type, country_id, name, name_en, gender, birthday,
                start_work, language, certificate_type, certificate_number,
-               tour_guide_numer, passport_country, telephone, intro, image_hash):
+               tour_guide_numer, telephone, image_hash,
+               passport_country=None, intro=None):
         session = DBSession()
         tour_guide = cls(
             guide_type=guide_type, country_id=country_id, name=name,
@@ -170,7 +169,7 @@ class TourGuideFee(Base,BaseMixin):
     )
 
     tour_guide_id = Column(Integer, unique=True, nullable=False, doc=u'导游ID')
-    currency = Column(TINYINT, nullable=False, doc=u'结算币种')
+    currency = Column(TINYINT, nullable=False, doc=u'货币类型')
     base_fee = Column(Float(precision=3), nullable=False, doc=u'基本工资')
     service_type = Column(TINYINT, nullable=False, doc=u'服务类型')
     service_fee = Column(Float(precision=3), nullable=False, doc=u'服务费')
@@ -228,9 +227,14 @@ class TourGuideFee(Base,BaseMixin):
         session.flush()
 
     @classmethod
-    def delete(cls, id):
+    def delete(cls, id=None, tour_guide_id=None):
+        if not (id or tour_guide_id):
+            raise_error_json(InvalidateError())
         session = DBSession()
-        fee = session.query(cls).filter(cls.id==id).first()
+        if tour_guide_id:
+            fee = session.query(cls).filter(cls.tour_guide_id==tour_guide_id).first()
+        else:
+            fee = session.query(cls).filter(cls.id==id).first()
         if not fee:
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.TOUR_GUIDE_FEE_NOT_EXIST))
@@ -264,7 +268,7 @@ class TourGuideAccount(Base, BaseMixin):
     deposit_bank = Column(String(30), nullable=False, doc=u'开户行')
     payee = Column(String(20), nullable=False, doc=u'收款人')
     account = Column(String(20), unique=True, nullable=False, doc=u'账号')
-    note = Column(String(40), nullable=False, doc=u'备注')
+    note = Column(String(40), nullable=True, doc=u'备注')
 
     @declared_attr
     def __table_args__(self):
@@ -297,12 +301,12 @@ class TourGuideAccount(Base, BaseMixin):
     @classmethod
     def get_by_tour_guide_id(cls, tour_guide_id):
         account = DBSession().query(cls).filter(
-            cls.tour_guide_id==tour_guide_id).first()
+            cls.tour_guide_id==tour_guide_id).all()
         return account
 
     @classmethod
     def create(cls, tour_guide_id, currency, bank_name,
-               deposit_bank, payee, account, note):
+               deposit_bank, payee, account, note=None):
         session = DBSession()
         account = cls(
             tour_guide_id=tour_guide_id, currency=currency,
@@ -312,9 +316,14 @@ class TourGuideAccount(Base, BaseMixin):
         session.flush()
 
     @classmethod
-    def delete(cls, id):
+    def delete(cls, id=None, tour_guide_id=None):
+        if not (id or tour_guide_id):
+            raise_error_json(InvalidateError())
         session = DBSession()
-        account = session.query(cls).filter(cls.id==id).first()
+        if tour_guide_id:
+            account = session.query(cls).filter(cls.tour_guide_id==tour_guide_id).first()
+        else:
+            account = session.query(cls).filter(cls.id==id).first()
         if not account:
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.TOUR_GUIDE_ACCOUNT_NOT_EXIST))

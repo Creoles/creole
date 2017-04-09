@@ -45,8 +45,10 @@ class BaseCreoleErrCode(object):
 
     # 导游
     TOUR_GUIDE_NOT_EXIST = 3060
-    TOUR_GUIDE_ACCOUNT_NOT_EXIST = 3061
-    TOUR_GUIDE_FEE_NOT_EXIST = 3062
+    TOUR_GUIDE_DUPLICATED = 3061
+    TOUR_GUIDE_ACCOUNT_NOT_EXIST = 3062
+    TOUR_GUIDE_ACCOUNT_DUPLICATED = 3063
+    TOUR_GUIDE_FEE_NOT_EXIST = 3064
 
 class CreoleErrCode(BaseCreoleErrCode):
     pass
@@ -90,6 +92,8 @@ TRANSLATIONS = {
     CreoleErrCode.RESTAURANT_MEAL_TYPE_NOT_EXIST: u'the type of the meal dose not exist',
 
     CreoleErrCode.TOUR_GUIDE_NOT_EXIST: u'the tour guide do not exist',
+    CreoleErrCode.TOUR_GUIDE_ID_DUPLICATED: u'the tour guide id duplicated',
+    CreoleErrCode.TOUR_GUIDE_ACCOUNT_DUPLICATED: u'the account of tour guide duplicated',
     CreoleErrCode.TOUR_GUIDE_ACCOUNT_NOT_EXIST: u'the account of the tour guide do not exist',
     CreoleErrCode.TOUR_GUIDE_FEE_NOT_EXIST: u'the tour guide fee do not exist',
 }
