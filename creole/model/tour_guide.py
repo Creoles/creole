@@ -70,6 +70,9 @@ class TourGuide(Base, BaseMixin):
             Index('idx_name_name_en', 'name', 'name_en'),
             Index('ix_name', 'name'),
             Index('ix_name_en', 'name_en'),
+            Index('ix_country_id', 'country_id'),
+            Index('ix_gender', 'gender'),
+            Index('idx_country_id_gender', 'country_id', 'gender'),
         )
         return table_args + BaseMixin.__table_args__
 
@@ -153,6 +156,23 @@ class TourGuide(Base, BaseMixin):
         session.merge(tour_guide)
         session.flush()
 
+    @classmethod
+    def search(cls, country_id=None, gender=None,
+               guide_type=None, page=1, number=20):
+        session = DBSession()
+        query = session.query(cls)
+        total = None
+        if country_id:
+            query = query.filter(cls.country_id==country_id)
+        if gender:
+            query = query.filter(cls.gender==gender)
+        if guide_type:
+            query = query.filter(cls.guide_type==guide_type)
+        if page == 1:
+            total = query.count()
+        tour_guide_list = \
+            query.offset((page - 1) * number).limit(number).all()
+        return tour_guide_list, total
 
 
 class TourGuideFee(Base,BaseMixin):
