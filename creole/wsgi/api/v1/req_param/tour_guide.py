@@ -7,17 +7,25 @@ from ...util import BaseRequestParser
 from creole.util import Enum
 
 
+GUIDE_TYPE = Enum(
+    ('INTERNATIONAL', 0, u'国际导游'),
+    ('DRIVER', 1, u'司机导游'),
+    ('ATTRACTION', 2, u'景点导游'),
+    ('TRANSLATOR', 3, u'翻译'),
+)
+
+GENDER = Enum(
+    ('MALE', 1, u'男性'),
+    ('FEMALE', 2, u'女性'),
+)
+
+
+class SearchTourGuideApiParser(BaseRequestParser):
+    country_id = Argument('country_id', type=int)
+    gender = Argument('gender', type=int, choices=GENDER.values())
+    guide_type = Argument('guide_type', type=int, choices=GUIDE_TYPE.values())
+
 class CreateTourGuideApiParser(BaseRequestParser):
-    GUIDE_TYPE = Enum(
-        ('INTERNATIONAL', 0, u'国际导游'),
-        ('DRIVER', 1, u'司机导游'),
-        ('ATTRACTION', 2, u'景点导游'),
-        ('TRANSLATOR', 3, u'翻译'),
-    )
-    GENDER = Enum(
-        ('MALE', 1, u'男性'),
-        ('FEMALE', 2, u'女性'),
-    )
     CERTIFICATE_TYPE = Enum(
         ('ID', 1, u'身份证'),
         ('PASSPORT', 2, u'护照'),

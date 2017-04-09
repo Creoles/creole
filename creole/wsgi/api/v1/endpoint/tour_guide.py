@@ -6,6 +6,7 @@ from .....service.tour_guide import (
     TourGuideAccountService,
 )
 from ..req_param.tour_guide import (
+    SearchTourGuideApiParser,
     CreateTourGuideApiParser,
     CreateTourGuideFeeApiParser,
     EditTourGuideAccountApiParser,
@@ -54,6 +55,23 @@ class CreateTourGuideApi(Resource):
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
+
+
+class SearchTourGuideApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'get': SearchTourGuideApiParser,
+        }
+    }
+
+    def get(self):
+        tour_guide_data, total = \
+            TourGuideService.search_tour_guide(**self.parsed_data)
+        if self.parsed_data['page'] == 1:
+            data = {'tour_guide_data': tour_guide_data, 'total': total}
+        else:
+            data = {'tour_guide_data': tour_guide_data}
+        return api_response(data=data)
 
 
 class TourGuideFeeApi(Resource):

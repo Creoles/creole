@@ -13,7 +13,6 @@ from ..exc import (
     DatabaseError,
     ClientError,
     CreoleErrCode,
-    InvalidateError,
 )
 
 
@@ -69,6 +68,18 @@ class TourGuideService(BaseService):
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def search_tour_guide(cls, country_id=None, gender=None,
+                          guide_type=None, number=20, page=1):
+        raw_data = []
+        tour_guide_list, total = TourGuide.search(
+            country_id=country_id, gender=gender,
+            guide_type=guide_type,
+            number=number, page=page)
+        for tour_guide in tour_guide_list:
+            raw_data.append(cls._get_db_obj_data_dict(tour_guide))
+        return raw_data. total
 
 
 class TourGuideFeeService(BaseService):

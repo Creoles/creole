@@ -45,6 +45,7 @@ from .endpoint.restaurant import (
 )
 from .endpoint.tour_guide import (
     TourGuideApi,
+    SearchTourGuideApi,
     CreateTourGuideApi,
     TourGuideFeeApi,
     CreateTourGuideFeeApi,
@@ -102,6 +103,7 @@ app.add_resource(EditMealApi, '/restaurant/meal/edit_meal', endpoint='edit-resta
 
 # 导游
 app.add_resource(TourGuideApi, '/tour_guide/<int:id>', endpoint='get-tour-guide')
+app.add_resource(SearchTourGuideApi, '/tour_guide/search', endpoint='search-tour-guide')
 app.add_resource(CreateTourGuideApi, '/tour_guide/create_tour_guide', endpoint='create-tour-guide')
 app.add_resource(TourGuideFeeApi, '/tour_guide/fee/<int:id>', endpoint='get-tour-guide-fee')
 app.add_resource(CreateTourGuideFeeApi, '/tour_guide/fee/create_tour_guide_fee', endpoint='create-tour-guide-fee')
