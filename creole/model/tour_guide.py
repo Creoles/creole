@@ -111,6 +111,50 @@ class TourGuide(Base, BaseMixin):
                 InvalidateError(args=('start_work', start_work)))
         return start_work
 
+    @classmethod
+    def get_by_id(cls, id):
+        session = DBSession()
+        tour_guide = session.query(cls).filter(cls.id==id).first()
+        return tour_guide
+
+    @classmethod
+    def create(cls, guide_type, country_id, name, name_en, gender, birthday,
+               start_work, language, certificate_type, certificate_number,
+               tour_guide_numer, passport_country, telephone, intro, image_hash):
+        session = DBSession()
+        tour_guide = cls(
+            guide_type=guide_type, country_id=country_id, name=name,
+            name_en=name_en, gender=gender, birthday=birthday,
+            start_work=start_work, language=language,
+            certificate_type=certificate_type, certificate_number=certificate_number,
+            tour_guide_numer=tour_guide_numer, passport_country=passport_country,
+            telephone=telephone, intro=intro, image_hash=image_hash)
+        session.add(tour_guide)
+        session.flush()
+
+    @classmethod
+    def delete(cls, id):
+        session = DBSession()
+        tour_guide = session.query(cls).filter(cls.id==id).first()
+        if not tour_guide:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.TOUR_GUIDE_NOT_EXIST))
+        session.delete(tour_guide)
+        session.flush()
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        session = DBSession()
+        tour_guide = cls.get_by_id(id)
+        if not tour_guide:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.TOUR_GUIDE_NOT_EXIST))
+        for k, v in kwargs.iteritems():
+            setattr(tour_guide, k, v)
+        session.merge(tour_guide)
+        session.flush()
+
+
 
 class TourGuideFee(Base,BaseMixin):
     __tablename__ = 'tour_guide_fee'
@@ -125,11 +169,18 @@ class TourGuideFee(Base,BaseMixin):
         ('COUNT', 2, u'人头费'),
     )
 
-    tour_guide_id = Column(Integer, nullable=False, doc=u'导游ID')
+    tour_guide_id = Column(Integer, unique=True, nullable=False, doc=u'导游ID')
     currency = Column(TINYINT, nullable=False, doc=u'结算币种')
     base_fee = Column(Float(precision=3), nullable=False, doc=u'基本工资')
     service_type = Column(TINYINT, nullable=False, doc=u'服务类型')
     service_fee = Column(Float(precision=3), nullable=False, doc=u'服务费')
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_tour_guide_id', 'tour_guide_id'),
+        )
+        return table_args + BaseMixin.__table_args__
 
     @validates('currency')
     def _validate_currency(self, key, currency):
@@ -214,6 +265,13 @@ class TourGuideAccount(Base, BaseMixin):
     payee = Column(String(20), nullable=False, doc=u'收款人')
     account = Column(String(20), unique=True, nullable=False, doc=u'账号')
     note = Column(String(40), nullable=False, doc=u'备注')
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_tour_guide_id', 'tour_guide_id'),
+        )
+        return table_args + BaseMixin.__table_args__
 
     @validates('tour_guide_id')
     def _validate_tour_guide_id(self, key, tour_guide_id):
