@@ -66,36 +66,12 @@ class SearchRestaurantApiParser(BaseRequestParser):
     number = Argument('number', type=int, default=20, required=False)
 
 
-def create_meal_dict_parser(meal_dict):
-    """相当于做下面这几个参数的验证:
-    restaurant_id = Argument('restaurant_id', type=int, required=True)
-    meal_type = Argument('meal_type', type=int, required=True, choices=TYPE.values())
-    adult_fee = Argument('adult_fee', type=float, required=True)
-    adult_cost = Argument('adult_cost', type=float, required=True)
-    child_fee = Argument('child_fee', type=float, required=True)
-    child_cost = Argument('child_cost', type=float, required=True)
-    """
-    for k, _type in EditMealApiParser._CREATE_PARAM_MAPPING.iteritems():
+def meal_dict_parser(meal_dict):
+    for k, _tuple in EditMealApiParser._CREATE_PARAM_MAPPING.iteritems():
+        _type, is_required = _tuple
         v = meal_dict.get(k, None)
-        try:
-            meal_dict[k] = _type(v)
-        except Exception:
-            raise ValueError('Invalid value: {!r}'.format(v))
-    return meal_dict
-
-
-def update_meal_dict_parser(meal_dict):
-    """
-    id = Argument('id', type=int, required=True)
-    adult_fee = Argument('adult_fee', type=float, required=False)
-    adult_cost = Argument('adult_cost', type=float, required=False)
-    child_fee = Argument('child_fee', type=float, required=False)
-    child_cost = Argument('child_cost', type=float, required=False)
-    """
-    for k, _type in EditMealApiParser._UPDATE_PARAM_MAPPING.iteritems():
-        v = meal_dict.get(k, None)
-        if k == 'id' and v is None:
-            raise ValueError('Invalid value: {!r}'.format(k))
+        if v is None and is_required:
+            raise ValueError('Required value: {!r}'.format(k))
         try:
             meal_dict[k] = _type(v)
         except Exception:
@@ -110,24 +86,24 @@ class EditMealApiParser(BaseRequestParser):
         ('LUXURY', 3, u'豪华餐'),
     )
     _CREATE_PARAM_MAPPING = {
-        'restaurant_id': int,
-        'meal_type': int,
-        'adult_fee': float,
-        'adult_cost': float,
-        'child_fee': float,
-        'child_cost': float,
+        'restaurant_id': (int, True),
+        'meal_type': (int, True),
+        'adult_fee': (float, True),
+        'adult_cost': (float, True),
+        'child_fee': (float, True),
+        'child_cost': (float, True),
     }
     _UPDATE_PARAM_MAPPING = {
-        'id': float,
-        'adult_fee': float,
-        'adult_cost': float,
-        'child_fee': float,
-        'child_cost': float,
+        'id': (int, True),
+        'adult_fee': (float, False),
+        'adult_cost': (float, False),
+        'child_fee': (float, False),
+        'child_cost': (float, False),
     }
 
     create_meal_list = Argument(
-        'create_meal_list', type=create_meal_dict_parser, required=False, action='append')
+        'create_meal_list', type=meal_dict_parser, required=False, action='append')
     update_meal_list = Argument(
-        'update_meal_list', type=update_meal_dict_parser, required=False, action='append')
+        'update_meal_list', type=meal_dict_parser, required=False, action='append')
     delete_id_list = Argument(
         'delete_id_list', type=int, required=False, action='append')
