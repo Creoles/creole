@@ -25,7 +25,7 @@ class TourGuideService(BaseService):
     @classmethod
     def create_tour_guide(cls, guide_type, country_id, name, name_en, gender, birthday,
                           start_work, language, certificate_type, certificate_number,
-                          tour_guide_numer, telephone, image_hash,
+                          tour_guide_number, telephone, image_hash,
                           passport_country=None, intro=None):
         session = DBSession()
         TourGuide.create(
@@ -33,7 +33,7 @@ class TourGuideService(BaseService):
             name_en=name_en, gender=gender, birthday=birthday,
             start_work=start_work, language=language,
             certificate_type=certificate_type, certificate_number=certificate_number,
-            tour_guide_numer=tour_guide_numer, passport_country=passport_country,
+            tour_guide_number=tour_guide_number, passport_country=passport_country,
             telephone=telephone, intro=intro, image_hash=image_hash)
         try:
             session.commit()
@@ -79,7 +79,7 @@ class TourGuideService(BaseService):
             number=number, page=page)
         for tour_guide in tour_guide_list:
             raw_data.append(cls._get_db_obj_data_dict(tour_guide))
-        return raw_data. total
+        return raw_data, total
 
 
 class TourGuideFeeService(BaseService):
@@ -155,10 +155,6 @@ class TourGuideAccountService(BaseService):
             cls.delete_tour_guide_account(delete_id_list)
         try:
             session.commit()
-        except IntegrityError as e:
-            session.rollback()
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.TOUR_GUIDE_ACCOUNT_DUPLICATED))
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
@@ -181,7 +177,7 @@ class TourGuideAccountService(BaseService):
     @classmethod
     def update_tour_guide_account(cls, update_list):
         for account_dict in update_list:
-            TourGuideAccount.update(**account_dict.__dict__)
+            TourGuideAccount.update(**account_dict)
 
     @classmethod
     def delete_tour_guide_account(cls, delete_id_list):

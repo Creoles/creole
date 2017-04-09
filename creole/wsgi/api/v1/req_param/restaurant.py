@@ -66,17 +66,23 @@ class SearchRestaurantApiParser(BaseRequestParser):
     number = Argument('number', type=int, default=20, required=False)
 
 
-def meal_dict_parser(meal_dict):
-    for k, _tuple in EditMealApiParser._CREATE_PARAM_MAPPING.iteritems():
-        _type, is_required = _tuple
-        v = meal_dict.get(k, None)
-        if v is None and is_required:
-            raise ValueError('Required value: {!r}'.format(k))
-        try:
-            meal_dict[k] = _type(v)
-        except Exception:
-            raise ValueError('Invalid value: {!r}'.format(v))
-    return meal_dict
+def meal_dict_parser(is_create):
+    def wrapper(meal_dict):
+        _iter_item = EditMealApiParser._CREATE_PARAM_MAPPING
+        if not is_create:
+            _iter_item = EditMealApiParser._UPDATE_PARAM_MAPPING
+
+        for k, _tuple in _iter_item.iteritems():
+            _type, is_required = _tuple
+            v = meal_dict.get(k, None)
+            if v is None and is_required:
+                raise ValueError('Required value: {!r}'.format(k))
+            try:
+                meal_dict[k] = _type(v)
+            except Exception:
+                raise ValueError('Invalid value: {!r}'.format(v))
+        return meal_dict
+    return wrapper
 
 
 class EditMealApiParser(BaseRequestParser):
@@ -102,8 +108,10 @@ class EditMealApiParser(BaseRequestParser):
     }
 
     create_meal_list = Argument(
-        'create_meal_list', type=meal_dict_parser, required=False, action='append')
+        'create_meal_list', type=meal_dict_parser(is_create=True),
+        required=False, action='append')
     update_meal_list = Argument(
-        'update_meal_list', type=meal_dict_parser, required=False, action='append')
+        'update_meal_list', type=meal_dict_parser(is_create=False),
+        required=False, action='append')
     delete_id_list = Argument(
         'delete_id_list', type=int, required=False, action='append')

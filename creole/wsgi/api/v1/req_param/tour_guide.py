@@ -1,6 +1,4 @@
 # coding: utf-8
-from datetime import datetime
-
 from flask_restful.reqparse import Argument
 
 from ...util import BaseRequestParser
@@ -24,6 +22,8 @@ class SearchTourGuideApiParser(BaseRequestParser):
     country_id = Argument('country_id', type=int)
     gender = Argument('gender', type=int, choices=GENDER.values())
     guide_type = Argument('guide_type', type=int, choices=GUIDE_TYPE.values())
+    page = Argument('page', type=int, default=1, required=False)
+    number = Argument('number', type=int, default=20, required=False)
 
 class CreateTourGuideApiParser(BaseRequestParser):
     CERTIFICATE_TYPE = Enum(
@@ -34,16 +34,16 @@ class CreateTourGuideApiParser(BaseRequestParser):
     guide_type = Argument(
         'guide_type', type=int, choices=GUIDE_TYPE.values(), required=True)
     country_id = Argument('country_id', type=int, required=True)
-    name = Argument('name', type=str, required=False)
+    name = Argument('name', required=False)
     name_en = Argument('name_en', type=str, required=False)
     gender = Argument('gender', type=int, choices=GENDER.values(), required=True)
-    birthday = Argument('birthday', type=datetime, required=True)
+    birthday = Argument('birthday', required=True, type=int)
     start_work = Argument('start_work', type=int, required=True)
     language = Argument('language', required=True)
     certificate_type = Argument(
         'certificate_type', type=int, choices=CERTIFICATE_TYPE.values(), required=True)
     certificate_number = Argument('certificate_number', required=True)
-    tour_guide_numer = Argument('tour_guide_numer', required=True)
+    tour_guide_number = Argument('tour_guide_number', required=True)
     passport_country = Argument('passport_country')
     telephone=Argument('telephone', required=True)
     intro = Argument('intro')
@@ -68,45 +68,50 @@ class CreateTourGuideFeeApiParser(BaseRequestParser):
     service_fee = Argument('service_fee', type=float, required=True)
 
 
-def account_dict_parser(account_dict):
-    for k, _tuple in \
-            EditTourGuideAccountApiParser._CREATE_PARAM_MAPPING.iteritems():
-        _type, is_required = _tuple
-        v = account_dict.get(k, None)
-        if v is None and is_required:
-            raise ValueError('Required value: {!r}'.format(k))
-        try:
-            account_dict[k] = _type(v)
-        except Exception:
-            raise ValueError('Invalid value: {!r}'.format(v))
-    return account_dict
+def account_dict_parser(is_create):
+    def wrapper(account_dict):
+        _iter_item = EditTourGuideAccountApiParser._CREATE_PARAM_MAPPING
+        if not is_create:
+            _iter_item = EditTourGuideAccountApiParser._UPDATE_PARAM_MAPPING
+
+        for k, _tuple in _iter_item.iteritems():
+            _type, is_required = _tuple
+            v = account_dict.get(k, None)
+            if v is None and is_required:
+                raise ValueError('Required value: {!r}'.format(k))
+            try:
+                account_dict[k] = _type(v)
+            except Exception:
+                raise ValueError('Invalid value: {!r}'.format(v))
+        return account_dict
+    return wrapper
 
 
 class EditTourGuideAccountApiParser(BaseRequestParser):
     _CREATE_PARAM_MAPPING = {
         'tour_guide_id': (int, True),  # key: (_type, is_required)
         'currency': (int, True),
-        'bank_name': (str, True),
-        'deposit_bank': (str, True),
-        'payee': (str, True),
+        'bank_name': (unicode, True),
+        'deposit_bank': (unicode, True),
+        'payee': (unicode, True),
         'account': (str, True),
-        'note': (str, False),
+        'note': (unicode, False),
     }
     _UPDATE_PARAM_MAPPING = {
         'id': (int, True),
         'currency': (int, True),
-        'bank_name': (str, True),
-        'deposit_bank': (str, True),
-        'payee': (str, True),
+        'bank_name': (unicode, True),
+        'deposit_bank': (unicode, True),
+        'payee': (unicode, True),
         'account': (str, True),
-        'note': (str, False),
+        'note': (unicode, False),
     }
 
     create_account_list = Argument(
-        'create_account_list', type=account_dict_parser,
+        'create_account_list', type=account_dict_parser(is_create=True),
         required=False, action='append')
     update_account_list = Argument(
-        'update_account_list', type=account_dict_parser,
+        'update_account_list', type=account_dict_parser(is_create=False),
         required=False, action='append')
     delete_id_list = Argument(
         'delete_id_list', type=int, required=False, action='append')

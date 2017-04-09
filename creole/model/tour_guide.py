@@ -8,7 +8,6 @@ from sqlalchemy import (
     Integer,
     Index,
     Float,
-    DateTime,
 )
 from sqlalchemy.dialects.mysql import (
     TINYINT,
@@ -16,6 +15,7 @@ from sqlalchemy.dialects.mysql import (
 )
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.exc import IntegrityError
 
 from . import Base, DBSession
 from .country import Country
@@ -53,12 +53,12 @@ class TourGuide(Base, BaseMixin):
     name = Column(Unicode(10), nullable=True, doc=u'中文名称')
     name_en = Column(String(20), nullable=True, doc=u'英文名称')
     gender = Column(TINYINT, nullable=False, doc=u'性别')
-    birthday = Column(DateTime, nullable=False, doc=u'生日')
+    birthday = Column(SMALLINT, nullable=False, doc=u'出生年份')
     start_work = Column(SMALLINT, nullable=False, doc=u'开始工作的年份')
     language = Column(String(20), nullable=False, doc=u'语言')
     certificate_type = Column(TINYINT, nullable=False, doc=u'证件类型')
     certificate_number = Column(String(20), nullable=False, doc=u'证件编号')
-    tour_guide_numer = Column(String(20), nullable=False, doc=u'导游证编号')
+    tour_guide_number = Column(String(20), nullable=False, doc=u'导游证编号')
     passport_country = Column(String(30), nullable=True, doc=u'签证国别')
     telephone = Column(String(20), nullable=False, doc=u'电话')
     intro = Column(String(256), nullable=True, doc=u'自我介绍')
@@ -121,7 +121,7 @@ class TourGuide(Base, BaseMixin):
     @classmethod
     def create(cls, guide_type, country_id, name, name_en, gender, birthday,
                start_work, language, certificate_type, certificate_number,
-               tour_guide_numer, telephone, image_hash,
+               tour_guide_number, telephone, image_hash,
                passport_country=None, intro=None):
         session = DBSession()
         tour_guide = cls(
@@ -129,7 +129,7 @@ class TourGuide(Base, BaseMixin):
             name_en=name_en, gender=gender, birthday=birthday,
             start_work=start_work, language=language,
             certificate_type=certificate_type, certificate_number=certificate_number,
-            tour_guide_numer=tour_guide_numer, passport_country=passport_country,
+            tour_guide_number=tour_guide_number, passport_country=passport_country,
             telephone=telephone, intro=intro, image_hash=image_hash)
         session.add(tour_guide)
         session.flush()
@@ -333,7 +333,12 @@ class TourGuideAccount(Base, BaseMixin):
             bank_name=bank_name, deposit_bank=deposit_bank,
             payee=payee, account=account, note=note)
         session.add(account)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.TOUR_GUIDE_ACCOUNT_DUPLICATED))
 
     @classmethod
     def delete(cls, id=None, tour_guide_id=None):
