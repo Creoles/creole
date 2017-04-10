@@ -43,6 +43,15 @@ from .endpoint.restaurant import (
     MealApi,
     EditMealApi,
 )
+from .endpoint.tour_guide import (
+    TourGuideApi,
+    SearchTourGuideApi,
+    CreateTourGuideApi,
+    TourGuideFeeApi,
+    CreateTourGuideFeeApi,
+    TourGuideAccountApi,
+    EditTourGuideAccountApi,
+)
 
 
 blue_print = Blueprint('api_v1', __name__)
@@ -89,5 +98,14 @@ app.add_resource(SearchRestaurantApi, '/restaurant/search', endpoint='search-res
 app.add_resource(RestaurantCompanyApi, '/restaurant_company/<int:id>', endpoint='get-restaurant-company')
 app.add_resource(CreateRestaurantCompanyApi, '/restaurant_company/create_company', endpoint='create-restaurant-company')
 app.add_resource(SearchRestaurantCompanyApi, '/restaurant_company/search', endpoint='search-restaurant-company')
-app.add_resource(MealApi, '/restaurant/meal/<int:id>', endpoint='get-restaurant-meal')
+app.add_resource(MealApi, '/restaurant/meal/<int:restaurant_id>', endpoint='get-restaurant-meal')
 app.add_resource(EditMealApi, '/restaurant/meal/edit_meal', endpoint='edit-restaurant-meal')
+
+# 导游
+app.add_resource(TourGuideApi, '/tour_guide/<int:id>', endpoint='get-tour-guide')
+app.add_resource(SearchTourGuideApi, '/tour_guide/search', endpoint='search-tour-guide')
+app.add_resource(CreateTourGuideApi, '/tour_guide/create_tour_guide', endpoint='create-tour-guide')
+app.add_resource(TourGuideFeeApi, '/tour_guide/fee/<int:id>', endpoint='get-tour-guide-fee')
+app.add_resource(CreateTourGuideFeeApi, '/tour_guide/fee/create_tour_guide_fee', endpoint='create-tour-guide-fee')
+app.add_resource(TourGuideAccountApi, '/tour_guide/account/<int:tour_guide_id>', endpoint='get-tour-guide-account')
+app.add_resource(EditTourGuideAccountApi, '/tour_guide/account/edit', endpoint='edit-tour-guide-account')

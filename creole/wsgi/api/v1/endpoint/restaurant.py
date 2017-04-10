@@ -134,10 +134,8 @@ class SearchRestaurantApi(Resource):
 
 
 class MealApi(Resource):
-    def get(self, id):
-        """根据restaurant_id获取餐厅下的套餐类型
-        这里的id是restaurant_id"""
-        restaurant_id = id
+    def get(self, restaurant_id):
+        """根据restaurant_id获取餐厅下的套餐类型"""
         meal_list = MealService.get_by_restaurant_id(restaurant_id)
         return api_response(data=meal_list)
 
