@@ -7,7 +7,7 @@ from subprocess import check_output, check_call, CalledProcessError
 @contextmanager
 def cd(dir_path):
     orig_dir = os.path.abspath('.')
-    os.chdir(dir)
+    os.chdir(dir_path)
     yield
     os.chdir(orig_dir)
 
