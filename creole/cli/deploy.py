@@ -11,7 +11,7 @@ Usage:
 Options:
   --rev <rev-name>                 Specify git revision name to deploy
   -u <user>, --remote-user <user>  Specify remote user to run the deploy
-                                   task [default: deploy]
+                                   task
   --install-ansible-roles          Install required ansible roles
   -y, --yes                        Answer `yes` when prompted, useful for
                                    script automation
