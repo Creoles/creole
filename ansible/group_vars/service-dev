@@ -1,0 +1,4 @@
+sync_code_git_reset_repo: yes
+
+CREOLE_PORT: 10026
+CREOLE_DB_URL: mysql+pymysql://root:123456@118.193.211.109:3306/creole?charset=utf8
