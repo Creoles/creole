@@ -9,9 +9,9 @@ from .config import setting
 from .env import is_prod_env
 
 
-class CreooleApplication(WSGIApplication):
+class CreoleApplication(WSGIApplication):
     def init(self, parser, opts, args):
-        super_cfg = super(CreooleApplication, self).init(
+        super_cfg = super(CreoleApplication, self).init(
             parser, opts, args)
         cfg = self._get_default_setting()
         if super_cfg:
@@ -36,7 +36,7 @@ class CreooleApplication(WSGIApplication):
         if sys.platform != 'darwin':
             cfg.update(dict(
                 syslog=True,
-                syslog_addr='unix://dev/log#dgram',
+                syslog_addr='unix:///dev/log#dgram',
                 syslog_prefix='creole',
                 syslog_facility='local6'))
         return cfg

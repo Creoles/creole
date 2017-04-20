@@ -34,8 +34,11 @@ INSTALL_ANSIBLE_ROLES_YML = """\
 - src: git+ssh://git@github.com/Creoles/ansible-role-creole.sync_code.git
   name: creole.sync_code
   version: master
-- src: git+ssh://git@github.com/Creoles/ansible-role-creole.docker.git
-  name: creole.docker
+- src: git+ssh://git@github.com/Creoles/ansible-role-creole.python.git
+  name: creole.python
+  version: master
+- src: git+ssh://git@github.com/Creoles/ansible-role-creole.runit.git
+  name: creole.runit
   version: master
 - src: git+ssh://git@github.com/Creoles/ansible-role-creole.service.git
   name: creole.service

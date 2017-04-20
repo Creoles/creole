@@ -27,8 +27,8 @@ def serve(dev=False, gunicorn_args=None):
     else:
         sys.argv[1:] = gunicorn_args
 
-    from creole.gunicorn import CreooleApplication
-    return CreooleApplication(__doc__[7:]).run()
+    from creole.gunicorn import CreoleApplication
+    return CreoleApplication(__doc__[7:]).run()
 
 
 def main(argv=None):
