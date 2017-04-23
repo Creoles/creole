@@ -1,4 +1,5 @@
 # coding: utf-8
+import sys
 import logging
 import logging.config
 
@@ -52,23 +53,23 @@ class CreoleFormatter(logging.Formatter):
         return super(CreoleFormatter, self).format(record)
 
 
-def _gen_console_log(app_name):
+def _gen_console_log(app_name, log_level):
     _dict = {
         'version': 1,
         'root': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': log_level,
         },
         'loggers': {
             app_name: {
-                'level': 'DEBUG',
+                'level': log_level,
                 'propagate': False,
                 'handlers': ['console'],
             },
         },
         'handlers': {
             'console': {
-                'level': 'DEBUG',
+                'level': log_level,
                 'formatter': 'console',
                 'class': 'logging.StreamHandler',
             }
@@ -84,23 +85,23 @@ def _gen_console_log(app_name):
     return _dict
 
 
-def _gen_syslog_log(app_name):
+def _gen_syslog_log(app_name, log_level):
     _dict = {
         'version': 1,
         'root': {
             'handlers': ['syslog'],
-            'level': 'INFO',
+            'level': log_level,
         },
         'loggers': {
             app_name: {
-                'level': 'INFO',
+                'level': log_level,
                 'handlers': ['syslog'],
                 'propagate': False,
             }
         },
         'handlers': {
             'syslog': {
-                'level': 'INFO',
+                'level': log_level,
                 'address': '/dev/log',
                 'facility': 'local6',
                 'formatter': 'syslog',
@@ -118,9 +119,14 @@ def _gen_syslog_log(app_name):
     return _dict
 
 
-def setup_logging(app_name):
-    if not is_prod_env():
-        log_dict = _gen_console_log(app_name)
+def setup_logging(app_name, log_level=None):
+    if sys.platform == 'darwin':
+        log_level = log_level or logging.DEBUG
+        log_dict = _gen_console_log(app_name, log_level)
+    elif is_prod_env():
+        log_level = log_level or logging.INFO
+        log_dict = _gen_syslog_log(app_name, log_level)
     else:
-        log_dict = _gen_syslog_log(app_name)
+        log_level = log_level or logging.DEBUG
+        log_dict = _gen_console_log(app_name, log_level)
     logging.config.dictConfig(log_dict)

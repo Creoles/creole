@@ -81,6 +81,12 @@ class EnvReader(object):
             value = default
         return value
 
+    def get_int(self, key, default=None):
+        value = self.__getitem__(key)
+        if value is not None:
+            return int(value)
+        return default
+
 
 def get_setting_manager():
     return EnvReader()

@@ -1,0 +1,14 @@
+---
+- hosts: creole
+  serial: "30%"
+  become: yes
+  become_user: deploy
+  vars:
+    service_name: ota.creole
+    service_port: 10026
+    docker_username: ericrs
+    docker_password: zhang651958
+    docker_image: ericrs/creole
+    docker_image_tag: dev1
+  roles:
+    - creole.service

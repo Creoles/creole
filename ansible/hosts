@@ -1,0 +1,17 @@
+[service-dev]
+ota-creole-dev
+
+[service-staging]
+ota-creole-staging
+
+[service-prod]
+ota-creole01
+
+[service-online:children]
+service-staging
+service-prod
+
+[creole:children]
+service-dev
+service-staging
+service-prod
