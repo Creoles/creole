@@ -102,9 +102,9 @@ class VehicleCompanyService(BaseService):
         return VehicleCompany.create(name=name, name_en=name_en)
 
     @classmethod
-    def search_company(cls, name=None, name_en=None):
+    def search_company(cls, name=None, name_en=None, is_all=False):
         vehicle_company = \
-            VehicleCompany.search(name=name, name_en=name_en)
+            VehicleCompany.search(name=name, name_en=name_en, is_all=is_all)
         return cls._get_db_obj_data_dict(vehicle_company)
 
 
