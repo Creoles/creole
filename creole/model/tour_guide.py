@@ -256,8 +256,7 @@ class TourGuideFee(Base,BaseMixin):
         else:
             fee = session.query(cls).filter(cls.id==id).first()
         if not fee:
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.TOUR_GUIDE_FEE_NOT_EXIST))
+            return
         session.delete(fee)
         session.flush()
 
@@ -350,8 +349,7 @@ class TourGuideAccount(Base, BaseMixin):
         else:
             account = session.query(cls).filter(cls.id==id).first()
         if not account:
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.TOUR_GUIDE_ACCOUNT_NOT_EXIST))
+            return
         session.delete(account)
         session.flush()
 
