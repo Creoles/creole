@@ -34,6 +34,7 @@ class CreateVehicleCompanyApiParser(BaseRequestParser):
 
 
 class SearchVehicleCompanyApiParser(BaseRequestParser):
+    is_all = Argument('is_all', type=bool, default=False, required=True)
     name = Argument('name', required=False)
     name_en = Argument('name_en', required=False)
 

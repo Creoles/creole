@@ -94,11 +94,13 @@ class ShopCompany(Base, BaseMixin):
             raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def search(cls, name=None, name_en=None):
+    def search(cls, name=None, name_en=None, is_all=False):
         session = DBSession()
         shop_company = None
         query = session.query(cls)
-        if name:
+        if is_all:
+            shop_company = query.all()
+        elif name:
             shop_company = query.filter(cls.name==name).first()
         elif name_en:
             shop_company = query.filter(cls.name_en==name_en).first()
