@@ -73,16 +73,17 @@ def meal_dict_parser(is_create):
         if not is_create:
             _iter_item = EditMealApiParser._UPDATE_PARAM_MAPPING
 
+        _meal_dict = {}
         for k, _tuple in _iter_item.iteritems():
             _type, is_required = _tuple
             v = meal_dict.get(k, None)
             if v is None and is_required:
                 raise ValueError('Required value: {!r}'.format(k))
             try:
-                meal_dict[k] = _type(v)
+                _meal_dict[k] = _type(v)
             except Exception:
                 raise ValueError('Invalid value: {!r}'.format(v))
-        return meal_dict
+        return _meal_dict
     return wrapper
 
 
