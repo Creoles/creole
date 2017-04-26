@@ -74,16 +74,17 @@ def account_dict_parser(is_create):
         if not is_create:
             _iter_item = EditTourGuideAccountApiParser._UPDATE_PARAM_MAPPING
 
+        _account_dict = {}
         for k, _tuple in _iter_item.iteritems():
             _type, is_required = _tuple
             v = account_dict.get(k, None)
             if v is None and is_required:
                 raise ValueError('Required value: {!r}'.format(k))
             try:
-                account_dict[k] = _type(v)
+                _account_dict[k] = _type(v)
             except Exception:
                 raise ValueError('Invalid value: {!r}'.format(v))
-        return account_dict
+        return _account_dict
     return wrapper
 
 
