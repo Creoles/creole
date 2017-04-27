@@ -23,6 +23,7 @@ class CreateVehicleApiParser(BaseRequestParser):
     start_use = Argument('start_use', required=True)
     license = Argument('license', required=True)
     register_number = Argument('register_number', required=True)
+    insurance_number = Argument('insurance_number', required=True)
     contact = Argument('contact', required=True)
     telephone = Argument('telephone', required=True)
     unit_price = Argument('unit_price', type=float, required=True)

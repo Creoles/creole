@@ -23,12 +23,14 @@ class VehicleService(BaseService):
     @classmethod
     def create_vehicle(cls, account_id, company_id, country_id,
                        city_id, vehicle_type, seat, start_use, license,
-                       register_number, contact, telephone, unit_price):
+                       register_number, insurance_number, contact,
+                       telephone, unit_price):
         return Vehicle.create(
             company_id=company_id, country_id=country_id, city_id=city_id,
             vehicle_type=vehicle_type, seat=seat, start_use=start_use,
             license=license, register_number=register_number, contact=contact,
-            telephone=telephone, unit_price=unit_price, account_id=account_id
+            telephone=telephone, unit_price=unit_price, account_id=account_id,
+            insurance_number=insurance_number
         )
 
     @classmethod

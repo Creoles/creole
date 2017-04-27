@@ -410,6 +410,7 @@ CREATE TABLE `vehicle` (
   `start_use` varchar(4) NOT NULL,
   `license` varchar(10) NOT NULL,
   `register_number` varchar(20) NOT NULL,
+  `insurance_number` varchar(30) NOT NULL,
   `contact` varchar(16) NOT NULL,
   `telephone` varchar(20) NOT NULL,
   `unit_price` float NOT NULL,

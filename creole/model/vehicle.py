@@ -242,6 +242,7 @@ class Vehicle(Base, BaseMixin):
     start_use = Column(String(4), nullable=False, doc=u'使用年限')
     license = Column(String(10), nullable=False, doc=u'车牌号')
     register_number = Column(String(20), nullable=False, doc=u'旅游局注册号')
+    insurance_number = Column(String(30), nullable=False, doc=u'车辆保险号')
     contact = Column(Unicode(16), nullable=False, doc=u'联系人')
     telephone = Column(String(20), nullable=False, doc=u'联系电话')
     unit_price = Column(Float(precision=3), nullable=False, doc=u'每公里单价')
@@ -298,14 +299,15 @@ class Vehicle(Base, BaseMixin):
     @classmethod
     def create(cls, account_id, company_id, country_id, city_id,
                vehicle_type, seat, start_use, license, register_number,
-               contact, telephone, unit_price):
+               insurance_number, contact, telephone, unit_price):
         cls._validate_country_and_city(country_id, city_id)
         session = DBSession()
         vehicle = cls(
             company_id=company_id, country_id=country_id, city_id=city_id,
             vehicle_type=vehicle_type, seat=seat, start_use=start_use,
             license=license, register_number=register_number, contact=contact,
-            telephone=telephone, unit_price=unit_price, account_id=account_id
+            telephone=telephone, unit_price=unit_price, account_id=account_id,
+            insurance_number=insurance_number,
         )
         session.add(vehicle)
         try:
