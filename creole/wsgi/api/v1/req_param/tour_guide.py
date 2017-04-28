@@ -33,19 +33,19 @@ class CreateTourGuideApiParser(BaseRequestParser):
 
     guide_type = Argument(
         'guide_type', type=int, choices=GUIDE_TYPE.values(), required=True)
-    country_id = Argument('country_id', type=int, required=True)
+    country_id = Argument('country_id', type=int, nullable=False, required=True)
     name = Argument('name', required=False)
     name_en = Argument('name_en', type=str, required=False)
     gender = Argument('gender', type=int, choices=GENDER.values(), required=True)
-    birthday = Argument('birthday', required=True, type=int)
-    start_work = Argument('start_work', type=int, required=True)
-    language = Argument('language', required=True)
+    birthday = Argument('birthday', nullable=False, required=True, type=int)
+    start_work = Argument('start_work', type=int, nullable=False, required=True)
+    language = Argument('language', nullable=False, required=True)
     certificate_type = Argument(
         'certificate_type', type=int, choices=CERTIFICATE_TYPE.values(), required=True)
-    certificate_number = Argument('certificate_number', required=True)
-    tour_guide_number = Argument('tour_guide_number', required=True)
+    certificate_number = Argument('certificate_number', nullable=False, required=True)
+    tour_guide_number = Argument('tour_guide_number', nullable=False, required=True)
     passport_country = Argument('passport_country')
-    telephone=Argument('telephone', required=True)
+    telephone=Argument('telephone', nullable=False, required=True)
     intro = Argument('intro')
     image_hash = Argument('image_hash', required=True)
 

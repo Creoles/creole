@@ -15,8 +15,8 @@ RESTAURANT_TYPE = Enum(
 
 
 class CreateRestaurantCompanyApiParser(BaseRequestParser):
-    name = Argument('name', required=True)
-    name_en = Argument('name_en', required=True)
+    name = Argument('name', nullable=False, required=True)
+    name_en = Argument('name_en', nullable=False, required=True)
 
 class SearchRestaurantCompanyApiParser(BaseRequestParser):
     is_all = Argument('is_all', type=bool, default=False, required=True)
@@ -31,28 +31,28 @@ class CreateRestaurantApiParser(BaseRequestParser):
         ('LKR', 3, u'斯里兰卡卢布'),
     )
 
-    name = Argument('name', required=True)
-    name_en = Argument('name_en', required=True)
+    name = Argument('name', nullable=False, required=True)
+    name_en = Argument('name_en', nullable=False, required=True)
     restaurant_type = Argument(
-        'restaurant_type', required=True, type=int,
+        'restaurant_type', required=True, type=int, nullable=False,
         choices=RESTAURANT_TYPE.values())
-    country_id = Argument('country_id', type=int, required=True)
-    city_id = Argument('city_id', type=int, required=True)
-    company_id = Argument('company_id', type=int, required=True)
-    address = Argument('address', required=True)
-    contact = Argument('contact', required=True)
-    telephone = Argument('telephone', required=True)
+    country_id = Argument('country_id', type=int, nullable=False, required=True)
+    city_id = Argument('city_id', type=int, nullable=False, required=True)
+    company_id = Argument('company_id', type=int, nullable=False, required=True)
+    address = Argument('address', nullable=False, required=True)
+    contact = Argument('contact', nullable=False, required=True)
+    telephone = Argument('telephone', nullable=False, required=True)
     intro_cn = Argument('intro_cn', required=False)
     intro_en = Argument('intro_en', required=False)
 
     # 支付
     currency = Argument(
-        'currency', choices=CURRENCY.values(), type=int,
+        'currency', choices=CURRENCY.values(), type=int, nullable=False,
         required=True, location=('json', 'form'))
-    bank_name = Argument('bank_name', required=True, location=('json', 'form'))
-    deposit_bank = Argument('deposit_bank', required=True, location=('json', 'form'))
-    payee = Argument('payee', required=True, location=('json', 'form'))
-    account = Argument('account', required=True, location=('json', 'form'))
+    bank_name = Argument('bank_name', nullable=False, required=True, location=('json', 'form'))
+    deposit_bank = Argument('deposit_bank', nullable=False, required=True, location=('json', 'form'))
+    payee = Argument('payee', nullable=False, required=True, location=('json', 'form'))
+    account = Argument('account', nullable=False, required=True, location=('json', 'form'))
     note = Argument('note', required=False, location=('json', 'form'))
 
 

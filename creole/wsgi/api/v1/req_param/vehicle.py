@@ -14,24 +14,24 @@ class GetVehicleAccountApiParser(BaseRequestParser):
         'account_type', type=int, choices=ACCOUNT_TYPE.values(), required=True)
 
 class CreateVehicleApiParser(BaseRequestParser):
-    account_id = Argument('account_id', type=int, required=True)
-    company_id = Argument('company_id', type=int, required=True)
-    country_id = Argument('country_id', type=int, required=True)
-    city_id = Argument('city_id', type=int, required=True)
-    vehicle_type = Argument('vehicle_type', required=True)
-    seat = Argument('seat', type=int, required=True)
-    start_use = Argument('start_use', required=True)
-    license = Argument('license', required=True)
-    register_number = Argument('register_number', required=True)
-    insurance_number = Argument('insurance_number', required=True)
-    contact = Argument('contact', required=True)
-    telephone = Argument('telephone', required=True)
-    unit_price = Argument('unit_price', type=float, required=True)
+    account_id = Argument('account_id', type=int, nullable=False, required=True)
+    company_id = Argument('company_id', type=int, nullable=False, required=True)
+    country_id = Argument('country_id', type=int, nullable=False, required=True)
+    city_id = Argument('city_id', type=int, nullable=False, required=True)
+    vehicle_type = Argument('vehicle_type', nullable=False, required=True)
+    seat = Argument('seat', type=int, nullable=False, required=True)
+    start_use = Argument('start_use', nullable=False, required=True)
+    license = Argument('license', nullable=False, required=True)
+    register_number = Argument('register_number', nullable=False, required=True)
+    insurance_number = Argument('insurance_number', nullable=False, required=True)
+    contact = Argument('contact', nullable=False, required=True)
+    telephone = Argument('telephone', nullable=False, required=True)
+    unit_price = Argument('unit_price', type=float, nullable=False, required=True)
 
 
 class CreateVehicleCompanyApiParser(BaseRequestParser):
-    name = Argument('name', required=True)
-    name_en = Argument('name_en', required=True)
+    name = Argument('name', nullable=False, required=True)
+    name_en = Argument('name_en', nullable=False, required=True)
 
 
 class SearchVehicleCompanyApiParser(BaseRequestParser):
@@ -73,8 +73,8 @@ class CreateVehicleAccountApiParser(BaseRequestParser):
     currency = Argument(
         'currency', choices=CURRENCY.values(), type=int,
         required=True, location=('json', 'form'))
-    bank_name = Argument('bank_name', required=True, location=('json', 'form'))
-    deposit_bank = Argument('deposit_bank', required=True, location=('json', 'form'))
-    payee = Argument('payee', required=True, location=('json', 'form'))
-    account = Argument('account', required=True, location=('json', 'form'))
+    bank_name = Argument('bank_name', nullable=False, required=True, location=('json', 'form'))
+    deposit_bank = Argument('deposit_bank', nullable=False, required=True, location=('json', 'form'))
+    payee = Argument('payee', nullable=False, required=True, location=('json', 'form'))
+    account = Argument('account', nullable=False, required=True, location=('json', 'form'))
     note = Argument('note', required=False, location=('json', 'form'))
