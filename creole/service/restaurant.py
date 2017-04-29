@@ -153,7 +153,7 @@ class MealService(BaseService):
         if create_list:
             if len(create_list) > 3:
                 raise_error_json(ParameterError())
-            cls.create_meal(create_list)
+            cls.create_meal(create_list, delete_id_list)
         if update_list:
             if len(update_list) > 3:
                 raise_error_json(ParameterError())
@@ -169,7 +169,7 @@ class MealService(BaseService):
             raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def create_meal(cls, meal_list):
+    def create_meal(cls, meal_list, delete_id_list):
         session = DBSession()
         for meal_dict in meal_list:
             restaurant_id=meal_dict['restaurant_id']
@@ -181,7 +181,7 @@ class MealService(BaseService):
             # 检查是否已经添加过
             meal = session.query(Meal).filter(
                 Meal.restaurant_id==restaurant_id, Meal.meal_type==meal_type).first()
-            if meal:
+            if meal and meal.id not in delete_id_list:
                 raise_error_json(
                     ClientError(errcode=CreoleErrCode.RESTAURANT_MEAL_REACH_LIMIT))
             Meal.create(
