@@ -63,11 +63,11 @@ CREATE TABLE `city` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
+  KEY `ix_updated_at` (`updated_at`),
   KEY `ix_name_en` (`name_en`),
   KEY `ix_country_id` (`country_id`),
-  KEY `ix_name` (`name`),
   KEY `ix_created_at` (`created_at`),
-  KEY `ix_updated_at` (`updated_at`)
+  KEY `ix_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -88,8 +88,8 @@ CREATE TABLE `country` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
-  KEY `ix_updated_at` (`updated_at`),
   KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`),
   KEY `ix_name_en` (`name_en`),
   KEY `ix_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -283,27 +283,38 @@ CREATE TABLE `tour_guide` (
   `guide_type` tinyint(4) NOT NULL,
   `country_id` int(11) NOT NULL,
   `name` varchar(10) DEFAULT NULL,
-  `name_en` varchar(20) DEFAULT NULL,
+  `name_en` varchar(20) NOT NULL,
+  `nickname_en` varchar(10) DEFAULT NULL,
   `gender` tinyint(4) NOT NULL,
   `birthday` smallint(6) NOT NULL,
   `start_work` smallint(6) NOT NULL,
-  `language` varchar(20) NOT NULL,
+  `first_language` varchar(20) NOT NULL,
+  `first_language_level` tinyint(4) NOT NULL,
+  `second_language` varchar(20) NOT NULL,
+  `second_language_level` tinyint(4) NOT NULL,
+  `third_language` varchar(20) DEFAULT NULL,
+  `third_language_level` tinyint(4) DEFAULT NULL,
   `certificate_type` tinyint(4) NOT NULL,
   `certificate_number` varchar(20) NOT NULL,
   `tour_guide_number` varchar(20) NOT NULL,
-  `passport_country` varchar(30) DEFAULT NULL,
-  `telephone` varchar(20) NOT NULL,
+  `passport_country` varchar(30) NOT NULL,
+  `passport_type` tinyint(4) NOT NULL,
+  `passport_note` varchar(128) DEFAULT NULL,
+  `telephone_one` varchar(20) NOT NULL,
+  `telephone_two` varchar(20) DEFAULT NULL,
+  `email` varchar(30) DEFAULT NULL,
+  `company_id` int(11) NOT NULL,
   `intro` varchar(256) DEFAULT NULL,
   `image_hash` varchar(128) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_country_id_gender` (`country_id`,`gender`),
-  KEY `ix_updated_at` (`updated_at`),
-  KEY `ix_name_en` (`name_en`),
-  KEY `idx_name_name_en` (`name`,`name_en`),
   KEY `ix_country_id` (`country_id`),
+  KEY `idx_name_name_en` (`name`,`name_en`),
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_gender` (`gender`),
   KEY `ix_name` (`name`),
+  KEY `idx_country_id_gender` (`country_id`,`gender`),
   KEY `ix_created_at` (`created_at`),
-  KEY `ix_gender` (`gender`)
+  KEY `ix_name_en` (`name_en`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -318,18 +329,18 @@ CREATE TABLE `tour_guide_account` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `tour_guide_id` int(11) NOT NULL,
   `currency` tinyint(4) NOT NULL,
   `bank_name` varchar(30) NOT NULL,
   `deposit_bank` varchar(30) NOT NULL,
   `payee` varchar(20) NOT NULL,
   `account` varchar(20) NOT NULL,
-  `note` varchar(40) DEFAULT NULL,
+  `note` varchar(40) NOT NULL,
+  `tour_guide_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `account` (`account`),
   KEY `ix_tour_guide_id` (`tour_guide_id`),
-  KEY `ix_updated_at` (`updated_at`),
-  KEY `ix_created_at` (`created_at`)
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -410,7 +421,6 @@ CREATE TABLE `vehicle` (
   `start_use` varchar(4) NOT NULL,
   `license` varchar(10) NOT NULL,
   `register_number` varchar(20) NOT NULL,
-  `insurance_number` varchar(30) NOT NULL,
   `contact` varchar(16) NOT NULL,
   `telephone` varchar(20) NOT NULL,
   `unit_price` float NOT NULL,
@@ -531,4 +541,4 @@ CREATE TABLE `vehicle_user_account` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-04-22 18:06:52
+-- Dump completed on 2017-05-03 15:22:34

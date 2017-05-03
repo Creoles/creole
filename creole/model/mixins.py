@@ -5,11 +5,13 @@ from sqlalchemy import (
     DateTime,
     text,
     Index,
-    TINYINT,
     String,
 )
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.dialects.mysql import (
+    TINYINT,
+)
 
 from . import DBSession
 from ..util import Enum
