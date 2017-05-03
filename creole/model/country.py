@@ -25,7 +25,12 @@ class Country(Base, BaseMixin):
     __tablename__ = 'country'
 
     name = Column(Unicode(20), unique=True, nullable=False, doc=u'国家名')
-    name_en = Column(String(40), unique=True, nullable=False, doc=u'国家名, 英文')
+    name_en = Column(String(40), unique=True, nullable=False, doc=u'英文国家名')
+    nationality = Column(String(30), nullable=False, doc=u'国籍')
+    language = Column(String(20), nullable=False, doc=u'使用语言')
+    area_code = Column(String(8), nullable=False, doc=u'国际区号')
+    country_code = Column(String(10), nullable=False, doc=u'国家代码')
+    note = Column(String(50), nullable=True, doc=u'中英文对照')
 
     @declared_attr
     def __table_args__(self):
@@ -75,9 +80,13 @@ class Country(Base, BaseMixin):
         session.flush()
 
     @classmethod
-    def create(cls, name, name_en):
+    def create(cls, name, name_en, nationality, language,
+               area_code, country_code, note=None):
         session = DBSession()
-        country = cls(name=name, name_en=name_en)
+        country = cls(
+            name=name, name_en=name_en, nationality=nationality,
+            language=language, area_code=area_code,
+            country_code=country_code, note=note)
         session.add(country)
         try:
             session.commit()
@@ -94,8 +103,10 @@ class City(Base, BaseMixin):
     __tablename__ = 'city'
 
     name = Column(Unicode(20), unique=True, nullable=False, doc=u'城市名')
-    name_en = Column(String(40), unique=True, nullable=False, doc=u'城市名, 英文')
+    name_en = Column(String(40), unique=True, nullable=False, doc=u'英文城市名')
     country_id = Column(Integer, nullable=False, doc=u'国家ID')
+    abbreviation = Column(String(3), nullable=False, doc=u'缩写')
+    note = Column(String(50), nullable=True, doc=u'中英文对照')
 
     @declared_attr
     def __table_args__(self):
@@ -159,10 +170,11 @@ class City(Base, BaseMixin):
             raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def create(cls, name, name_en, country_id):
+    def create(cls, name, name_en, country_id, abbreviation, note=None):
         session = DBSession()
         city = cls(
-            name=name, name_en=name_en, country_id=country_id)
+            name=name, name_en=name_en, country_id=country_id,
+            abbreviation=abbreviation, note=note)
         session.add(city)
         try:
             session.commit()
