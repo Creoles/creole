@@ -361,12 +361,12 @@ class TourGuideAccount(Base, AccountMixin):
 
     @classmethod
     def create(cls, tour_guide_id, currency, bank_name,
-               deposit_bank, payee, account, note=None):
+               deposit_bank, payee, account, swift_code=None, note=None):
         session = DBSession()
         account = cls(
             tour_guide_id=tour_guide_id, currency=currency,
             bank_name=bank_name, deposit_bank=deposit_bank,
-            payee=payee, account=account, note=note)
+            payee=payee, account=account, swift_code=swift_code, note=note)
         session.add(account)
         try:
             session.flush()

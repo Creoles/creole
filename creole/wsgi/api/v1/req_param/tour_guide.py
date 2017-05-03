@@ -123,6 +123,7 @@ class EditTourGuideAccountApiParser(BaseRequestParser):
         'deposit_bank': (unicode, True),
         'payee': (unicode, True),
         'account': (str, True),
+        'swift_code': (str, False),
         'note': (unicode, False),
     }
     _UPDATE_PARAM_MAPPING = {
@@ -132,6 +133,7 @@ class EditTourGuideAccountApiParser(BaseRequestParser):
         'deposit_bank': (unicode, True),
         'payee': (unicode, True),
         'account': (str, True),
+        'swift_code': (str, False),
         'note': (unicode, False),
     }
 

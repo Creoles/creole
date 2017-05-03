@@ -175,11 +175,13 @@ class TourGuideAccountService(BaseService):
             deposit_bank = account_dict['deposit_bank']
             payee = account_dict['payee']
             account = account_dict['account']
+            swift_code = account_dict.get('swift_code', None)
             note = account_dict.get('note', None)
             TourGuideAccount.create(
                 tour_guide_id=tour_guide_id, currency=currency,
                 bank_name=bank_name, deposit_bank=deposit_bank,
-                payee=payee, account=account, note=note)
+                payee=payee, account=account, swift_code=swift_code,
+                note=note)
 
     @classmethod
     def update_tour_guide_account(cls, update_list):

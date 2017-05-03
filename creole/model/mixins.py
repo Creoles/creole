@@ -55,6 +55,7 @@ class AccountMixin(BaseMixin):
     deposit_bank = Column(String(30), nullable=False, doc=u'开户行')
     payee = Column(String(20), nullable=False, doc=u'收款人')
     account = Column(String(20), unique=True, nullable=False, doc=u'账号')
+    swift_code = Column(String(20), nullable=True, doc=u'国际电汇码')
     note = Column(String(40), nullable=False, doc=u'备注')
 
     @validates('currency')
