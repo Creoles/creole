@@ -28,8 +28,8 @@ class TourGuideService(BaseService):
                           second_language, second_language_level, certificate_type,
                           certificate_number, tour_guide_number, passport_country,
                           passport_type, passport_note, telephone_one, image_hash,
-                          third_language=None, third_language_level=None,
-                          intro=None, telephone_two=None):
+                          company_id, third_language=None, third_language_level=None,
+                          email=None, intro=None, telephone_two=None):
         session = DBSession()
         TourGuide.create(
             guide_type=guide_type, country_id=country_id, name=name,
@@ -41,7 +41,8 @@ class TourGuideService(BaseService):
             certificate_number=certificate_number, tour_guide_number=tour_guide_number,
             passport_country=passport_country, passport_type=passport_type,
             passport_note=passport_note, telephone_one=telephone_one,
-            telephone_two=telephone_two, image_hash=image_hash, intro=intro)
+            telephone_two=telephone_two, image_hash=image_hash, intro=intro,
+            company_id=company_id, email=email)
         try:
             session.commit()
         except SQLAlchemyError as e:

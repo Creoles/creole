@@ -52,8 +52,7 @@ class CreateCountryApi(Resource):
     def post(self):
         """添加国家"""
         try:
-            CountryService.create_country(
-                self.parsed_data['name'], self.parsed_data['name_en'])
+            CountryService.create_country(**self.parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
@@ -99,11 +98,7 @@ class CreateCityApi(Resource):
     def post(self):
         """添加国家"""
         try:
-            CityService.create_city(
-                self.parsed_data['name'],
-                self.parsed_data['name_en'],
-                self.parsed_data['country_id']
-            )
+            CityService.create_city(**self.parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()

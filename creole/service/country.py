@@ -8,25 +8,19 @@ from ..exc import (
     raise_error_json,
     DatabaseError,
 )
+from .base import BaseService
 
 
-class CountryService(object):
+class CountryService(BaseService):
     @classmethod
     def get_by_id(cls, id):
-        country_data = {'city_data': []}
         country = Country.get(id)
         if not country:
-            return country_data
-        country_data['name'] = getattr(country, 'name', '')
-        country_data['name_en'] = getattr(country, 'name_en', '')
-        country_data['id'] = country.id
+            return {}
+        country_data = cls._get_db_obj_data_dict(country)
         city_list = City.get_by_country_id(country.id)
-        for city in city_list:
-            city_dict = {}
-            city_dict['name'] = getattr(city, 'name', '')
-            city_dict['name_en'] = getattr(city, 'name_en', '')
-            city_dict['id'] = city.id
-            country_data['city_data'].append(city_dict)
+        country_data['city_data'] = \
+            [cls._get_db_obj_data_dict(city) for city in city_list]
         return country_data
 
     @classmethod
@@ -72,17 +66,10 @@ class CountryService(object):
         resp_data = []
         country_list = Country.get_all()
         for country in country_list:
-            country_dict = {'city_data': []}
-            country_dict['name'] = country.name
-            country_dict['name_en'] = country.name_en
-            country_dict['id'] = country.id
+            country_dict = cls._get_db_obj_data_dict(country)
             city_list = City.get_by_country_id(country.id)
-            for city in city_list:
-                country_dict['city_data'].append({
-                    'name': city.name,
-                    'name_en': city.name_en,
-                    'id': city.id
-                })
+            country_dict['city_data'] = \
+                [cls._get_db_obj_data_dict(city) for city in city_list]
             resp_data.append(country_dict)
         return resp_data
 
@@ -106,26 +93,23 @@ class CountryService(object):
             raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def create_country(cls, name, name_en):
-        Country.create(name, name_en)
+    def create_country(cls, name, name_en, nationality, language,
+                       area_code, country_code, note=None):
+        Country.create(
+            name=name, name_en=name_en, nationality=nationality,
+            language=language, area_code=area_code,
+            country_code=country_code, note=note)
 
 
-class CityService(object):
+class CityService(BaseService):
     @classmethod
     def get_by_id(cls, id):
-        city_data = {}
         city = City.get(id)
         if not city:
-            return city_data
-        city_data['name'] = city.name
-        city_data['name_en'] = city.name_en
-        city_data['id'] = city.id
+            return {}
+        city_data = cls._get_db_obj_data_dict(city)
         country = Country.get(city.country_id)
-        city_data['country'] = {
-            'name': country.name,
-            'name_en': country.name_en,
-            'id': country.id
-        }
+        city_data['country'] = cls._get_db_obj_data_dict(country)
         return city_data
 
     @classmethod
@@ -137,5 +121,8 @@ class CityService(object):
         City.delete(id)
 
     @classmethod
-    def create_city(cls, name, name_en, country_id):
-        City.create(name, name_en, country_id)
+    def create_city(cls, name, name_en, country_id,
+                    abbreviation, note=None):
+        City.create(
+            name=name, name_en=name_en, country_id=country_id,
+            abbreviation=abbreviation, note=note)

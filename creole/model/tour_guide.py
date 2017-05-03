@@ -34,11 +34,11 @@ class TourGuide(Base, BaseMixin):
     __tablename__ = 'tour_guide'
 
     GUIDE_TYPE = Enum(
-        ('INTERNATIONAL', 0, u'国际导游'),
-        ('DRIVER', 1, u'司机导游'),
-        ('ATTRACTION', 2, u'景点导游'),
-        ('TRANSLATOR', 3, u'翻译'),
-        ('LEADER', 4, u'领队'),
+        ('INTERNATIONAL', 1, u'国际导游'),
+        ('DRIVER', 2, u'司机导游'),
+        ('ATTRACTION', 3, u'景点导游'),
+        ('TRANSLATOR', 4, u'翻译'),
+        ('LEADER', 5, u'领队'),
     )
     GENDER = Enum(
         ('MALE', 1, u'男性'),
@@ -163,22 +163,14 @@ class TourGuide(Base, BaseMixin):
         tour_guide = session.query(cls).filter(cls.id==id).first()
         return tour_guide
 
-    passport_type = Column(TINYINT, nullable=False, doc=u'签证类型')
-    passport_note = Column(String(128), nullable=True, doc=u'签证备注')
-    telephone_one = Column(String(20), nullable=False, doc=u'电话')
-    telephone_two = Column(String(20), nullable=True, doc=u'电话')
-    email = Column(String(30), nullable=True, doc=u'邮箱')
-    company_id = Column(Integer, nullable=False, doc=u'所属公司')
-    intro = Column(String(256), nullable=True, doc=u'自我介绍')
-    image_hash = Column(String(128), nullable=False, doc=u'护照/身份证照片')
     @classmethod
     def create(cls, guide_type, country_id, name, name_en, nickname_en,
                gender, birthday, start_work, first_language, first_language_level,
                second_language, second_language_level, certificate_type,
                certificate_number, tour_guide_number, passport_country,
                passport_type, passport_note, telephone_one, image_hash,
-                third_language=None, third_language_level=None,
-               intro=None, telephone_two=None):
+               company_id, third_language=None, third_language_level=None,
+               email=None, intro=None, telephone_two=None):
         session = DBSession()
         tour_guide = cls(
             guide_type=guide_type, country_id=country_id, name=name,
@@ -190,7 +182,8 @@ class TourGuide(Base, BaseMixin):
             certificate_number=certificate_number, tour_guide_number=tour_guide_number,
             passport_country=passport_country, passport_type=passport_type,
             passport_note=passport_note, telephone_one=telephone_one,
-            telephone_two=telephone_two, image_hash=image_hash, intro=intro)
+            company_id=company_id, email=email, telephone_two=telephone_two,
+            image_hash=image_hash, intro=intro)
         session.add(tour_guide)
         session.flush()
 

@@ -6,11 +6,11 @@ from creole.util import Enum
 
 
 GUIDE_TYPE = Enum(
-    ('INTERNATIONAL', 0, u'国际导游'),
-    ('DRIVER', 1, u'司机导游'),
-    ('ATTRACTION', 2, u'景点导游'),
-    ('TRANSLATOR', 3, u'翻译'),
-    ('LEADER', 4, u'领队'),
+    ('INTERNATIONAL', 1, u'国际导游'),
+    ('DRIVER', 2, u'司机导游'),
+    ('ATTRACTION', 3, u'景点导游'),
+    ('TRANSLATOR', 4, u'翻译'),
+    ('LEADER', 5, u'领队'),
 )
 
 GENDER = Enum(
@@ -55,19 +55,21 @@ class CreateTourGuideApiParser(BaseRequestParser):
     start_work = Argument('start_work', type=int, nullable=False, required=True)
     first_language = Argument('first_language', nullable=False, required=True)
     first_language_level = Argument(
-        'first_language_level', choices=LANGUAGE_LEVEL.values(), nullable=False, required=True)
+        'first_language_level', type=int, choices=LANGUAGE_LEVEL.values(),
+        nullable=False, required=True)
     second_language = Argument('second_language', nullable=False, required=True)
     second_language_level = Argument(
-        'second_language_level', choices=LANGUAGE_LEVEL.values(), nullable=False, required=True)
+        'second_language_level', type=int, choices=LANGUAGE_LEVEL.values(),
+        nullable=False, required=True)
     third_language = Argument('third_language', required=False)
     third_language_level = Argument(
-        'third_language_level', choices=LANGUAGE_LEVEL.values(), required=False)
+        'third_language_level', type=int, choices=LANGUAGE_LEVEL.values(), required=False)
     certificate_type = Argument(
         'certificate_type', type=int, choices=CERTIFICATE_TYPE.values(), required=True)
     certificate_number = Argument('certificate_number', nullable=False, required=True)
     tour_guide_number = Argument('tour_guide_number', nullable=False, required=True)
     passport_country = Argument('passport_country', nullable=False, required=True)
-    passport_type = Argument('passport_type', choices=PASSPORT_TYPE.values(), required=True)
+    passport_type = Argument('passport_type', type=int, choices=PASSPORT_TYPE.values(), required=True)
     passport_note = Argument('passport_note', required=False)
     telephone_one=Argument('telephone_one', nullable=False, required=True)
     telephone_two=Argument('telephone_two', required=False)

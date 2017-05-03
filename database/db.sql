@@ -59,15 +59,17 @@ CREATE TABLE `city` (
   `name` varchar(20) NOT NULL,
   `name_en` varchar(40) NOT NULL,
   `country_id` int(11) NOT NULL,
+  `abbreviation` varchar(3) NOT NULL,
+  `note` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
-  KEY `ix_updated_at` (`updated_at`),
-  KEY `ix_name_en` (`name_en`),
   KEY `ix_country_id` (`country_id`),
   KEY `ix_created_at` (`created_at`),
-  KEY `ix_name` (`name`)
+  KEY `ix_name` (`name`),
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_name_en` (`name_en`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -84,13 +86,18 @@ CREATE TABLE `country` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `name` varchar(20) NOT NULL,
   `name_en` varchar(40) NOT NULL,
+  `nationality` varchar(30) NOT NULL,
+  `language` varchar(20) NOT NULL,
+  `area_code` varchar(8) NOT NULL,
+  `country_code` varchar(10) NOT NULL,
+  `note` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
+  KEY `ix_name_en` (`name_en`),
   KEY `ix_created_at` (`created_at`),
   KEY `ix_updated_at` (`updated_at`),
-  KEY `ix_name_en` (`name_en`),
   KEY `ix_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -541,4 +548,4 @@ CREATE TABLE `vehicle_user_account` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-03 15:22:34
+-- Dump completed on 2017-05-03 16:07:48
