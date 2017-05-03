@@ -16,7 +16,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 from ..util import Enum
 from . import Base, DBSession
-from .mixins import BaseMixin
+from .mixins import BaseMixin, AccountMixin
 from .country import Country, City
 from .user import User
 from ..exc import (
@@ -109,25 +109,13 @@ class VehicleCompany(Base, BaseMixin):
         return vehicle_company
 
 
-class VehicleAccount(Base, BaseMixin):
+class VehicleAccount(Base, AccountMixin):
     """车辆公司账单结算账号"""
     __tablename__ = 'vehicle_company_account'
-    CURRENCY = Enum(
-        ('USD', 1, u'美元'),
-        ('CNY', 2, u'人民币'),
-        ('LKR', 3, u'斯里兰卡卢布'),
-    )
     ACCOUNT_TYPE = Enum(
         ('COMPANY', 1, u'公司账号'),
         ('PERSSON', 2, u'个人账号'),
     )
-
-    currency = Column(TINYINT, nullable=False, doc=u'结算币种')
-    bank_name = Column(String(30), nullable=False, doc=u'银行名称')
-    deposit_bank = Column(String(30), nullable=False, doc=u'开户行')
-    payee = Column(String(20), nullable=False, doc=u'收款人')
-    account = Column(String(20), unique=True, nullable=False, doc=u'账号')
-    note = Column(String(40), nullable=False, doc=u'备注')
 
     account_type = Column(
         TINYINT, nullable=False, default=ACCOUNT_TYPE.COMPANY, doc=u'账号类型')

@@ -5,10 +5,18 @@ from sqlalchemy import (
     DateTime,
     text,
     Index,
+    TINYINT,
+    String,
 )
+from sqlalchemy.orm import validates
 from sqlalchemy.ext.declarative import declared_attr
 
+from . import DBSession
 from ..util import Enum
+from ..exc import (
+    raise_error_json,
+    InvalidateError,
+)
 
 
 class BaseMixin(object):
@@ -31,3 +39,31 @@ class BaseMixin(object):
                         server_default=text(
                             'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
                         ))
+
+
+class AccountMixin(BaseMixin):
+    CURRENCY = Enum(
+        ('USD', 1, u'美元'),
+        ('CNY', 2, u'人民币'),
+        ('LKR', 3, u'斯里兰卡卢布'),
+    )
+
+    currency = Column(TINYINT, nullable=False, doc=u'结算币种')
+    bank_name = Column(String(30), nullable=False, doc=u'银行名称')
+    deposit_bank = Column(String(30), nullable=False, doc=u'开户行')
+    payee = Column(String(20), nullable=False, doc=u'收款人')
+    account = Column(String(20), unique=True, nullable=False, doc=u'账号')
+    note = Column(String(40), nullable=False, doc=u'备注')
+
+    @validates('currency')
+    def _validate_currency(self, key, currency):
+        if currency not in self.CURRENCY.values():
+            raise_error_json(
+                InvalidateError(args=('currency', currency,)))
+        return currency
+
+    @classmethod
+    def get_by_id(cls, id):
+        session = DBSession()
+        account = session.query(cls).filter(cls.id==id).first()
+        return account
