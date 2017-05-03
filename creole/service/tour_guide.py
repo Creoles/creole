@@ -23,18 +23,25 @@ class TourGuideService(BaseService):
         return cls._get_db_obj_data_dict(tour_guide)
 
     @classmethod
-    def create_tour_guide(cls, guide_type, country_id, name, name_en, gender, birthday,
-                          start_work, language, certificate_type, certificate_number,
-                          tour_guide_number, telephone, image_hash,
-                          passport_country=None, intro=None):
+    def create_tour_guide(cls, guide_type, country_id, name, name_en, nickname_en,
+                          gender, birthday, start_work, first_language, first_language_level,
+                          second_language, second_language_level, certificate_type,
+                          certificate_number, tour_guide_number, passport_country,
+                          passport_type, passport_note, telephone_one, image_hash,
+                          third_language=None, third_language_level=None,
+                          intro=None, telephone_two=None):
         session = DBSession()
         TourGuide.create(
             guide_type=guide_type, country_id=country_id, name=name,
-            name_en=name_en, gender=gender, birthday=birthday,
-            start_work=start_work, language=language,
-            certificate_type=certificate_type, certificate_number=certificate_number,
-            tour_guide_number=tour_guide_number, passport_country=passport_country,
-            telephone=telephone, intro=intro, image_hash=image_hash)
+            name_en=name_en, nickname_en=nickname_en, gender=gender,
+            birthday=birthday, start_work=start_work, first_language=first_language,
+            first_language_level=first_language_level, second_language=second_language,
+            second_language_level=second_language_level, third_language=third_language,
+            third_language_level=third_language_level, certificate_type=certificate_type,
+            certificate_number=certificate_number, tour_guide_number=tour_guide_number,
+            passport_country=passport_country, passport_type=passport_type,
+            passport_note=passport_note, telephone_one=telephone_one,
+            telephone_two=telephone_two, image_hash=image_hash, intro=intro)
         try:
             session.commit()
         except SQLAlchemyError as e:
