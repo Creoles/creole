@@ -65,11 +65,11 @@ CREATE TABLE `city` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
+  KEY `ix_name_en` (`name_en`),
   KEY `ix_country_id` (`country_id`),
   KEY `ix_created_at` (`created_at`),
   KEY `ix_name` (`name`),
-  KEY `ix_updated_at` (`updated_at`),
-  KEY `ix_name_en` (`name_en`)
+  KEY `ix_updated_at` (`updated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -254,7 +254,7 @@ CREATE TABLE `shop_company` (
   KEY `ix_updated_at` (`updated_at`),
   KEY `ix_name_en` (`name_en`),
   KEY `ix_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -314,14 +314,14 @@ CREATE TABLE `tour_guide` (
   `intro` varchar(256) DEFAULT NULL,
   `image_hash` varchar(128) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `ix_country_id` (`country_id`),
+  KEY `ix_gender` (`gender`),
+  KEY `ix_name_en` (`name_en`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `idx_country_id_gender` (`country_id`,`gender`),
   KEY `idx_name_name_en` (`name`,`name_en`),
   KEY `ix_updated_at` (`updated_at`),
-  KEY `ix_gender` (`gender`),
-  KEY `ix_name` (`name`),
-  KEY `idx_country_id_gender` (`country_id`,`gender`),
-  KEY `ix_created_at` (`created_at`),
-  KEY `ix_name_en` (`name_en`)
+  KEY `ix_country_id` (`country_id`),
+  KEY `ix_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -341,13 +341,14 @@ CREATE TABLE `tour_guide_account` (
   `deposit_bank` varchar(30) NOT NULL,
   `payee` varchar(20) NOT NULL,
   `account` varchar(20) NOT NULL,
+  `swift_code` varchar(20) DEFAULT NULL,
   `note` varchar(40) NOT NULL,
   `tour_guide_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `account` (`account`),
   KEY `ix_tour_guide_id` (`tour_guide_id`),
-  KEY `ix_created_at` (`created_at`),
-  KEY `ix_updated_at` (`updated_at`)
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -370,8 +371,8 @@ CREATE TABLE `tour_guide_fee` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `tour_guide_id` (`tour_guide_id`),
   KEY `ix_tour_guide_id` (`tour_guide_id`),
-  KEY `ix_updated_at` (`updated_at`),
-  KEY `ix_created_at` (`created_at`)
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -399,12 +400,12 @@ CREATE TABLE `user` (
   UNIQUE KEY `user_name` (`user_name`),
   UNIQUE KEY `uuid` (`uuid`),
   KEY `ix_role` (`role`),
-  KEY `ix_updated_at` (`updated_at`),
   KEY `ix_customer_name` (`customer_name`),
+  KEY `ix_session_id` (`session_id`),
   KEY `ix_user_name` (`user_name`),
   KEY `ix_uuid` (`uuid`),
   KEY `ix_created_at` (`created_at`),
-  KEY `ix_session_id` (`session_id`)
+  KEY `ix_updated_at` (`updated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -428,16 +429,17 @@ CREATE TABLE `vehicle` (
   `start_use` varchar(4) NOT NULL,
   `license` varchar(10) NOT NULL,
   `register_number` varchar(20) NOT NULL,
+  `insurance_number` varchar(30) NOT NULL,
   `contact` varchar(16) NOT NULL,
   `telephone` varchar(20) NOT NULL,
   `unit_price` float NOT NULL,
   PRIMARY KEY (`id`),
+  KEY `ix_vehicle_type` (`vehicle_type`),
+  KEY `ix_updated_at` (`updated_at`),
   KEY `ix_created_at` (`created_at`),
   KEY `ix_country_id` (`country_id`),
   KEY `idx_country_id_city_id_company_id_vehicle_type_seat` (`country_id`,`city_id`,`company_id`,`vehicle_type`,`seat`),
   KEY `ix_city_id` (`city_id`),
-  KEY `ix_updated_at` (`updated_at`),
-  KEY `ix_vehicle_type` (`vehicle_type`),
   KEY `ix_company_id` (`company_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -459,9 +461,9 @@ CREATE TABLE `vehicle_company` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
+  KEY `ix_name_en` (`name_en`),
   KEY `ix_updated_at` (`updated_at`),
   KEY `ix_created_at` (`created_at`),
-  KEY `ix_name_en` (`name_en`),
   KEY `ix_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -482,6 +484,7 @@ CREATE TABLE `vehicle_company_account` (
   `deposit_bank` varchar(30) NOT NULL,
   `payee` varchar(20) NOT NULL,
   `account` varchar(20) NOT NULL,
+  `swift_code` varchar(20) DEFAULT NULL,
   `note` varchar(40) NOT NULL,
   `account_type` tinyint(4) NOT NULL,
   `owner_id` int(11) NOT NULL,
@@ -508,8 +511,8 @@ CREATE TABLE `vehicle_image` (
   `vehicle_id` int(11) NOT NULL,
   `image_hash` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `ix_updated_at` (`updated_at`),
-  KEY `ix_created_at` (`created_at`)
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -548,4 +551,4 @@ CREATE TABLE `vehicle_user_account` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-03 16:07:48
+-- Dump completed on 2017-05-04 12:12:47
