@@ -42,6 +42,7 @@ class BaseCreoleErrCode(object):
     RESTAURANT_NOT_EXIST = 3052
     RESTAURANT_MEAL_REACH_LIMIT = 3053
     RESTAURANT_MEAL_TYPE_NOT_EXIST = 3054
+    RESTAURANT_ACCOUNT_NOT_EXIST = 3055
 
     # 导游
     TOUR_GUIDE_NOT_EXIST = 3060
@@ -90,6 +91,7 @@ TRANSLATIONS = {
     CreoleErrCode.RESTAURANT_NOT_EXIST: u'restaurant do not exist',
     CreoleErrCode.RESTAURANT_MEAL_REACH_LIMIT: u'the meal type of the restaurant has reach the limit.',
     CreoleErrCode.RESTAURANT_MEAL_TYPE_NOT_EXIST: u'the type of the meal dose not exist',
+    CreoleErrCode.RESTAURANT_ACCOUNT_NOT_EXIST: u'the account of restaurant dose not exist',
 
     CreoleErrCode.TOUR_GUIDE_NOT_EXIST: u'the tour guide do not exist',
     CreoleErrCode.TOUR_GUIDE_ID_DUPLICATED: u'the tour guide id duplicated',

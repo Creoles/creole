@@ -4,8 +4,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from .base import BaseService
 from ..model import DBSession
 from ..model.restaurant import (
-    RestaurantCompany,
     Restaurant,
+    RestaurantAccount,
     Meal,
 )
 from ..exc import (
@@ -15,61 +15,6 @@ from ..exc import (
     CreoleErrCode,
     ParameterError,
 )
-
-
-class RestaurantCompanyService(BaseService):
-    @classmethod
-    def get_by_id(cls, id):
-        company_info = {}
-        company = RestaurantCompany.get_by_id(id)
-        restaurant_list = Restaurant.get_by_company_id(id)
-        if not company:
-            return company_info
-        company_info['id'] = company.id
-        company_info['name'] = company.name
-        company_info['name_en'] = company.name_en
-        company_info['restaurant_list'] = \
-            [cls._get_db_obj_data_dict(item) for item in restaurant_list]
-        return company_info
-
-    @classmethod
-    def delete_restaurant_company_by_id(cls, id):
-        """删除餐饮公司, 有三个步骤:
-        1. 删除公司
-        2. 删除公司名下的所有餐厅
-        3. 删除所有餐厅对应的套餐
-        """
-        session = DBSession()
-        # 删除公司
-        RestaurantCompany.delete(id)
-        restaurant_list = Restaurant.get_by_company_id(id)
-        for restaurant in restaurant_list:
-            # 删除餐厅对应的套餐
-            meal_list = Meal.get_by_restaurant_id(restaurant.id)
-            for meal in meal_list:
-                session.delete(meal)
-            # 删除公司下的餐厅
-            session.delete(restaurant)
-        try:
-            session.flush()
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
-
-    @classmethod
-    def update_restaurant_company_by_id(cls, id, **kwargs):
-        return RestaurantCompany.update(id, **kwargs)
-
-    @classmethod
-    def create_restaurant_company(cls, name, name_en):
-        return RestaurantCompany.create(name=name, name_en=name_en)
-
-    @classmethod
-    def search_company(cls, name=None, name_en=None, is_all=False):
-        restaurant_company = \
-            RestaurantCompany.search(name=name, name_en=name_en, is_all=is_all)
-        return [cls._get_db_obj_data_dict(item) for item in restaurant_company]
 
 
 class RestaurantService(BaseService):
@@ -103,32 +48,97 @@ class RestaurantService(BaseService):
         return Restaurant.update(id, **kwargs)
 
     @classmethod
-    def create_restaurant(cls, name, name_en, restaurant_type,
-                          country_id, city_id, company_id, address,
-                          contact, telephone, currency, bank_name,
-                          deposit_bank, payee, account, note=None,
-                          intro_cn=None, intro_en=None):
+    def create_restaurant(cls, name, name_en, nickname_en, restaurant_type,
+               country_id, city_id, address, environ_level,
+               taste_level, service_level, cost_level,
+               cooperation_level, recommend_level, contact_one,
+               position_one, telephone_one, email_one, contact_two,
+               position_two, email_two, telephone_two, contact_three=None,
+               position_three=None, email_three=None, telephone_three=None,
+               standard_meal_intro_cn=None, standard_meal_intro_en=None,
+               upgrade_meal_intro_cn=None, upgrade_meal_intro_en=None,
+               luxury_meal_intro_cn=None, luxury_meal_intro_en=None,
+               intro_cn=None, intro_en=None):
         return Restaurant.create(
-            name=name, name_en=name_en, restaurant_type=restaurant_type,
-            country_id=country_id, city_id=city_id, company_id=company_id,
-            address=address, contact=contact, telephone=telephone,
-            currency=currency, bank_name=bank_name, deposit_bank=deposit_bank,
-            payee=payee, account=account, note=note,
+            name=name, name_en=name_en, nickname_en=nickname_en,
+            restaurant_type=restaurant_type, country_id=country_id,
+            city_id=city_id, address=address, environ_level=environ_level,
+            taste_level=taste_level, service_level=service_level,
+            cost_level=cost_level, cooperation_level=cooperation_level,
+            recommend_level=recommend_level, contact_one=contact_one,
+            position_one=position_one, telephone_one=telephone_one,
+            email_one=email_one, contact_two=contact_two,
+            position_two=position_two, email_two=email_two,
+            telephone_two=telephone_two, contact_three=contact_three,
+            position_three=position_three, email_three=email_three,
+            telephone_three=telephone_three,
+            standard_meal_intro_cn=standard_meal_intro_cn,
+            standard_meal_intro_en=standard_meal_intro_en,
+            upgrade_meal_intro_cn=upgrade_meal_intro_cn,
+            upgrade_meal_intro_en=upgrade_meal_intro_en,
+            luxury_meal_intro_cn=luxury_meal_intro_cn,
+            luxury_meal_intro_en=luxury_meal_intro_en,
             intro_cn=intro_cn, intro_en=intro_en
         )
 
     @classmethod
     def search_restaurant(cls, country_id=None, city_id=None,
-                          company_id=None, restaurant_type=None,
-                          page=1, number=20):
+                          restaurant_type=None, page=1, number=20):
         raw_data = []
         restaurant_list, total = Restaurant.search(
             country_id=country_id, city_id=city_id,
-            company_id=company_id, restaurant_type=restaurant_type,
+            restaurant_type=restaurant_type,
             page=page, number=number)
         for restaurant in restaurant_list:
             raw_data.append(cls._get_db_obj_data_dict(restaurant))
         return raw_data, total
+
+
+class RestaurantAccountService(BaseService):
+    @classmethod
+    def get_by_id(cls, id):
+        account = RestaurantAccount.get_by_id(id)
+        return cls._get_db_obj_data_dict(account)
+
+    @classmethod
+    def get_by_restaurant_id(cls, restaurant_id):
+        account = RestaurantAccount.get_by_restaurant_id(restaurant_id)
+        return cls._get_db_obj_data_dict(account)
+
+    @classmethod
+    def create_account(cls, restaurant_id, currency, bank_name,
+                       deposit_bank, payee, account,
+                       swift_code=None, note=None):
+        session = DBSession()
+        try:
+            RestaurantAccount.create(
+                restaurant_id=restaurant_id, currency=currency,
+                bank_name=bank_name, deposit_bank=deposit_bank,
+                payee=payee, account=account, note=note,
+                swift_code=swift_code)
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def delete_account_by_id(cls, id):
+        session = DBSession()
+        RestaurantAccount.delete(restaurant_id=id)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def update_account_by_id(cls, id, **kwargs):
+        session = DBSession()
+        RestaurantAccount.update(id, **kwargs)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
 
 class MealService(BaseService):

@@ -10,12 +10,12 @@ from sqlalchemy import (
 from sqlalchemy.dialects.mysql import (
     TINYINT,
 )
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.declarative import declared_attr
 
 from . import Base, DBSession
-from .mixins import BaseMixin
+from .mixins import AccountMixin, BaseMixin
 from ..util import Enum
 from .country import Country, City
 from ..exc import (
@@ -116,131 +116,100 @@ class Meal(Base, BaseMixin):
         session.flush()
 
 
-class RestaurantCompany(Base, BaseMixin):
-    __tablename__ = 'restaurant_company'
-    name = Column(Unicode(30), unique=True, nullable=False, doc=u'中文名称')
-    name_en = Column(String(30), unique=True, nullable=False, doc=u'英文名称')
-
-    @declared_attr
-    def __table_args__(self):
-        table_args = (
-            Index('idx_name_name_en', 'name', 'name_en', unique=True),
-            Index('ix_name', 'name'),
-            Index('ix_name_en', 'name_en'),
-        )
-        return table_args + BaseMixin.__table_args__
-
-    @classmethod
-    def get_by_id(cls, id):
-        session = DBSession()
-        company = session.query(cls).filter(cls.id==id).first()
-        return company
-
-    @classmethod
-    def delete(cls, id):
-        session = DBSession()
-        company = session.query(cls).filter(cls.id==id).first()
-        if not company:
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.RESTAURANT_COMPANY_NOT_EXIST))
-        session.delete(company)
-        session.flush()
-
-    @classmethod
-    def create(cls, name, name_en):
-        session = DBSession()
-        company = cls(name=name, name_en=name_en)
-        session.add(company)
-        try:
-            session.commit()
-        except IntegrityError as e:
-            session.rollback()
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.RESTAURANT_COMPANY_DUPLICATED))
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
-
-    @classmethod
-    def update(cls, id, **kwargs):
-        session = DBSession()
-        company = cls.get_by_id(id)
-        if not company:
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.RESTAURANT_COMPANY_NOT_EXIST))
-        for k, v in kwargs.iteritems():
-            setattr(company, k, v)
-        try:
-            session.merge(company)
-            session.commit()
-        except IntegrityError as e:
-            session.rollback()
-            raise_error_json(
-                ClientError(errcode=CreoleErrCode.RESTAURANT_COMPANY_DUPLICATED))
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
-
-    @classmethod
-    def search(cls, name=None, name_en=None, is_all=False):
-        session = DBSession()
-        restaurant_company = None
-        query = session.query(cls)
-        if is_all:
-            restaurant_company = query.all()
-        elif name:
-            restaurant_company = query.filter(cls.name==name).first()
-        elif name_en:
-            restaurant_company = query.filter(cls.name_en==name_en).first()
-        return restaurant_company
-
-
 class Restaurant(Base, BaseMixin):
     __tablename__ = 'restaurant'
 
     TYPE = Enum(
         ('CHINESE', 1, u'中餐'),
-        ('WESTERN', 2, u'西餐'),
-        ('SPECIAL', 3, u'特色'),
-        ('GENERAL', 4, u'综合'),
+        ('SRILANKA', 2, u'斯里兰卡'),
+        ('WESTERN', 3, u'西餐'),
+        ('SPECIAL', 4, u'综合'),
+        ('GENERAL', 5, u'其他'),
     )
-
-    CURRENCY = Enum(
-        ('USD', 1, u'美元'),
-        ('CNY', 2, u'人民币'),
-        ('LKR', 3, u'斯里兰卡卢布'),
+    ENVIRON_LEVEL = Enum(
+        ('EXCELLENT', 1, u'卓越'),
+        ('VERY_GOOD', 2, u'非常好'),
+        ('GOOD', 3, u'好'),
+        ('NORMAL', 4, u'一般'),
+        ('POOR', 5, u'差'),
+    )
+    TASTE_LEVEL = Enum(
+        ('EXCELLENT', 1, u'卓越'),
+        ('VERY_GOOD', 2, u'非常好'),
+        ('GOOD', 3, u'好'),
+        ('NORMAL', 4, u'一般'),
+        ('POOR', 5, u'差'),
+    )
+    SERVICE_LEVEL = Enum(
+        ('EXCELLENT', 1, u'卓越'),
+        ('VERY_GOOD', 2, u'非常好'),
+        ('GOOD', 3, u'好'),
+        ('NORMAL', 4, u'一般'),
+        ('POOR', 5, u'差'),
+    )
+    COST_LEVEL = Enum(
+        ('LUXURY', 1, u'昂贵'),
+        ('NORMAL', 2, u'一般'),
+        ('BUDGET', 3, u'便宜'),
+    )
+    COOPERATION_LEVEL = Enum(
+        ('KEY', 1, u'核心'),
+        ('NORMAL', 2, u'一般'),
+    )
+    RECOMMEND_LEVEL = Enum(
+        ('EXCELLENT', 1, u'卓越'),
+        ('VERY_GOOD', 2, u'非常好'),
+        ('GOOD', 3, u'好'),
+        ('NORMAL', 4, u'一般'),
+        ('POOR', 5, u'差'),
     )
 
     name = Column(Unicode(30), unique=True, nullable=False, doc=u'中文名称')
     name_en = Column(String(30), unique=True, nullable=False, doc=u'英文名称')
+    nickname_en = Column(String(20), unique=True, nullable=False, doc=u'英文名简称')
     restaurant_type = Column(TINYINT, nullable=False, doc=u'餐厅类型')
     country_id = Column(Integer, nullable=False, doc=u'国家id')
     city_id = Column(Integer, nullable=False, doc=u'城市id')
-    company_id = Column(Integer, nullable=False, doc=u'公司id')
-    address = Column(String(80), nullable=False, doc=u'餐厅地址')
-    contact = Column(Unicode(16), nullable=False, doc=u'联系人')
-    telephone = Column(String(20), nullable=False, doc=u'联系电话')
+    address = Column(String(100), nullable=False, doc=u'餐厅地址')
     intro_cn = Column(Unicode(128), nullable=True, doc=u'中文介绍')
     intro_en = Column(String(128), nullable=True, doc=u'英文介绍')
+    environ_level = Column(TINYINT, nullable=False, doc=u'环境等级')
+    taste_level = Column(TINYINT, nullable=False, doc=u'口味等级')
+    service_level = Column(TINYINT, nullable=False, doc=u'服务等级')
+    cost_level = Column(TINYINT, nullable=False, doc=u'消费等级')
+    cooperation_level = Column(TINYINT, nullable=False, doc=u'合作程度')
+    recommend_level = Column(TINYINT, nullable=False, doc=u'推荐程度')
 
-    # 收款
-    currency = Column(TINYINT, nullable=False, doc=u'结算币种')
-    bank_name = Column(String(30), nullable=False, doc=u'银行名称')
-    deposit_bank = Column(String(30), nullable=False, doc=u'开户行')
-    payee = Column(String(20), nullable=False, doc=u'收款人')
-    account = Column(String(20), unique=True, nullable=False, doc=u'账号')
-    note = Column(String(40), nullable=False, doc=u'备注')
+    # 联系人信息
+    contact_one = Column(String(20), nullable=False, doc=u'联系人')
+    position_one = Column(String(20), nullable=False, doc=u'职位')
+    telephone_one = Column(String(20), nullable=False, doc=u'联系电话')
+    email_one = Column(String(30), nullable=False, doc=u'邮箱')
+    contact_two = Column(String(20), nullable=False, doc=u'联系人')
+    position_two = Column(String(20), nullable=False, doc=u'职位')
+    telephone_two = Column(String(20), nullable=False, doc=u'联系电话')
+    email_two = Column(String(30), nullable=False, doc=u'邮箱')
+    contact_three = Column(String(20), nullable=True, doc=u'联系人')
+    position_three = Column(String(20), nullable=True, doc=u'职位')
+    telephone_three = Column(String(20), nullable=True, doc=u'联系电话')
+    email_three = Column(String(30), nullable=True, doc=u'邮箱')
+
+    # 餐厅套餐介绍
+    standard_meal_intro_cn = Column(Unicode(500), nullable=True, doc=u'标准餐中文介绍')
+    standard_meal_intro_en = Column(String(800), nullable=True, doc=u'标准餐英文介绍')
+    upgrade_meal_intro_cn = Column(Unicode(500), nullable=True, doc=u'升级餐中文介绍')
+    upgrade_meal_intro_en = Column(String(800), nullable=True, doc=u'升级餐英文介绍')
+    luxury_meal_intro_cn = Column(Unicode(500), nullable=True, doc=u'豪华餐中文介绍')
+    luxury_meal_intro_en = Column(String(800), nullable=True, doc=u'豪华餐英文介绍')
 
     @declared_attr
     def __table_args__(self):
         table_args = (
             Index('ix_name', 'name'),
             Index('ix_name_en', 'name_en'),
-            Index('ix_company_id', 'company_id'),
             Index('ix_country_id', 'country_id'),
             Index('ix_city_id', 'city_id'),
-            Index('idx_city_id_company_id', 'city_id', 'company_id'),
-            Index('idx_country_id_company_id', 'country_id', 'company_id'),
+            Index('ix_restaurant_type', 'restaurant_type'),
         )
         return table_args + BaseMixin.__table_args__
 
@@ -258,18 +227,41 @@ class Restaurant(Base, BaseMixin):
             raise_error_json(InvalidateError(args=('restaurant_type', restaurant_type)))
         return restaurant_type
 
-    @validates('currency')
-    def _validate_currency(self, key, currency):
-        if currency not in self.CURRENCY.values():
-            raise_error_json(InvalidateError(args=('currency', currency)))
-        return currency
+    @validates('environ_level')
+    def _validate_environ_level(self, key, environ_level):
+        if environ_level not in self.ENVIRON_LEVEL.values():
+            raise_error_json(InvalidateError(args=('environ_level', environ_level)))
+        return environ_level
 
-    @validates('company_id')
-    def _validate_company_id(self, key, company_id):
-        company = RestaurantCompany.get_by_id(company_id)
-        if not company:
-            raise_error_json(InvalidateError(args=('company_id', company_id)))
-        return company_id
+    @validates('taste_level')
+    def _validate_taste_level(self, key, taste_level):
+        if taste_level not in self.TASTE_LEVEL.values():
+            raise_error_json(InvalidateError(args=('taste_level', taste_level)))
+        return taste_level
+
+    @validates('service_level')
+    def _validate_service_level(self, key, service_level):
+        if service_level not in self.SERVICE_LEVEL.values():
+            raise_error_json(InvalidateError(args=('service_level', service_level)))
+        return service_level
+
+    @validates('cost_level')
+    def _validate_cost_level(self, key, cost_level):
+        if cost_level not in self.COST_LEVEL.values():
+            raise_error_json(InvalidateError(args=('cost_level', cost_level)))
+        return cost_level
+
+    @validates('cooperation_level')
+    def _validate_cooperation_level(self, key, cooperation_level):
+        if cooperation_level not in self.COOPERATION_LEVEL.values():
+            raise_error_json(InvalidateError(args=('cooperation_level', cooperation_level)))
+        return cooperation_level
+
+    @validates('recommend_level')
+    def _validate_recommend_level(self, key, recommend_level):
+        if recommend_level not in self.RECOMMEND_LEVEL.values():
+            raise_error_json(InvalidateError(args=('recommend_level', recommend_level)))
+        return recommend_level
 
     @classmethod
     def _validate_country_and_city(cls, country_id, city_id):
@@ -286,13 +278,6 @@ class Restaurant(Base, BaseMixin):
         return restaurant
 
     @classmethod
-    def get_by_company_id(cls, company_id):
-        session = DBSession()
-        restaurant_list = session.query(cls).filter(
-            cls.company_id==company_id).all()
-        return restaurant_list
-
-    @classmethod
     def delete(cls, id):
         session = DBSession()
         restaurant = session.query(cls).filter(cls.id==id).first()
@@ -303,19 +288,38 @@ class Restaurant(Base, BaseMixin):
         session.flush()
 
     @classmethod
-    def create(cls, name, name_en, restaurant_type,
-               country_id, city_id, company_id, address,
-               contact, telephone, currency, bank_name,
-               deposit_bank, payee, account, note=None,
+    def create(cls, name, name_en, nickname_en, restaurant_type,
+               country_id, city_id, address, environ_level,
+               taste_level, service_level, cost_level,
+               cooperation_level, recommend_level, contact_one,
+               position_one, telephone_one, email_one, contact_two,
+               position_two, email_two, telephone_two, contact_three=None,
+               position_three=None, email_three=None, telephone_three=None,
+               standard_meal_intro_cn=None, standard_meal_intro_en=None,
+               upgrade_meal_intro_cn=None, upgrade_meal_intro_en=None,
+               luxury_meal_intro_cn=None, luxury_meal_intro_en=None,
                intro_cn=None, intro_en=None):
         cls._validate_country_and_city(country_id, city_id)
         session = DBSession()
         restaurant = cls(
-            name=name, name_en=name_en, restaurant_type=restaurant_type,
-            country_id=country_id, city_id=city_id, company_id=company_id,
-            address=address, contact=contact, telephone=telephone,
-            currency=currency, bank_name=bank_name, deposit_bank=deposit_bank,
-            payee=payee, account=account, note=note,
+            name=name, name_en=name_en, nickname_en=nickname_en,
+            restaurant_type=restaurant_type, country_id=country_id,
+            city_id=city_id, address=address, environ_level=environ_level,
+            taste_level=taste_level, service_level=service_level,
+            cost_level=cost_level, cooperation_level=cooperation_level,
+            recommend_level=recommend_level, contact_one=contact_one,
+            position_one=position_one, telephone_one=telephone_one,
+            email_one=email_one, contact_two=contact_two,
+            position_two=position_two, email_two=email_two,
+            telephone_two=telephone_two, contact_three=contact_three,
+            position_three=position_three, email_three=email_three,
+            telephone_three=telephone_three,
+            standard_meal_intro_cn=standard_meal_intro_cn,
+            standard_meal_intro_en=standard_meal_intro_en,
+            upgrade_meal_intro_cn=upgrade_meal_intro_cn,
+            upgrade_meal_intro_en=upgrade_meal_intro_en,
+            luxury_meal_intro_cn=luxury_meal_intro_cn,
+            luxury_meal_intro_en=luxury_meal_intro_en,
             intro_cn=intro_cn, intro_en=intro_en
         )
         try:
@@ -346,7 +350,7 @@ class Restaurant(Base, BaseMixin):
 
     @classmethod
     def search(cls, country_id=None, city_id=None,
-               company_id=None, restaurant_type=None,
+               restaurant_type=None,
                page=1, number=20):
         session = DBSession()
         query = session.query(cls)
@@ -355,11 +359,75 @@ class Restaurant(Base, BaseMixin):
             query = query.filter(cls.city_id==city_id)
         elif country_id:
             query = query.filter(cls.country_id==country_id)
-        if company_id:
-            query = query.filter(cls.company_id==company_id)
         if restaurant_type:
             query = query.filter(cls.restaurant_type==restaurant_type)
         if page == 1:
             total = query.count()
         shop_list = query.offset((page - 1) * number).limit(number).all()
         return shop_list, total
+
+
+class RestaurantAccount(AccountMixin):
+    __tablename__ = 'restaurant_account'
+
+    restaurant_id = Column(Integer, nullable=False, doc=u'餐厅id')
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_restaurant_id', 'restaurant_id'),
+        )
+        return table_args + BaseMixin.__table_args__
+
+    @validates('restaurant_id')
+    def _validate_restaurant_id(self, key, restaurant_id):
+        tour_guide = DBSession().query(Restaurant).filter(
+            Restaurant.id==restaurant_id).first()
+        if not tour_guide:
+            raise_error_json(InvalidateError(args=('restaurant_id', restaurant_id,)))
+        return restaurant_id
+
+    @classmethod
+    def get_by_restaurant_id(cls, restaurant_id):
+        account = DBSession().query(cls).filter(
+            cls.restaurant_id==restaurant_id).all()
+        return account
+
+    @classmethod
+    def create(cls, restaurant_id, currency, bank_name,
+               deposit_bank, payee, account, swift_code=None,
+               note=None):
+        session = DBSession()
+        account = cls(
+            restaurant_id=restaurant_id, currency=currency,
+            bank_name=bank_name, deposit_bank=deposit_bank,
+            payee=payee, account=account, swift_code=swift_code,
+            note=note)
+        session.add(account)
+        session.flush()
+
+    @classmethod
+    def delete(cls, id=None, restaurant_id=None):
+        if not (id or restaurant_id):
+            raise_error_json(InvalidateError())
+        session = DBSession()
+        if restaurant_id:
+            account = session.query(cls).filter(cls.restaurant_id==restaurant_id).first()
+        else:
+            account = session.query(cls).filter(cls.id==id).first()
+        if not account:
+            return
+        session.delete(account)
+        session.flush()
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        session = DBSession()
+        account = cls.get_by_id(id)
+        if not account:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.RESTAURANT_ACCOUNT_NOT_EXIST))
+        for k, v in kwargs.iteritems():
+            setattr(account, k, v)
+        session.merge(account)
+        session.flush()
