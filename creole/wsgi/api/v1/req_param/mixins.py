@@ -19,3 +19,19 @@ class AccountParserMixin:
     payee = Argument('payee', nullable=False, required=True, location=('json', 'form'))
     account = Argument('account', nullable=False, required=True, location=('json', 'form'))
     note = Argument('note', required=False, location=('json', 'form'))
+
+
+def dict_parser_func(param_mapping):
+    def wrapper(item_dict):
+        _item_dict = {}
+        for k, _tuple in param_mapping.iteritems():
+            _type, is_required = _tuple
+            v = item_dict.get(k, None)
+            if v is None and is_required:
+                raise ValueError('Required value: {!r}'.format(k))
+            try:
+                _item_dict[k] = _type(v)
+            except Exception:
+                raise ValueError('Invalid value: {!r}'.format(v))
+        return _item_dict
+    return wrapper

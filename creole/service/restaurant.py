@@ -106,24 +106,21 @@ class RestaurantAccountService(BaseService):
         return [cls._get_db_obj_data_dict(account) for account in account_list]
 
     @classmethod
-    def create_account(cls, restaurant_id, currency, bank_name,
-                       deposit_bank, payee, account,
-                       swift_code=None, note=None):
+    def edit_restaurant_account(cls, create_list=None,
+                                update_list=None, delete_id_list=None):
+        """编辑餐厅银行资料:
+        
+        :param create_list: 需要创建的银行资料列表, 元素为dict
+        :param update_list: 需要更新的银行资料列表, 元素为dict
+        :param delete_id_list: 需要删除的银行资料Id列表
+        """
         session = DBSession()
-        try:
-            RestaurantAccount.create(
-                restaurant_id=restaurant_id, currency=currency,
-                bank_name=bank_name, deposit_bank=deposit_bank,
-                payee=payee, account=account, note=note,
-                swift_code=swift_code)
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
-
-    @classmethod
-    def delete_account_by_id(cls, id):
-        session = DBSession()
-        RestaurantAccount.delete(restaurant_id=id)
+        if create_list:
+            cls.create_account(create_list)
+        if update_list:
+            cls.update_account(update_list)
+        if delete_id_list:
+            cls.delete_account(delete_id_list)
         try:
             session.commit()
         except SQLAlchemyError as e:
@@ -131,14 +128,31 @@ class RestaurantAccountService(BaseService):
             raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def update_account_by_id(cls, id, **kwargs):
-        session = DBSession()
-        RestaurantAccount.update(id, **kwargs)
-        try:
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
+    def create_account(cls, account_list):
+        for account_dict in account_list:
+            restaurant_id = account_dict['restaurant_id']
+            currency = account_dict['currency']
+            bank_name = account_dict['bank_name']
+            deposit_bank = account_dict['deposit_bank']
+            payee = account_dict['payee']
+            account = account_dict['account']
+            swift_code = account_dict.get('swift_code', None)
+            note = account_dict.get('note', None)
+        RestaurantAccount.create(
+            restaurant_id=restaurant_id, currency=currency,
+            bank_name=bank_name, deposit_bank=deposit_bank,
+            payee=payee, account=account, note=note,
+            swift_code=swift_code)
+
+    @classmethod
+    def delete_account(cls, delete_id_list):
+        for id in delete_id_list:
+            RestaurantAccount.delete(id)
+
+    @classmethod
+    def update_account(cls, update_list):
+        for account_dict in update_list:
+            RestaurantAccount.update(**account_dict)
 
 
 class MealService(BaseService):

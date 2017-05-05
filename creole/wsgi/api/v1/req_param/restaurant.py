@@ -3,7 +3,7 @@ from flask_restful.reqparse import Argument
 
 from creole.util import Enum
 from ...util import BaseRequestParser
-from .mixins import AccountParserMixin
+from .mixins import dict_parser_func
 
 
 # 餐厅类型
@@ -98,8 +98,38 @@ class CreateRestaurantApiParser(BaseRequestParser):
     intro_en = Argument('intro_en', required=False)
 
 
-class CreateRestaurantAccountApiParser(BaseRequestParser, AccountParserMixin):
-    restaurant_id = Argument('restaurant_id', type=int, nullable=False, required=True)
+class EditRestaurantAccountApiParser(BaseRequestParser):
+    _CREATE_PARAM_MAPPING = {
+        'restaurant_id': (int, True),  # key: (_type, is_required)
+        'currency': (int, True),
+        'bank_name': (unicode, True),
+        'deposit_bank': (unicode, True),
+        'payee': (unicode, True),
+        'account': (str, True),
+        'swift_code': (str, False),
+        'note': (unicode, False),
+    }
+    _UPDATE_PARAM_MAPPING = {
+        'id': (int, True),
+        'currency': (int, True),
+        'bank_name': (unicode, True),
+        'deposit_bank': (unicode, True),
+        'payee': (unicode, True),
+        'account': (str, True),
+        'swift_code': (str, False),
+        'note': (unicode, False),
+    }
+
+    create_account_list = Argument(
+        'create_account_list',
+        type=dict_parser_func(param_mapping=_CREATE_PARAM_MAPPING),
+        required=False, action='append')
+    update_account_list = Argument(
+        'update_account_list',
+        type=dict_parser_func(param_mapping=_UPDATE_PARAM_MAPPING),
+        required=False, action='append')
+    delete_id_list = Argument(
+        'delete_id_list', type=int, required=False, action='append')
 
 
 class SearchRestaurantApiParser(BaseRequestParser):
@@ -110,26 +140,6 @@ class SearchRestaurantApiParser(BaseRequestParser):
         choices=RESTAURANT_TYPE.values())
     page = Argument('page', type=int, default=1, required=False)
     number = Argument('number', type=int, default=20, required=False)
-
-
-def meal_dict_parser(is_create):
-    def wrapper(meal_dict):
-        _iter_item = EditMealApiParser._CREATE_PARAM_MAPPING
-        if not is_create:
-            _iter_item = EditMealApiParser._UPDATE_PARAM_MAPPING
-
-        _meal_dict = {}
-        for k, _tuple in _iter_item.iteritems():
-            _type, is_required = _tuple
-            v = meal_dict.get(k, None)
-            if v is None and is_required:
-                raise ValueError('Required value: {!r}'.format(k))
-            try:
-                _meal_dict[k] = _type(v)
-            except Exception:
-                raise ValueError('Invalid value: {!r}'.format(v))
-        return _meal_dict
-    return wrapper
 
 
 class EditMealApiParser(BaseRequestParser):
@@ -155,10 +165,12 @@ class EditMealApiParser(BaseRequestParser):
     }
 
     create_meal_list = Argument(
-        'create_meal_list', type=meal_dict_parser(is_create=True),
+        'create_meal_list',
+        type=dict_parser_func(param_mapping=_CREATE_PARAM_MAPPING),
         required=False, action='append')
     update_meal_list = Argument(
-        'update_meal_list', type=meal_dict_parser(is_create=False),
+        'update_meal_list',
+        type=dict_parser_func(param_mapping=_UPDATE_PARAM_MAPPING),
         required=False, action='append')
     delete_id_list = Argument(
         'delete_id_list', type=int, required=False, action='append')

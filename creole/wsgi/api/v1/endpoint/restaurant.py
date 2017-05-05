@@ -9,6 +9,7 @@ from ..req_param.restaurant import (
     EditMealApiParser,
     CreateRestaurantApiParser,
     SearchRestaurantApiParser,
+    EditRestaurantAccountApiParser,
 )
 from creole.exc import ClientError
 
@@ -75,41 +76,28 @@ class SearchRestaurantApi(Resource):
 
 
 class RestaurantAccountApi(Resource):
-    meta = {
-        'args_parser_dict': {
-            'put': CreateRestaurantApiParser,
-        }
-    }
-
-    def get(self, id):
-        account = RestaurantAccountService.get_by_restaurant_id(id)
+    def get(self, restaurant_id):
+        account = RestaurantAccountService.get_by_restaurant_id(restaurant_id)
         return api_response(data=account)
 
-    def delete(self, id):
-        try:
-            RestaurantAccountService.delete_account_by_id(id)
-        except ClientError as e:
-            return api_response(code=e.errcode, message=e.msg)
-        return api_response()
 
-    def put(self, id):
-        try:
-            RestaurantAccountService.update_account_by_id(id, **self.parsed_data)
-        except ClientError as e:
-            return api_response(code=e.errcode, message=e.msg)
-        return api_response()
-
-
-class CreateRestaurantAccountApi(Resource):
+class EditRestaurantAccountApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': CreateRestaurantApiParser,
+            'post': EditRestaurantAccountApiParser,
         }
     }
 
     def post(self):
+        parsed_data = self.parsed_data
+        delete_id_list = parsed_data.get('delete_id_list', None)
+        update_list = parsed_data.get('update_account_list', None)
+        create_list = parsed_data.get('create_account_list', None)
         try:
-            RestaurantAccountService.create_account(**self.parsed_data)
+            RestaurantAccountService.edit_restaurant_account(
+                create_list=create_list,
+                update_list=update_list,
+                delete_id_list=delete_id_list)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
