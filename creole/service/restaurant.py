@@ -102,8 +102,8 @@ class RestaurantAccountService(BaseService):
 
     @classmethod
     def get_by_restaurant_id(cls, restaurant_id):
-        account = RestaurantAccount.get_by_restaurant_id(restaurant_id)
-        return cls._get_db_obj_data_dict(account)
+        account_list = RestaurantAccount.get_by_restaurant_id(restaurant_id)
+        return [cls._get_db_obj_data_dict(account) for account in account_list]
 
     @classmethod
     def create_account(cls, restaurant_id, currency, bank_name,
