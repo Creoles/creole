@@ -95,10 +95,10 @@ CREATE TABLE `country` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
-  KEY `ix_name_en` (`name_en`),
-  KEY `ix_created_at` (`created_at`),
   KEY `ix_updated_at` (`updated_at`),
-  KEY `ix_name` (`name`)
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_name` (`name`),
+  KEY `ix_name_en` (`name_en`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -120,8 +120,8 @@ CREATE TABLE `meal` (
   `child_fee` float NOT NULL,
   `child_cost` float NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `ix_restaurant_id` (`restaurant_id`),
   KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_restaurant_id` (`restaurant_id`),
   KEY `ix_created_at` (`created_at`),
   KEY `idx_restaurant_id_meal_type` (`restaurant_id`,`meal_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -140,58 +140,75 @@ CREATE TABLE `restaurant` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `name` varchar(30) NOT NULL,
   `name_en` varchar(30) NOT NULL,
+  `nickname_en` varchar(20) NOT NULL,
   `restaurant_type` tinyint(4) NOT NULL,
   `country_id` int(11) NOT NULL,
   `city_id` int(11) NOT NULL,
-  `company_id` int(11) NOT NULL,
-  `address` varchar(80) NOT NULL,
-  `contact` varchar(16) NOT NULL,
-  `telephone` varchar(20) NOT NULL,
+  `address` varchar(100) NOT NULL,
   `intro_cn` varchar(128) DEFAULT NULL,
   `intro_en` varchar(128) DEFAULT NULL,
+  `environ_level` tinyint(4) NOT NULL,
+  `taste_level` tinyint(4) NOT NULL,
+  `service_level` tinyint(4) NOT NULL,
+  `cost_level` tinyint(4) NOT NULL,
+  `cooperation_level` tinyint(4) NOT NULL,
+  `recommend_level` tinyint(4) NOT NULL,
+  `contact_one` varchar(20) NOT NULL,
+  `position_one` varchar(20) NOT NULL,
+  `telephone_one` varchar(20) NOT NULL,
+  `email_one` varchar(30) NOT NULL,
+  `contact_two` varchar(20) NOT NULL,
+  `position_two` varchar(20) NOT NULL,
+  `telephone_two` varchar(20) NOT NULL,
+  `email_two` varchar(30) NOT NULL,
+  `contact_three` varchar(20) DEFAULT NULL,
+  `position_three` varchar(20) DEFAULT NULL,
+  `telephone_three` varchar(20) DEFAULT NULL,
+  `email_three` varchar(30) DEFAULT NULL,
+  `standard_meal_intro_cn` varchar(500) DEFAULT NULL,
+  `standard_meal_intro_en` varchar(800) DEFAULT NULL,
+  `upgrade_meal_intro_cn` varchar(500) DEFAULT NULL,
+  `upgrade_meal_intro_en` varchar(800) DEFAULT NULL,
+  `luxury_meal_intro_cn` varchar(500) DEFAULT NULL,
+  `luxury_meal_intro_en` varchar(800) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `name_en` (`name_en`),
+  UNIQUE KEY `nickname_en` (`nickname_en`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_name_en` (`name_en`),
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_name` (`name`),
+  KEY `ix_city_id` (`city_id`),
+  KEY `ix_country_id` (`country_id`),
+  KEY `ix_restaurant_type` (`restaurant_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `restaurant_account`
+--
+
+DROP TABLE IF EXISTS `restaurant_account`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `restaurant_account` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `currency` tinyint(4) NOT NULL,
   `bank_name` varchar(30) NOT NULL,
   `deposit_bank` varchar(30) NOT NULL,
   `payee` varchar(20) NOT NULL,
   `account` varchar(20) NOT NULL,
+  `swift_code` varchar(20) DEFAULT NULL,
   `note` varchar(40) NOT NULL,
+  `restaurant_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `account` (`account`),
-  KEY `ix_city_id` (`city_id`),
-  KEY `idx_country_id_company_id` (`country_id`,`company_id`),
   KEY `ix_updated_at` (`updated_at`),
-  KEY `idx_city_id_company_id` (`city_id`,`company_id`),
-  KEY `ix_name_en` (`name_en`),
-  KEY `ix_company_id` (`company_id`),
-  KEY `ix_created_at` (`created_at`),
-  KEY `ix_country_id` (`country_id`),
-  KEY `ix_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `restaurant_company`
---
-
-DROP TABLE IF EXISTS `restaurant_company`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `restaurant_company` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `name` varchar(30) NOT NULL,
-  `name_en` varchar(30) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  UNIQUE KEY `name_en` (`name_en`),
-  UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
-  KEY `ix_created_at` (`created_at`),
-  KEY `ix_updated_at` (`updated_at`),
-  KEY `ix_name_en` (`name_en`),
-  KEY `ix_name` (`name`)
+  KEY `ix_restaurant_id` (`restaurant_id`),
+  KEY `ix_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -551,4 +568,4 @@ CREATE TABLE `vehicle_user_account` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-04 12:12:47
+-- Dump completed on 2017-05-05  9:51:46

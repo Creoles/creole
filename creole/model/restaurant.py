@@ -367,7 +367,7 @@ class Restaurant(Base, BaseMixin):
         return shop_list, total
 
 
-class RestaurantAccount(AccountMixin):
+class RestaurantAccount(Base, AccountMixin):
     __tablename__ = 'restaurant_account'
 
     restaurant_id = Column(Integer, nullable=False, doc=u'餐厅id')
