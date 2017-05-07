@@ -42,6 +42,12 @@ class BaseMixin(object):
                             'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
                         ))
 
+    @classmethod
+    def get_by_id(cls, id):
+        session = DBSession()
+        obj = session.query(cls).filter(cls.id==id).first()
+        return obj
+
 
 class AccountMixin(BaseMixin):
     CURRENCY = Enum(
@@ -64,9 +70,3 @@ class AccountMixin(BaseMixin):
             raise_error_json(
                 InvalidateError(args=('currency', currency,)))
         return currency
-
-    @classmethod
-    def get_by_id(cls, id):
-        session = DBSession()
-        account = session.query(cls).filter(cls.id==id).first()
-        return account

@@ -66,12 +66,6 @@ class Meal(Base, BaseMixin):
         return restaurant_id
 
     @classmethod
-    def get_by_id(cls, id):
-        session = DBSession()
-        restaurant = session.query(cls).filter(cls.id==id).first()
-        return restaurant
-
-    @classmethod
     def get_by_restaurant_id(cls, restaurant_id):
         return DBSession().query(cls).filter(cls.restaurant_id==restaurant_id).all()
 
@@ -270,12 +264,6 @@ class Restaurant(Base, BaseMixin):
             raise_error_json(ClientError(errcode=CreoleErrCode.CITY_NOT_EXIST))
         elif city.country_id != country_id:
             raise_error_json(InvalidateError(errcode=CreoleErrCode.COUNTRY_NOT_EXIST))
-
-    @classmethod
-    def get_by_id(cls, id):
-        session = DBSession()
-        restaurant = session.query(cls).filter(cls.id==id).first()
-        return restaurant
 
     @classmethod
     def delete(cls, id):
