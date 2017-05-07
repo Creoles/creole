@@ -37,9 +37,8 @@ from .endpoint.restaurant import (
     RestaurantApi,
     CreateRestaurantApi,
     SearchRestaurantApi,
-    RestaurantCompanyApi,
-    CreateRestaurantCompanyApi,
-    SearchRestaurantCompanyApi,
+    EditRestaurantAccountApi,
+    RestaurantAccountApi,
     MealApi,
     EditMealApi,
 )
@@ -71,41 +70,40 @@ app.add_resource(CreateCityApi, '/city/create', endpoint='create-city')
 # 购物店
 app.add_resource(ShopApi, '/shop/<int:id>', endpoint='get-shop')
 app.add_resource(ShopSearchApi, '/shop/search', endpoint='search-shop')
-app.add_resource(CreateShopApi, '/shop/create_shop', endpoint='create-shop')
-app.add_resource(ShopCompanyApi, '/shop_company/<int:id>', endpoint='get-shop-company')
-app.add_resource(CreateShopCompanyApi, '/shop_company/create_company', endpoint='create-shop-company')
-app.add_resource(SearchShopCompanyApi, '/shop_company/search', endpoint='search-shop-company')
+app.add_resource(CreateShopApi, '/shop/create', endpoint='create-shop')
+app.add_resource(ShopCompanyApi, '/shop/company/<int:id>', endpoint='get-shop-company')
+app.add_resource(CreateShopCompanyApi, '/shop/company/create', endpoint='create-shop-company')
+app.add_resource(SearchShopCompanyApi, '/shop/company/search', endpoint='search-shop-company')
 
 # 车辆
 app.add_resource(VehicleApi, '/vehicle/<int:id>', endpoint='get-vehicle')
-app.add_resource(CreateVehicleApi, '/vehicle/create_vehicle', endpoint='create-vehicle')
+app.add_resource(CreateVehicleApi, '/vehicle/create', endpoint='create-vehicle')
 app.add_resource(SearchVehicleApi, '/vehicle/search', endpoint='search-vehicle')
-app.add_resource(VehicleCompanyApi, '/vehicle_company/<int:id>', endpoint='get-vehicle-company')
-app.add_resource(CreateVehicleCompanyApi, '/vehicle_company/create_company', endpoint='create-vehicle-company')
-app.add_resource(SearchVehicleCompanyApi, '/vehicle_company/search', endpoint='search-vehicle-company')
-app.add_resource(VehicleAccountApi, '/vehicle_account/<int:id>', endpoint='get-vehicle-account')
-app.add_resource(CreateVehicleAccountApi, '/vehicle_account/create_account', endpoint='create-account')
+app.add_resource(VehicleCompanyApi, '/vehicle/company/<int:id>', endpoint='get-vehicle-company')
+app.add_resource(CreateVehicleCompanyApi, '/vehicle/company/create', endpoint='create-vehicle-company')
+app.add_resource(SearchVehicleCompanyApi, '/vehicle/company/search', endpoint='search-vehicle-company')
+app.add_resource(VehicleAccountApi, '/vehicle/account/<int:id>', endpoint='get-vehicle-account')
+app.add_resource(CreateVehicleAccountApi, '/vehicle/account/create', endpoint='create-account')
 
 # 景点
 app.add_resource(AttractionApi, '/attraction/<int:id>', endpoint='get-attraction')
-app.add_resource(CreateAttractionApi, '/attraction/create_attraction', endpoint='create-attraction')
+app.add_resource(CreateAttractionApi, '/attraction/create', endpoint='create-attraction')
 app.add_resource(SearchAttractionApi, '/attraction/search', endpoint='search-attraction')
 
 # 餐饮
 app.add_resource(RestaurantApi, '/restaurant/<int:id>', endpoint='get-restaurant')
-app.add_resource(CreateRestaurantApi, '/restaurant/create_restaurant', endpoint='create-restaurant')
+app.add_resource(CreateRestaurantApi, '/restaurant/create', endpoint='create-restaurant')
 app.add_resource(SearchRestaurantApi, '/restaurant/search', endpoint='search-restaurant')
-app.add_resource(RestaurantCompanyApi, '/restaurant_company/<int:id>', endpoint='get-restaurant-company')
-app.add_resource(CreateRestaurantCompanyApi, '/restaurant_company/create_company', endpoint='create-restaurant-company')
-app.add_resource(SearchRestaurantCompanyApi, '/restaurant_company/search', endpoint='search-restaurant-company')
+app.add_resource(RestaurantAccountApi, '/restaurant/account/<int:restaurant_id>', endpoint='get-restaurant-account')
+app.add_resource(EditRestaurantAccountApi, '/restaurant/account/edit', endpoint='edit-restaurant-account')
 app.add_resource(MealApi, '/restaurant/meal/<int:restaurant_id>', endpoint='get-restaurant-meal')
-app.add_resource(EditMealApi, '/restaurant/meal/edit_meal', endpoint='edit-restaurant-meal')
+app.add_resource(EditMealApi, '/restaurant/meal/edit', endpoint='edit-restaurant-meal')
 
 # 导游
 app.add_resource(TourGuideApi, '/tour_guide/<int:id>', endpoint='get-tour-guide')
 app.add_resource(SearchTourGuideApi, '/tour_guide/search', endpoint='search-tour-guide')
-app.add_resource(CreateTourGuideApi, '/tour_guide/create_tour_guide', endpoint='create-tour-guide')
+app.add_resource(CreateTourGuideApi, '/tour_guide/create', endpoint='create-tour-guide')
 app.add_resource(TourGuideFeeApi, '/tour_guide/fee/<int:id>', endpoint='get-tour-guide-fee')
-app.add_resource(CreateTourGuideFeeApi, '/tour_guide/fee/create_tour_guide_fee', endpoint='create-tour-guide-fee')
+app.add_resource(CreateTourGuideFeeApi, '/tour_guide/fee/create', endpoint='create-tour-guide-fee')
 app.add_resource(TourGuideAccountApi, '/tour_guide/account/<int:tour_guide_id>', endpoint='get-tour-guide-account')
 app.add_resource(EditTourGuideAccountApi, '/tour_guide/account/edit', endpoint='edit-tour-guide-account')

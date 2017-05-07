@@ -1,6 +1,7 @@
 # coding: utf-8
 from flask_restful.reqparse import Argument
 
+from .mixins import dict_parser_func
 from ...util import BaseRequestParser
 from creole.util import Enum
 
@@ -97,26 +98,6 @@ class CreateTourGuideFeeApiParser(BaseRequestParser):
     service_fee = Argument('service_fee', type=float, required=True)
 
 
-def account_dict_parser(is_create):
-    def wrapper(account_dict):
-        _iter_item = EditTourGuideAccountApiParser._CREATE_PARAM_MAPPING
-        if not is_create:
-            _iter_item = EditTourGuideAccountApiParser._UPDATE_PARAM_MAPPING
-
-        _account_dict = {}
-        for k, _tuple in _iter_item.iteritems():
-            _type, is_required = _tuple
-            v = account_dict.get(k, None)
-            if v is None and is_required:
-                raise ValueError('Required value: {!r}'.format(k))
-            try:
-                _account_dict[k] = _type(v)
-            except Exception:
-                raise ValueError('Invalid value: {!r}'.format(v))
-        return _account_dict
-    return wrapper
-
-
 class EditTourGuideAccountApiParser(BaseRequestParser):
     _CREATE_PARAM_MAPPING = {
         'tour_guide_id': (int, True),  # key: (_type, is_required)
@@ -140,10 +121,12 @@ class EditTourGuideAccountApiParser(BaseRequestParser):
     }
 
     create_account_list = Argument(
-        'create_account_list', type=account_dict_parser(is_create=True),
+        'create_account_list',
+        type=dict_parser_func(param_mapping=_CREATE_PARAM_MAPPING),
         required=False, action='append')
     update_account_list = Argument(
-        'update_account_list', type=account_dict_parser(is_create=False),
+        'update_account_list',
+        type=dict_parser_func(param_mapping=_UPDATE_PARAM_MAPPING),
         required=False, action='append')
     delete_id_list = Argument(
         'delete_id_list', type=int, required=False, action='append')

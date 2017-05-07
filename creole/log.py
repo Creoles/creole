@@ -19,7 +19,7 @@ class CreoleFormatter(logging.Formatter):
 
     meta-log structure:
 
-        [rid: request_id] [ip: ip] [os: os] [endpoint: endpoint] ## msg
+        (rid: request_id ip: ip os: os endpoint: endpoint) ## msg
         |---------------------- meta-log ----------------------|
     """
     MSG_SEPARTOR = '##'
@@ -37,8 +37,8 @@ class CreoleFormatter(logging.Formatter):
             os = request.platform
             endpoint = request.endpoint
             meta_log = \
-                '[rid: {rid}] [ip: {ip}] [os: {os}] ' \
-                '[endpoint: {endpoint}]'.format(
+                '(rid: {rid} ip: {ip} os: {os} ' \
+                'endpoint: {endpoint})'.format(
                     rid=rid, ip=ip, os=os, endpoint=endpoint)
         if meta_log:
             return ' '.join([meta_log, msg])

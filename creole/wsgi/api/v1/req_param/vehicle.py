@@ -1,6 +1,7 @@
 # coding: utf-8
 from flask_restful.reqparse import Argument
 
+from .mixins import AccountParserMixin
 from ...util import BaseRequestParser
 from creole.util import Enum
 
@@ -57,12 +58,7 @@ class VehicleSearchApiParser(BaseRequestParser):
     number = Argument('number', type=int, default=20, required=False)
 
 
-class CreateVehicleAccountApiParser(BaseRequestParser):
-    CURRENCY = Enum(
-        ('USD', 1, u'美元'),
-        ('CNY', 2, u'人民币'),
-        ('LKR', 3, u'斯里兰卡卢布'),
-    )
+class CreateVehicleAccountApiParser(BaseRequestParser, AccountParserMixin):
     TYPE = Enum(
         ('COMPANY', 1, u'公司账号'),
         ('PERSSON', 2, u'个人账号'),
@@ -70,11 +66,3 @@ class CreateVehicleAccountApiParser(BaseRequestParser):
     owner_id = Argument('owner_id', type=int, required=False, location=('json', 'form'))
     account_type = Argument(
         'account_type', type=int, choices=TYPE.values(), required=True)
-    currency = Argument(
-        'currency', choices=CURRENCY.values(), type=int,
-        required=True, location=('json', 'form'))
-    bank_name = Argument('bank_name', nullable=False, required=True, location=('json', 'form'))
-    deposit_bank = Argument('deposit_bank', nullable=False, required=True, location=('json', 'form'))
-    payee = Argument('payee', nullable=False, required=True, location=('json', 'form'))
-    account = Argument('account', nullable=False, required=True, location=('json', 'form'))
-    note = Argument('note', required=False, location=('json', 'form'))
