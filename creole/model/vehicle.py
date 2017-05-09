@@ -133,6 +133,18 @@ class VehicleContact(Base, ContactMixin):
 
     company_id = Column(Integer, nullable=False, doc=u'公司id')
 
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_company_id', 'company_id'),
+        )
+        return table_args + ContactMixin.__table_args__
+
+    @classmethod
+    def get_by_company_id(cls, company_id):
+        session = DBSession()
+        return session.query(cls).filter(cls.company_id==company_id).all()
+
     @classmethod
     def create(cls, contact, position, telephone, email, company_id):
         session = DBSession()
@@ -156,7 +168,7 @@ class VehicleAccount(Base, AccountMixin):
         table_args = (
             Index('ix_company_id', 'company_id'),
         )
-        return table_args + BaseMixin.__table_args__
+        return table_args + AccountMixin.__table_args__
 
     @classmethod
     def create(cls, company_id, currency, bank_name,
@@ -268,7 +280,7 @@ class Vehicle(Base, BaseMixin):
 
     country_id = Column(Integer, nullable=False, doc=u'国家名')
     city_id = Column(Integer, nullable=False, doc=u'城市名')
-    company_id = Column(Integer, nullable=True, doc=u'所属车辆公司')
+    company_id = Column(Integer, nullable=False, doc=u'所属车辆公司')
     license = Column(String(10), nullable=False, doc=u'车牌号')
     insurance_number = Column(String(30), nullable=False, doc=u'车辆保险号')
     start_use = Column(String(4), nullable=False, doc=u'使用年限')
@@ -396,6 +408,11 @@ class VehicleFee(Base, BaseMixin):
     end_time = Column(Datetime, nullable=False, doc=u'结束时间')
     confirm_id = Column(Integer, nullable=False, doc=u'确认人')
     attachment_hash = Column(String(128), nullable=False, doc=u'合同附件')
+
+    @classmethod
+    def get_by_company_id(cls, company_id):
+        session = DBSession()
+        return session.query(cls).filter(cls.company_id==company_id).all()
 
     @classmethod
     def delete(cls, id):
