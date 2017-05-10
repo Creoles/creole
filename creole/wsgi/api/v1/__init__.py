@@ -27,6 +27,12 @@ from .endpoint.vehicle import (
     SearchVehicleCompanyApi,
     VehicleAccountApi,
     CreateVehicleAccountApi,
+    VehicleFeeApi,
+    CreateVehicleFeeApi,
+    VehicleContactApi,
+    CreateVehicleContactApi,
+    VehicleTypeApi,
+    CreateVehicleTypeApi,
 )
 from .endpoint.attraction import (
     AttractionApi,
@@ -84,6 +90,12 @@ app.add_resource(CreateVehicleCompanyApi, '/vehicle/company/create', endpoint='c
 app.add_resource(SearchVehicleCompanyApi, '/vehicle/company/search', endpoint='search-vehicle-company')
 app.add_resource(VehicleAccountApi, '/vehicle/account/<int:id>', endpoint='get-vehicle-account')
 app.add_resource(CreateVehicleAccountApi, '/vehicle/account/create', endpoint='create-account')
+app.add_resource(VehicleFeeApi, '/vehicle/fee/<int:id>', endpoint='get-vehicle-fee')
+app.add_resource(CreateVehicleFeeApi, '/vehicle/fee/create', endpoint='create-vehicle-fee')
+app.add_resource(VehicleContactApi, '/vehicle/contact/<int:id>', endpoint='get-vehicle-contact')
+app.add_resource(CreateVehicleContactApi, '/vehicle/contact/create', endpoint='create-vehicle-contact')
+app.add_resource(VehicleTypeApi, '/vehicle/type/<int:id>', endpoint='get-vehicle-type')
+app.add_resource(CreateVehicleTypeApi, '/vehicle/type/create', endpoint='create-vehicle-type')
 
 # 景点
 app.add_resource(AttractionApi, '/attraction/<int:id>', endpoint='get-attraction')

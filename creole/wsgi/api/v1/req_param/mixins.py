@@ -21,6 +21,13 @@ class AccountParserMixin:
     note = Argument('note', required=False, location=('json', 'form'))
 
 
+class ContactParserMixin:
+    contact = Argument('contact', required=True, nullable=False)
+    position = Argument('position', required=True, nullable=False)
+    telephone = Argument('telephone', required=True, nullable=False)
+    email = Argument('email', required=True, nullable=False)
+
+
 def dict_parser_func(param_mapping):
     def wrapper(item_dict):
         _item_dict = {}

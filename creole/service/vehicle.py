@@ -91,6 +91,11 @@ class VehicleCompanyService(BaseService):
 
 class VehicleAccountService(BaseService):
     @classmethod
+    def get_by_id(cls, id):
+        account = VehicleAccount.get_by_id(id)
+        return cls._get_db_obj_data_dict(account)
+
+    @classmethod
     def get_by_company_id(cls, company_id):
         raw_data = []
         account_list = VehicleAccount.get_by_company_id(company_id)
@@ -136,6 +141,11 @@ class VehicleAccountService(BaseService):
 
 class VehicleFeeService(BaseService):
     @classmethod
+    def get_by_id(cls, id):
+        fee = VehicleFee.get_by_id(id)
+        return cls._get_db_obj_data_dict(fee)
+
+    @classmethod
     def create_fee(cls, vehicle_type_id, company_id,
                    unit_price, start_time, end_time,
                    confirm_id, attachment_hash):
@@ -174,38 +184,38 @@ class VehicleFeeService(BaseService):
 
 class VehicleContactService(BaseService):
     @classmethod
-    def create_contact(cls, create_list):
-        for contact_dict in create_list:
-            contact = contact_dict['contact']
-            position = contact_dict['position']
-            telephone = contact_dict['telephone']
-            email = contact_dict['email']
-            company_id = contact_dict['company_id']
-            VehicleContact.create(
-                contact=contact, position=position,
-                telephone=telephone, email=email,
-                company_id=company_id)
+    def get_contact_by_id(cls, id):
+        contact = VehicleContact.get_by_id(id)
+        return cls._get_db_obj_data_dict(contact)
 
     @classmethod
-    def update_contact(cls, update_list):
-        for item in update_list:
-            VehicleContact.update(**item)
-
-    @classmethod
-    def delete_contact(cls, delete_id_list):
-        for id in delete_id_list:
-            VehicleContact.delete(id)
-
-    @classmethod
-    def edit_contact(cls, create_list=None, update_list=None,
-                     delete_id_list=None):
+    def create_contact(cls, contact, position, telephone,
+                       email, company_id):
         session = DBSession()
-        if create_list:
-            cls.create_contact(create_list)
-        if update_list:
-            cls.update_contact(update_list)
-        if delete_id_list:
-            cls.delete_contact(delete_id_list)
+        VehicleContact.create(
+            contact=contact, position=position,
+            telephone=telephone, email=email,
+            company_id=company_id)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def update_contact(cls, id, **kwargs):
+        session = DBSession()
+        VehicleContact.update(id, **kwargs)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def delete_contact(cls, id):
+        session = DBSession()
+        VehicleContact.delete(id)
         try:
             session.commit()
         except SQLAlchemyError as e:
