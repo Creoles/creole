@@ -31,6 +31,13 @@ class VehicleCompanyApi(Resource):
 
     def get(self, id):
         company = VehicleCompanyService.get_by_id(id)
+        # 获得公司下的所有联系人列表
+        contact_list = \
+            VehicleContactService.get_contact_list_by_company_id(id)
+        # 获得公司下的所有支付账户列表
+        account_list = VehicleAccountService.get_by_company_id(id)
+        company['contact_list'] = contact_list
+        company['account_list'] = account_list
         return api_response(data=company)
 
     def put(self, id):

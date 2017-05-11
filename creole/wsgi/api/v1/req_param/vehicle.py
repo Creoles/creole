@@ -69,8 +69,8 @@ class CreateVehicleFeeApiParser(BaseRequestParser):
         'start_time', required=True, nullable=False, location=('json', 'form'))
     end_time = Argument(
         'end_time', required=True, nullable=False, location=('json', 'form'))
-    confirm_id = Argument(  
-        'confirm_id', required=True, nullable=False,
+    confirm_person = Argument(  
+        'confirm_person', required=True, nullable=False,
         type=int, location=('json', 'form'))
     attachment_hash = Argument(
         'attachment_hash', required=True,

@@ -129,7 +129,7 @@ class VehicleCompany(Base, BaseMixin):
 
 
 class VehicleContact(Base, ContactMixin):
-    __tablename__ = 'contact_person'
+    __tablename__ = 'vehicle_contact'
 
     company_id = Column(Integer, nullable=False, doc=u'公司id')
 
@@ -406,7 +406,7 @@ class VehicleFee(Base, BaseMixin):
     unit_price = Column(Float(3), nullable=False, doc=u'每公里价格')
     start_time = Column(Datetime, nullable=False, doc=u'开始时间')
     end_time = Column(Datetime, nullable=False, doc=u'结束时间')
-    confirm_id = Column(Integer, nullable=False, doc=u'确认人')
+    confirm_person = Column(String(30), nullable=True, doc=u'确认人')
     attachment_hash = Column(String(128), nullable=False, doc=u'合同附件')
 
     @classmethod
@@ -426,12 +426,12 @@ class VehicleFee(Base, BaseMixin):
 
     @classmethod
     def create(cls, vehicle_type_id, company_id, unit_price, start_time,
-               end_time, confirm_id, attachment_hash):
+               end_time, confirm_person, attachment_hash):
         session = DBSession()
         fee = cls(
             vehicle_type_id=vehicle_type_id, company_id=company_id,
             unit_price=unit_price, start_time=start_time,
-            end_time=end_time, confirm_id=confirm_id,
+            end_time=end_time, confirm_person=confirm_person,
             attachment_hash=attachment_hash
         )
         session.add(fee)

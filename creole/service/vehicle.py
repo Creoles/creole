@@ -148,13 +148,14 @@ class VehicleFeeService(BaseService):
     @classmethod
     def create_fee(cls, vehicle_type_id, company_id,
                    unit_price, start_time, end_time,
-                   confirm_id, attachment_hash):
+                   confirm_person, attachment_hash):
         session = DBSession()
         VehicleFee.create(
             vehicle_type_id=vehicle_type_id,
             company_id=company_id, unit_price=unit_price,
             start_time=start_time, end_time=end_time,
-            confirm_id=confirm_id, attachment_hash=attachment_hash)
+            confirm_person=confirm_person,
+            attachment_hash=attachment_hash)
         try:
             session.commit()
         except SQLAlchemyError as e:
@@ -187,6 +188,11 @@ class VehicleContactService(BaseService):
     def get_contact_by_id(cls, id):
         contact = VehicleContact.get_by_id(id)
         return cls._get_db_obj_data_dict(contact)
+
+    @classmethod
+    def get_contact_list_by_company_id(cls, company_id):
+        contact_list = VehicleContact.get_by_company_id(company_id)
+        return [cls._get_db_obj_data_dict(item) for item in contact_list]
 
     @classmethod
     def create_contact(cls, contact, position, telephone,
