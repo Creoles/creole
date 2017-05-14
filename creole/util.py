@@ -1,6 +1,19 @@
 # coding: utf-8
 import os
 import sys
+import time
+import datetime
+
+
+def timestamp_to_datetime(timestamp):
+    t = time.localtime(int(timestamp))
+    return time.strftime("%Y-%m-%d", t)
+
+
+def datetime_to_timestamp(dt):
+    if isinstance(dt, datetime.datetime):
+        return time.mktime(dt.timetuple())
+    return 0
 
 
 class CachedProperty(object):

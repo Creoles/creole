@@ -1,7 +1,7 @@
 # coding: utf-8
 from sqlalchemy import (
     Column,
-    Datetime,
+    DateTime,
     Unicode,
     String,
     Integer,
@@ -423,8 +423,8 @@ class VehicleFee(Base, BaseMixin):
     vehicle_type_id = Column(Integer, nullable=False, doc=u'车型ID')
     company_id = Column(Integer, nullable=False, doc=u'公司ID')
     unit_price = Column(Float(3), nullable=False, doc=u'每公里价格')
-    start_time = Column(Datetime, nullable=False, doc=u'开始时间')
-    end_time = Column(Datetime, nullable=False, doc=u'结束时间')
+    start_time = Column(DateTime, nullable=False, doc=u'开始时间')
+    end_time = Column(DateTime, nullable=False, doc=u'结束时间')
     confirm_person = Column(String(30), nullable=True, doc=u'确认人')
     attachment_hash = Column(String(128), nullable=False, doc=u'合同附件')
 
