@@ -49,6 +49,9 @@ class BaseCreoleErrCode(object):
     TOUR_GUIDE_ACCOUNT_DUPLICATED = 3063
     TOUR_GUIDE_FEE_NOT_EXIST = 3064
 
+    # 联系人
+    CONTACT_PERSON_NOT_EXIST = 3070
+
 class CreoleErrCode(BaseCreoleErrCode):
     pass
 
@@ -94,6 +97,8 @@ TRANSLATIONS = {
     CreoleErrCode.TOUR_GUIDE_ACCOUNT_DUPLICATED: u'the account of tour guide duplicated',
     CreoleErrCode.TOUR_GUIDE_ACCOUNT_NOT_EXIST: u'the account of the tour guide do not exist',
     CreoleErrCode.TOUR_GUIDE_FEE_NOT_EXIST: u'the tour guide fee do not exist',
+
+    CreoleErrCode.CONTACT_PERSON_NOT_EXIST: u'the contact person do not exist',
 }
 
 

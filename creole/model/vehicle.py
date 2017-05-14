@@ -8,7 +8,6 @@ from sqlalchemy import (
     Float,
     Index,
 )
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.dialects.mysql import (
     TINYINT,
     SMALLINT,
@@ -20,12 +19,10 @@ from ..util import Enum
 from . import Base, DBSession
 from .mixins import BaseMixin, AccountMixin, ContactMixin
 from .country import Country, City
-from .user import User
 from ..exc import (
     raise_error_json,
     InvalidateError,
     CreoleErrCode,
-    DatabaseError,
     ClientError,
 )
 
@@ -115,17 +112,26 @@ class VehicleCompany(Base, BaseMixin):
         session.flush()
 
     @classmethod
-    def search(cls, name=None, name_en=None, is_all=False):
+    def search(cls, name=None, name_en=None, country_id=None,
+               city_id=None, company_type=None, number=20, page=1):
         session = DBSession()
-        vehicle_company = None
         query = session.query(cls)
-        if is_all:
-            vehicle_company = query.all()
-        elif name:
-            vehicle_company = query.filter(cls.name==name).first()
+        total = None
+        if name:
+            company_list = query.filter(cls.name==name).all()
         elif name_en:
-            vehicle_company = query.filter(cls.name_en==name_en).first()
-        return vehicle_company
+            company_list = query.filter(cls.name_en==name_en).all()
+        else:
+            if country_id:
+                query = query.filter(cls.country_id==country_id)
+            if city_id:
+                query = query.filter(cls.city_id==city_id)
+            if company_type:
+                query = query.filter(cls.company_type==company_type)
+            if page == 1:
+                total = query.count()
+            company_list = query.offset((page - 1) * number).limit(number).all()
+        return company_list, total
 
 
 class VehicleContact(Base, ContactMixin):
@@ -273,6 +279,17 @@ class VehicleType(Base, BaseMixin):
         session.merge(type)
         session.flush()
 
+    @classmethod
+    def search(cls, vehicle_type, number=20, page=1):
+        total = None
+        session = DBSession()
+        query = session.query(cls).filter(
+            cls.vehicle_type==vehicle_type)
+        if page == 1:
+            total = query.count()
+        type_list = query.offset((page - 1) * number).limit(number).all()
+        return type_list, total
+
 
 class Vehicle(Base, BaseMixin):
     """车辆"""
@@ -381,9 +398,11 @@ class Vehicle(Base, BaseMixin):
 
     @classmethod
     def search(cls, country_id=None, city_id=None, company_id=None,
-               vehicle_type_id=None, page=1, number=20):
+               vehicle_type_id=None, license=None, page=1, number=20):
         query = DBSession().query(cls)
         total = None
+        if license:
+            vehicle_list = query.filter(cls.license==license).all()
         if city_id:
             query = query.filter(cls.city_id==city_id)
         elif country_id:
@@ -448,6 +467,30 @@ class VehicleFee(Base, BaseMixin):
         session = DBSession()
         session.merge(type)
         session.flush()
+
+    @classmethod
+    def search(cls, vehicle_type_id=None, company_id=None, unit_price=None,
+               start_time=None, end_time=None, confirm_person=None,
+               number=20, page=1):
+        session = DBSession()
+        total = None
+        query = session.query(cls)
+        if vehicle_type_id:
+            query = query.filter(cls.vehicle_type_id==vehicle_type_id)
+        if company_id:
+            query = query.filter(cls.company_id==company_id)
+        if unit_price:
+            query = query.filter(cls.unit_price==unit_price)
+        if start_time:
+            query = query.filter(cls.start_time==start_time)
+        if end_time:
+            query = query.filter(cls.end_time==end_time)
+        if confirm_person:
+            query = query.filter(cls.confirm_person==confirm_person)
+        if page == 1:
+            total = query.count()
+        fee_list = query.offset((page - 1) * number).limit(number).all()
+        return fee_list, total
 
 
 class VehicleImage(Base, BaseMixin):

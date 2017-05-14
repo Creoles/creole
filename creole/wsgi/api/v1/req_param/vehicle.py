@@ -36,16 +36,27 @@ class CreateVehicleCompanyApiParser(BaseRequestParser):
 
 
 class SearchVehicleCompanyApiParser(BaseRequestParser):
-    is_all = Argument('is_all', type=bool, default=False, required=True)
+    COMPANY_TYPE = Enum(
+        ('COMPANY', 1, u'公司'),
+        ('PERSON', 2, u'个人'),
+    )
+
     name = Argument('name', required=False)
     name_en = Argument('name_en', required=False)
+    country_id = Argument('country_id', type=int, required=False)
+    city_id = Argument('city_id', type=int, required=False)
+    company_type = Argument(
+        'company_type', type=int, choices=COMPANY_TYPE.values(), required=False)
+    number = Argument('number', type=int, default=20, required=False)
+    page = Argument('page', type=int, default=1, required=False)
 
 
-class VehicleSearchApiParser(BaseRequestParser):
+class SearchVehicleApiParser(BaseRequestParser):
     country_id = Argument('country_id', type=int, required=False)
     city_id = Argument('city_id', type=int, required=False)
     company_id = Argument('company_id', type=int, required=False)
     vehicle_type_id = Argument('vehicle_type_id', type=int, required=False)
+    license = Argument('license', required=False)
     page = Argument('page', type=int, default=1, required=False)
     number = Argument('number', type=int, default=20, required=False)
 
@@ -77,6 +88,17 @@ class CreateVehicleFeeApiParser(BaseRequestParser):
         nullable=False, location=('json', 'form'))
 
 
+class SearchVehicleFeeApiParser(BaseRequestParser):
+    vehicle_type_id = Argument('vehicle_type_id', required=False, type=int)
+    company_id = Argument('company_id', required=False, type=int)
+    unit_price = Argument('unit_price', required=False, type=float)
+    start_time = Argument('start_time', required=False)
+    end_time = Argument('end_time', required=False)
+    confirm_person = Argument('confirm_person', required=False)
+    page = Argument('page', type=int, default=1, required=False)
+    number = Argument('number', type=int, default=20, required=False)
+
+
 class CreateVehicleTypeApiParser(BaseRequestParser):
     VEHICLE_TYPE = Enum(
         ('CAR', 1, u'轿车'),
@@ -98,6 +120,23 @@ class CreateVehicleTypeApiParser(BaseRequestParser):
     passenger_count = Argument(
         'passenger_count', type=int, required=True, nullable=False)
     note = Argument('note')
+
+
+class SearchVehicleTypeApiParser(BaseRequestParser):
+    VEHICLE_TYPE = Enum(
+        ('CAR', 1, u'轿车'),
+        ('VAN', 2, u'货车'),
+        ('BIG_VAN', 3, u'大货车'),
+        ('MINI_COATCH', 4, u'迷你大巴'),
+        ('COATCH', 5, u'大巴'),
+        ('LONG_COATCH', 6, u'加长大巴'),
+        ('OTHER', 7, u'其他'),
+    )
+
+    vehicle_type = Argument(
+        'vehicle_type', type=int, choices=VEHICLE_TYPE.values())
+    page = Argument('page', type=int, default=1, required=False)
+    number = Argument('number', type=int, default=20, required=False)
 
 
 class CreateVehicleContactApiParser(BaseRequestParser, ContactParserMixin):

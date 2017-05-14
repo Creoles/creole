@@ -12,13 +12,15 @@ from ..req_param.vehicle import (
     CreateVehicleApiParser,
     CreateVehicleCompanyApiParser,
     SearchVehicleCompanyApiParser,
-    VehicleSearchApiParser,
+    SearchVehicleApiParser,
     CreateVehicleAccountApiParser,
     CreateVehicleFeeApiParser,
+    SearchVehicleFeeApiParser,
     CreateVehicleTypeApiParser,
+    SearchVehicleTypeApiParser,
     CreateVehicleContactApiParser,
 )
-from creole.exc import ClientError, CreoleErrCode
+from creole.exc import ClientError
 from .....util import timestamp_to_datetime
 
 
@@ -81,9 +83,16 @@ class SearchVehicleCompanyApi(Resource):
     }
 
     def get(self):
-        vehicle_company = \
-            VehicleCompanyService.search_company(**self.parsed_data)
-        return api_response(data=vehicle_company)
+        try:
+            vehicle_company_list, total = \
+                VehicleCompanyService.search_company(**self.parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        if self.parsed_data['page'] == 1:
+            data = {'vehicle_company_list': vehicle_company_list, 'total': total}
+        else:
+            data = {'vehicle_company_list': vehicle_company_list}
+        return api_response(data=data)
 
 
 class VehicleAccountApi(Resource):
@@ -157,6 +166,23 @@ class VehicleTypeApi(Resource):
         return api_response()
 
 
+class SearchVehicleTypeApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'get': SearchVehicleTypeApiParser,
+        }
+    }
+
+    def get(self):
+        vehicle_type_list, total = \
+            VehicleTypeService.search_type(**self.parsed_data)
+        if self.parsed_data['page'] == 1:
+            data = {'vehicle_type_list': vehicle_type_list, 'total': total}
+        else:
+            data = {'vehicle_type_list': vehicle_type_list}
+        return api_response(data=data)
+
+
 class CreateVehicleTypeApi(Resource):
     meta = {
         'args_parser_dict': {
@@ -171,6 +197,11 @@ class CreateVehicleTypeApi(Resource):
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
 
+
+class GetVehicleFeeApi(Resource):
+    def get(self, company_id):
+        fee_list = VehicleFeeService.get_by_company_id(company_id)
+        return api_response(data=fee_list)
 
 class VehicleFeeApi(Resource):
     meta = {
@@ -203,6 +234,31 @@ class VehicleFeeApi(Resource):
         return api_response()
 
 
+class SearchVehicleFeeApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'get': SearchVehicleFeeApiParser,
+        }
+    }
+
+    def get(self):
+        parsed_data = self.parsed_data
+        start_time = parsed_data.get('start_time', None)
+        end_time = parsed_data.get('end_time', None)
+        if start_time:
+            start_time_stamp = int(start_time)
+            parsed_data['start_time'] = timestamp_to_datetime(start_time_stamp)
+        if end_time:
+            end_time_stamp = int(end_time)
+            parsed_data['end_time'] = timestamp_to_datetime(end_time_stamp)
+        vehicle_fee_list, total = VehicleFeeService.search_fee(parsed_data)
+        if self.parsed_data['page'] == 1:
+            data = {'vehicle_fee_list': vehicle_fee_list, 'total': total}
+        else:
+            data = {'vehicle_fee_list': vehicle_fee_list}
+        return api_response(data=data)
+
+
 class CreateVehicleFeeApi(Resource):
     meta = {
         'args_parser_dict': {
@@ -221,6 +277,13 @@ class CreateVehicleFeeApi(Resource):
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
+
+
+class GetVehicleContactApi(Resource):
+    def get(self, company_id):
+        contact_list = \
+            VehicleContactService.get_contact_list_by_company_id(company_id)
+        return api_response(data=contact_list)
 
 
 class VehicleContactApi(Resource):
@@ -312,15 +375,11 @@ class SearchVehicleApi(Resource):
     """搜索车辆Api"""
     meta = {
         'args_parser_dict': {
-            'get': VehicleSearchApiParser,
+            'get': SearchVehicleApiParser,
         }
     }
 
     def get(self):
-        operation = self.parsed_data.get('operation', None)
-        seat = self.parsed_data.get('seat', None)
-        if (seat and operation is None) or (seat is None and operation):
-            return api_response(code=CreoleErrCode.PARAMETER_ERROR)
         try:
             vehicle_list, total = VehicleService.search_vehicle(**self.parsed_data)
         except ClientError as e:

@@ -83,10 +83,14 @@ class VehicleCompanyService(BaseService):
             raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def search_company(cls, name=None, name_en=None, is_all=False):
-        vehicle_company = \
-            VehicleCompany.search(name=name, name_en=name_en, is_all=is_all)
-        return [cls._get_db_obj_data_dict(item) for item in vehicle_company]
+    def search_company(cls, name=None, name_en=None, country_id=None,
+                       city_id=None, company_type=None, number=20, page=1):
+        vehicle_company, total = \
+            VehicleCompany.search(
+                name=None, name_en=None, country_id=None,
+                city_id=None, company_type=None,
+                number=number, page=page)
+        return [cls._get_db_obj_data_dict(item) for item in vehicle_company], total
 
 
 class VehicleAccountService(BaseService):
@@ -146,6 +150,11 @@ class VehicleFeeService(BaseService):
         return cls._get_db_obj_data_dict(fee)
 
     @classmethod
+    def get_by_company_id(cls, company_id):
+        fee_list = VehicleFee.get_by_company_id(company_id)
+        return [cls._get_db_obj_data_dict(item) for item in fee_list]
+
+    @classmethod
     def create_fee(cls, vehicle_type_id, company_id,
                    unit_price, start_time, end_time,
                    confirm_person, attachment_hash):
@@ -181,6 +190,16 @@ class VehicleFeeService(BaseService):
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def search_fee(cls, vehicle_type_id=None, company_id=None,
+                   unit_price=None, start_time=None, end_time=None,
+                   confirm_person=None, number=20, page=1):
+        fee_list, total = VehicleFee.search(
+            vehicle_type_id=vehicle_type_id, company_id=company_id,
+            unit_price=unit_price, start_time=start_time, end_time=end_time,
+            confirm_person=confirm_person, number=number, page=page)
+        return [cls._get_db_obj_data_dict(item) for item in fee_list], total
 
 
 class VehicleContactService(BaseService):
@@ -269,6 +288,12 @@ class VehicleTypeService(BaseService):
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
 
+    @classmethod
+    def search_type(cls, vehicle_type, number=20, page=1):
+        type_list, total = VehicleType.search(
+            vehicle_type=vehicle_type, number=number, page=page)
+        return [cls._get_db_obj_data_dict(item) for item in type_list], total
+
 
 class VehicleService(BaseService):
     @classmethod
@@ -316,12 +341,12 @@ class VehicleService(BaseService):
     @classmethod
     def search_vehicle(
             cls, country_id=None, city_id=None, company_id=None,
-            vehicle_type_id=None ,page=1, number=20):
+            vehicle_type_id=None , license=None,page=1, number=20):
         raw_data = []
         vehicle_list, total = Vehicle.search(
             country_id=country_id, city_id=city_id,
             company_id=company_id, vehicle_type_id=vehicle_type_id,
-            page=page, number=number)
+            license=license, page=page, number=number)
         for vehicle in vehicle_list:
             raw_data.append(cls._get_db_obj_data_dict(vehicle))
         return raw_data, total
