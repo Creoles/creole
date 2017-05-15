@@ -27,7 +27,7 @@ from .....util import timestamp_to_datetime
 class VehicleCompanyApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateVehicleCompanyApiParser,
+            'put': CreateVehicleCompanyApiParser(),
         }
     }
 
@@ -62,7 +62,7 @@ class CreateVehicleCompanyApi(Resource):
     """创建车辆公司Api"""
     meta = {
         'args_parser_dict': {
-            'post': CreateVehicleCompanyApiParser,
+            'post': CreateVehicleCompanyApiParser(),
         }
     }
 
@@ -78,7 +78,7 @@ class CreateVehicleCompanyApi(Resource):
 class SearchVehicleCompanyApi(Resource):
     meta = {
         'args_parser_dict': {
-            'get': SearchVehicleCompanyApiParser,
+            'get': SearchVehicleCompanyApiParser(),
         }
     }
 
@@ -98,7 +98,7 @@ class SearchVehicleCompanyApi(Resource):
 class VehicleAccountApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateVehicleAccountApiParser,
+            'put': CreateVehicleAccountApiParser(),
         }
     }
 
@@ -127,7 +127,7 @@ class CreateVehicleAccountApi(Resource):
     """创建车辆账号信息"""
     meta = {
         'args_parser_dict': {
-            'post': CreateVehicleAccountApiParser,
+            'post': CreateVehicleAccountApiParser(),
         }
     }
 
@@ -143,7 +143,7 @@ class CreateVehicleAccountApi(Resource):
 class VehicleTypeApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateVehicleTypeApiParser,
+            'put': CreateVehicleTypeApiParser(),
         }
     }
 
@@ -169,7 +169,7 @@ class VehicleTypeApi(Resource):
 class SearchVehicleTypeApi(Resource):
     meta = {
         'args_parser_dict': {
-            'get': SearchVehicleTypeApiParser,
+            'get': SearchVehicleTypeApiParser(),
         }
     }
 
@@ -186,7 +186,7 @@ class SearchVehicleTypeApi(Resource):
 class CreateVehicleTypeApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': CreateVehicleTypeApiParser,
+            'post': CreateVehicleTypeApiParser(),
         }
     }
 
@@ -206,7 +206,7 @@ class GetVehicleFeeApi(Resource):
 class VehicleFeeApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateVehicleFeeApiParser,
+            'put': CreateVehicleFeeApiParser(),
         }
     }
 
@@ -237,7 +237,7 @@ class VehicleFeeApi(Resource):
 class SearchVehicleFeeApi(Resource):
     meta = {
         'args_parser_dict': {
-            'get': SearchVehicleFeeApiParser,
+            'get': SearchVehicleFeeApiParser(),
         }
     }
 
@@ -262,7 +262,7 @@ class SearchVehicleFeeApi(Resource):
 class CreateVehicleFeeApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': CreateVehicleFeeApiParser,
+            'post': CreateVehicleFeeApiParser(),
         }
     }
 
@@ -289,7 +289,7 @@ class GetVehicleContactApi(Resource):
 class VehicleContactApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateVehicleContactApiParser,
+            'put': CreateVehicleContactApiParser(),
         }
     }
 
@@ -315,7 +315,7 @@ class VehicleContactApi(Resource):
 class CreateVehicleContactApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': CreateVehicleContactApiParser,
+            'post': CreateVehicleContactApiParser(),
         }
     }
 
@@ -330,7 +330,7 @@ class CreateVehicleContactApi(Resource):
 class VehicleApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateVehicleApiParser,
+            'put': CreateVehicleApiParser(),
         }
     }
 
@@ -358,7 +358,7 @@ class CreateVehicleApi(Resource):
     """创建车辆Api"""
     meta = {
         'args_parser_dict': {
-            'post': CreateVehicleApiParser,
+            'post': CreateVehicleApiParser(),
         }
     }
 
@@ -375,7 +375,7 @@ class SearchVehicleApi(Resource):
     """搜索车辆Api"""
     meta = {
         'args_parser_dict': {
-            'get': SearchVehicleApiParser,
+            'get': SearchVehicleApiParser(),
         }
     }
 

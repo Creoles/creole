@@ -23,7 +23,7 @@ class CreateVehicleCompanyApiParser(BaseRequestParser):
         ('PERSON', 2, u'个人'),
     )
     company_type = Argument(
-        'company_type', choices=COMPANY_TYPE.values(),
+        'company_type', choices=COMPANY_TYPE.values(), type=int,
         nullable=False, required=True)
     country_id = Argument(
         'country_id', type=int, nullable=False, required=True)
@@ -61,7 +61,7 @@ class SearchVehicleApiParser(BaseRequestParser):
     number = Argument('number', type=int, default=20, required=False)
 
 
-class CreateVehicleAccountApiParser(BaseRequestParser, AccountParserMixin):
+class CreateVehicleAccountApiParser(AccountParserMixin, BaseRequestParser):
     company_id = Argument(
         'company_id', type=int, required=True, location=('json', 'form'))
 
@@ -134,12 +134,12 @@ class SearchVehicleTypeApiParser(BaseRequestParser):
     )
 
     vehicle_type = Argument(
-        'vehicle_type', type=int, choices=VEHICLE_TYPE.values())
+        'vehicle_type', type=int, choices=VEHICLE_TYPE.values(), required=False)
     page = Argument('page', type=int, default=1, required=False)
     number = Argument('number', type=int, default=20, required=False)
 
 
-class CreateVehicleContactApiParser(BaseRequestParser, ContactParserMixin):
+class CreateVehicleContactApiParser(ContactParserMixin, BaseRequestParser):
     company_id = Argument(
         'company_id', required=True, nullable=False,
         type=int, location=('json', 'form'))

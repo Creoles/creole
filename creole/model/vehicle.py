@@ -55,7 +55,7 @@ class VehicleCompany(Base, BaseMixin):
 
     @validates('company_type')
     def _validate_company_type(self, key, company_type):
-        if not company_type not in self.COMPANY_TYPE.values():
+        if company_type not in self.COMPANY_TYPE.values():
             raise_error_json(InvalidateError(args=('company_type', company_type,)))
         return company_type
 
@@ -191,7 +191,8 @@ class VehicleAccount(Base, AccountMixin):
 
     @classmethod
     def get_by_company_id(cls, company_id):
-        return DBSession().query(cls).filter(company_id=company_id).all()
+        return DBSession().query(cls).\
+            filter(cls.company_id==company_id).all()
 
     @classmethod
     def delete(cls, id):
@@ -239,9 +240,7 @@ class VehicleType(Base, BaseMixin):
 
     @validates('vehicle_type')
     def _validate_vehicle_type(self, key, vehicle_type):
-        type = DBSession().query(VehicleType).filter(
-            VehicleType.id==vehicle_type).first()
-        if not type:
+        if vehicle_type not in self.VEHICLE_TYPE.values():
             raise_error_json(InvalidateError(args=('vehicle_type', vehicle_type)))
         return vehicle_type
 
@@ -280,11 +279,12 @@ class VehicleType(Base, BaseMixin):
         session.flush()
 
     @classmethod
-    def search(cls, vehicle_type, number=20, page=1):
+    def search(cls, vehicle_type=None, number=20, page=1):
         total = None
         session = DBSession()
-        query = session.query(cls).filter(
-            cls.vehicle_type==vehicle_type)
+        query = session.query(cls)
+        if vehicle_type:
+            query = query.filter(cls.vehicle_type==vehicle_type)
         if page == 1:
             total = query.count()
         type_list = query.offset((page - 1) * number).limit(number).all()

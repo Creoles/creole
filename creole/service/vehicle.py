@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from ..model import DBSession
 from ..model.vehicle import (
@@ -14,6 +14,8 @@ from .base import BaseService
 from ..exc import (
     raise_error_json,
     DatabaseError,
+    ClientError,
+    CreoleErrCode,
 )
 
 
@@ -78,6 +80,9 @@ class VehicleCompanyService(BaseService):
         session = DBSession()
         try:
             session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise_error_json(ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_DUPLICATED))
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
@@ -87,8 +92,8 @@ class VehicleCompanyService(BaseService):
                        city_id=None, company_type=None, number=20, page=1):
         vehicle_company, total = \
             VehicleCompany.search(
-                name=None, name_en=None, country_id=None,
-                city_id=None, company_type=None,
+                name=name, name_en=name_en, country_id=country_id,
+                city_id=city_id, company_type=company_type,
                 number=number, page=page)
         return [cls._get_db_obj_data_dict(item) for item in vehicle_company], total
 
@@ -112,8 +117,9 @@ class VehicleAccountService(BaseService):
                        deposit_bank, payee, account, swift_code=None,
                        note=None):
         VehicleAccount.create(
-            currency=currency, bank_name=bank_name,
-            deposit_bank=deposit_bank, payee=payee, account=account,
+            company_id=company_id, currency=currency,
+            bank_name=bank_name, deposit_bank=deposit_bank,
+            payee=payee, account=account,
             note=note, swift_code=swift_code)
         session = DBSession()
         try:
@@ -270,7 +276,7 @@ class VehicleTypeService(BaseService):
 
     @classmethod
     def update_type_by_id(cls, id, **kwargs):
-        VehicleType.updated(id, **kwargs)
+        VehicleType.update(id, **kwargs)
         session = DBSession()
         try:
             session.commit()
@@ -289,7 +295,7 @@ class VehicleTypeService(BaseService):
             raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def search_type(cls, vehicle_type, number=20, page=1):
+    def search_type(cls, vehicle_type=None, number=20, page=1):
         type_list, total = VehicleType.search(
             vehicle_type=vehicle_type, number=number, page=page)
         return [cls._get_db_obj_data_dict(item) for item in type_list], total
