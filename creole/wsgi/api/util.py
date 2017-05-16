@@ -17,7 +17,8 @@ class BaseRequestParser(RequestParser):
         self._add_customize_arguments()
 
     def _add_customize_arguments(self):
-        for value in self.__class__.__dict__.values():
+        for name in dir(self):
+            value = getattr(self, name) if not name.startswith('__') else None
             if isinstance(value, Argument):
                 self.add_argument(value)
 
@@ -30,7 +31,7 @@ class Resource(BaseResource):
         if args_parser_dict is None:
             return self._req_method_decorate
 
-        def set_parser(parser_cls):
+        def set_parser(parser_instance):
             def wrapper(func):
                 def decorated(*args, **kwargs):
                     # method:url:values
@@ -39,7 +40,7 @@ class Resource(BaseResource):
                         request.json, request.files
                     ))
                     try:
-                        parsed_data = parser_cls().parse_args()
+                        parsed_data = parser_instance.parse_args()
                     except BadRequest as e:
                         return api_response(
                             code=CreoleErrCode.PARAMETER_ERROR,
@@ -56,10 +57,10 @@ class Resource(BaseResource):
                 return decorated
             return wrapper
 
-        parser_cls = args_parser_dict.get(method_name, None) or \
+        parser_instance = args_parser_dict.get(method_name, None) or \
             args_parser_dict.get('*', None)
-        if parser_cls is not None:
-            self._req_method_decorate[method_name] = [set_parser(parser_cls)]
+        if parser_instance is not None:
+            self._req_method_decorate[method_name] = [set_parser(parser_instance)]
 
     def _set_method_decorate(self):
         # flask-restulf==0.3.5目前还不支持针对不同的request method

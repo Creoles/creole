@@ -1,6 +1,7 @@
 # coding: utf-8
 from sqlalchemy import (
     Column,
+    Unicode,
     Integer,
     DateTime,
     text,
@@ -17,6 +18,8 @@ from . import DBSession
 from ..util import Enum
 from ..exc import (
     raise_error_json,
+    CreoleErrCode,
+    ClientError,
     InvalidateError,
 )
 
@@ -42,6 +45,12 @@ class BaseMixin(object):
                             'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
                         ))
 
+    @classmethod
+    def get_by_id(cls, id):
+        session = DBSession()
+        obj = session.query(cls).filter(cls.id==id).first()
+        return obj
+
 
 class AccountMixin(BaseMixin):
     CURRENCY = Enum(
@@ -65,8 +74,31 @@ class AccountMixin(BaseMixin):
                 InvalidateError(args=('currency', currency,)))
         return currency
 
+
+class ContactMixin(BaseMixin):
+    contact = Column(Unicode(16), nullable=False, doc=u'联系人')
+    position = Column(String(30), nullable=False, doc=u'职位')
+    telephone = Column(String(20), nullable=False, doc=u'联系电话')
+    email = Column(String(30), nullable=False, doc=u'邮箱')
+
     @classmethod
-    def get_by_id(cls, id):
+    def update(cls, id, **kwargs):
+        person = cls.get_by_id(id)
+        if not person:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.CONTACT_PERSON_NOT_EXIST))
         session = DBSession()
-        account = session.query(cls).filter(cls.id==id).first()
-        return account
+        for k, v in kwargs.iteritems():
+            setattr(person, k, v)
+        session.merge(person)
+        session.flush()
+
+    @classmethod
+    def delete(cls, id):
+        session = DBSession()
+        person = session.query(cls).filter(cls.id==id).first()
+        if not person:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.CONTACT_PERSON_NOT_EXIST))
+        session.delete(person)
+        session.flush()

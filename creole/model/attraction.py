@@ -98,12 +98,6 @@ class Attraction(Base, BaseMixin):
             raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def get_by_id(cls, id):
-        session = DBSession()
-        attraction = session.query(cls).filter(cls.id==id).first()
-        return attraction
-
-    @classmethod
     def delete(cls, id):
         session = DBSession()
         attraction = session.query(cls).filter(cls.id==id).first()
@@ -132,4 +126,3 @@ class Attraction(Base, BaseMixin):
             total = query.count()
         attraction_list = query.offset((page - 1) * number).limit(number).all()
         return attraction_list, total
-

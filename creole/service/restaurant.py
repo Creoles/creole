@@ -138,11 +138,11 @@ class RestaurantAccountService(BaseService):
             account = account_dict['account']
             swift_code = account_dict.get('swift_code', None)
             note = account_dict.get('note', None)
-        RestaurantAccount.create(
-            restaurant_id=restaurant_id, currency=currency,
-            bank_name=bank_name, deposit_bank=deposit_bank,
-            payee=payee, account=account, note=note,
-            swift_code=swift_code)
+            RestaurantAccount.create(
+                restaurant_id=restaurant_id, currency=currency,
+                bank_name=bank_name, deposit_bank=deposit_bank,
+                payee=payee, account=account, note=note,
+                swift_code=swift_code)
 
     @classmethod
     def delete_account(cls, delete_id_list):

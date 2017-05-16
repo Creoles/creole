@@ -65,11 +65,11 @@ CREATE TABLE `city` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
-  KEY `ix_name_en` (`name_en`),
   KEY `ix_country_id` (`country_id`),
   KEY `ix_created_at` (`created_at`),
   KEY `ix_name` (`name`),
-  KEY `ix_updated_at` (`updated_at`)
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_name_en` (`name_en`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -96,9 +96,9 @@ CREATE TABLE `country` (
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
   KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_name_en` (`name_en`),
   KEY `ix_created_at` (`created_at`),
-  KEY `ix_name` (`name`),
-  KEY `ix_name_en` (`name_en`)
+  KEY `ix_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -209,6 +209,30 @@ CREATE TABLE `restaurant_account` (
   KEY `ix_updated_at` (`updated_at`),
   KEY `ix_restaurant_id` (`restaurant_id`),
   KEY `ix_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `restaurant_company`
+--
+
+DROP TABLE IF EXISTS `restaurant_company`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `restaurant_company` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `name` varchar(30) NOT NULL,
+  `name_en` varchar(30) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `name_en` (`name_en`),
+  UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_name_en` (`name_en`),
+  KEY `ix_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -437,27 +461,22 @@ CREATE TABLE `vehicle` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `account_id` int(11) NOT NULL,
-  `company_id` int(11) DEFAULT NULL,
   `country_id` int(11) NOT NULL,
   `city_id` int(11) NOT NULL,
-  `vehicle_type` varchar(16) NOT NULL,
-  `seat` tinyint(4) NOT NULL,
-  `start_use` varchar(4) NOT NULL,
+  `company_id` int(11) NOT NULL,
   `license` varchar(10) NOT NULL,
-  `register_number` varchar(20) NOT NULL,
   `insurance_number` varchar(30) NOT NULL,
-  `contact` varchar(16) NOT NULL,
-  `telephone` varchar(20) NOT NULL,
-  `unit_price` float NOT NULL,
+  `start_use` varchar(4) NOT NULL,
+  `register_number` varchar(20) NOT NULL,
+  `vehicle_type_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `ix_vehicle_type` (`vehicle_type`),
   KEY `ix_updated_at` (`updated_at`),
   KEY `ix_created_at` (`created_at`),
+  KEY `idx_country_id_city_id_company_id_vehicle_type_id` (`country_id`,`city_id`,`company_id`,`vehicle_type_id`),
   KEY `ix_country_id` (`country_id`),
-  KEY `idx_country_id_city_id_company_id_vehicle_type_seat` (`country_id`,`city_id`,`company_id`,`vehicle_type`,`seat`),
   KEY `ix_city_id` (`city_id`),
-  KEY `ix_company_id` (`company_id`)
+  KEY `ix_company_id` (`company_id`),
+  KEY `ix_vehicle_type_id` (`vehicle_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -472,15 +491,22 @@ CREATE TABLE `vehicle_company` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `company_type` tinyint(4) NOT NULL,
+  `country_id` int(11) NOT NULL,
+  `city_id` int(11) NOT NULL,
   `name` varchar(40) NOT NULL,
   `name_en` varchar(60) NOT NULL,
+  `nickname_en` varchar(30) NOT NULL,
+  `vehicle_number` smallint(6) NOT NULL,
+  `register_number` varchar(30) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
+  UNIQUE KEY `nickname_en` (`nickname_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
-  KEY `ix_name_en` (`name_en`),
-  KEY `ix_updated_at` (`updated_at`),
   KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_name_en` (`name_en`),
   KEY `ix_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -503,14 +529,59 @@ CREATE TABLE `vehicle_company_account` (
   `account` varchar(20) NOT NULL,
   `swift_code` varchar(20) DEFAULT NULL,
   `note` varchar(40) NOT NULL,
-  `account_type` tinyint(4) NOT NULL,
-  `owner_id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `account` (`account`),
-  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_company_id` (`company_id`),
   KEY `ix_created_at` (`created_at`),
-  KEY `idx_owner_id_account_type_account` (`owner_id`,`account_type`,`account`),
-  KEY `idx_owner_id_account_type` (`owner_id`,`account_type`)
+  KEY `ix_updated_at` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `vehicle_contact`
+--
+
+DROP TABLE IF EXISTS `vehicle_contact`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `vehicle_contact` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `contact` varchar(16) NOT NULL,
+  `position` varchar(30) NOT NULL,
+  `telephone` varchar(20) NOT NULL,
+  `email` varchar(30) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_company_id` (`company_id`),
+  KEY `ix_updated_at` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `vehicle_fee`
+--
+
+DROP TABLE IF EXISTS `vehicle_fee`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `vehicle_fee` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `vehicle_type_id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `unit_price` float NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `confirm_person` varchar(30) DEFAULT NULL,
+  `attachment_hash` varchar(128) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -527,6 +598,29 @@ CREATE TABLE `vehicle_image` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `vehicle_id` int(11) NOT NULL,
   `image_hash` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `vehicle_type`
+--
+
+DROP TABLE IF EXISTS `vehicle_type`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `vehicle_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `vehicle_type` tinyint(4) NOT NULL,
+  `brand` varchar(20) NOT NULL,
+  `seat` tinyint(4) NOT NULL,
+  `available_seat` tinyint(4) NOT NULL,
+  `passenger_count` tinyint(4) NOT NULL,
+  `note` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `ix_created_at` (`created_at`),
   KEY `ix_updated_at` (`updated_at`)
@@ -568,4 +662,4 @@ CREATE TABLE `vehicle_user_account` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-05  9:51:46
+-- Dump completed on 2017-05-14  9:27:00

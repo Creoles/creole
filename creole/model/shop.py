@@ -44,11 +44,6 @@ class ShopCompany(Base, BaseMixin):
         return table_args + BaseMixin.__table_args__
 
     @classmethod
-    def get_by_id(cls, id):
-        company = DBSession().query(cls).filter(cls.id==id).first()
-        return company
-
-    @classmethod
     def delete(cls, id):
         session = DBSession()
         company = session.query(cls).filter(cls.id==id).first()
@@ -191,12 +186,6 @@ class Shop(Base, BaseMixin):
             raise_error_json(ClientError(errcode=CreoleErrCode.CITY_NOT_EXIST))
         elif city.country_id != country_id:
             raise_error_json(InvalidateError(errcode=CreoleErrCode.COUNTRY_NOT_EXIST))
-
-    @classmethod
-    def get_by_id(cls, id):
-        session = DBSession()
-        shop = session.query(cls).filter(cls.id==id).first()
-        return shop
 
     @classmethod
     def get_by_company_id(cls, company_id):

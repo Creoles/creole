@@ -158,12 +158,6 @@ class TourGuide(Base, BaseMixin):
         return passport_type
 
     @classmethod
-    def get_by_id(cls, id):
-        session = DBSession()
-        tour_guide = session.query(cls).filter(cls.id==id).first()
-        return tour_guide
-
-    @classmethod
     def create(cls, guide_type, country_id, name, name_en, nickname_en,
                gender, birthday, start_work, first_language, first_language_level,
                second_language, second_language_level, certificate_type,
@@ -275,12 +269,6 @@ class TourGuideFee(Base,BaseMixin):
         if not tour_guide:
             raise_error_json(InvalidateError(args=('tour_guide_id', tour_guide_id,)))
         return tour_guide_id
-
-    @classmethod
-    def get_by_id(cls, id):
-        session = DBSession()
-        fee = session.query(cls).filter(cls.id==id).first()
-        return fee
 
     @classmethod
     def get_by_tour_guide_id(cls, tour_guide_id):

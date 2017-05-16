@@ -4,7 +4,7 @@ from flask_restful.reqparse import Argument
 from creole.util import Enum
 
 
-class AccountParserMixin:
+class AccountParserMixin(object):
     CURRENCY = Enum(
         ('USD', 1, u'美元'),
         ('CNY', 2, u'人民币'),
@@ -18,7 +18,15 @@ class AccountParserMixin:
     deposit_bank = Argument('deposit_bank', nullable=False, required=True, location=('json', 'form'))
     payee = Argument('payee', nullable=False, required=True, location=('json', 'form'))
     account = Argument('account', nullable=False, required=True, location=('json', 'form'))
+    swift_code = Argument('swift_code', required=False, location=('json', 'form'))
     note = Argument('note', required=False, location=('json', 'form'))
+
+
+class ContactParserMixin(object):
+    contact = Argument('contact', required=True, nullable=False)
+    position = Argument('position', required=True, nullable=False)
+    telephone = Argument('telephone', required=True, nullable=False)
+    email = Argument('email', required=True, nullable=False)
 
 
 def dict_parser_func(param_mapping):
