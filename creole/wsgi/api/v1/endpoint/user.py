@@ -12,8 +12,8 @@ from creole.service.user import UserService
 class UserInfoApi(Resource):
     meta = {
         'args_parser_dict': {
-            '*': UserInfoParser,
-            'put': UserInfoPutParser,
+            '*': UserInfoParser(),
+            'put': UserInfoPutParser(),
         }
     }
 
@@ -44,7 +44,7 @@ class UserInfoApi(Resource):
 class CreateUserApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': UserInfoPostParser,
+            'post': UserInfoPostParser(),
         }
     }
 

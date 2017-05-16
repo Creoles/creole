@@ -17,7 +17,7 @@ from creole.exc import ClientError
 class TourGuideApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateTourGuideApiParser,
+            'put': CreateTourGuideApiParser(),
         }
     }
 
@@ -44,7 +44,7 @@ class TourGuideApi(Resource):
 class CreateTourGuideApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': CreateTourGuideApiParser,
+            'post': CreateTourGuideApiParser(),
         }
     }
 
@@ -60,7 +60,7 @@ class CreateTourGuideApi(Resource):
 class SearchTourGuideApi(Resource):
     meta = {
         'args_parser_dict': {
-            'get': SearchTourGuideApiParser,
+            'get': SearchTourGuideApiParser(),
         }
     }
 
@@ -77,7 +77,7 @@ class SearchTourGuideApi(Resource):
 class TourGuideFeeApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateTourGuideFeeApiParser,
+            'put': CreateTourGuideFeeApiParser(),
         }
     }
 
@@ -105,7 +105,7 @@ class TourGuideFeeApi(Resource):
 class CreateTourGuideFeeApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': CreateTourGuideFeeApiParser,
+            'post': CreateTourGuideFeeApiParser(),
         }
     }
 
@@ -128,7 +128,7 @@ class TourGuideAccountApi(Resource):
 class EditTourGuideAccountApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': EditTourGuideAccountApiParser,
+            'post': EditTourGuideAccountApiParser(),
         }
     }
 

@@ -11,7 +11,7 @@ from creole.exc import ClientError
 class AttractionApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateAttractionApiParser,
+            'put': CreateAttractionApiParser(),
         }
     }
 
@@ -38,7 +38,7 @@ class AttractionApi(Resource):
 class CreateAttractionApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': CreateAttractionApiParser,
+            'post': CreateAttractionApiParser(),
         }
     }
 
@@ -54,7 +54,7 @@ class CreateAttractionApi(Resource):
 class SearchAttractionApi(Resource):
     meta = {
         'args_parser_dict': {
-            'get': SearchAttractionApiParser,
+            'get': SearchAttractionApiParser(),
         }
     }
 

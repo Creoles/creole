@@ -14,7 +14,7 @@ from creole.model.shop import Shop
 class ShopApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateShopApiParser,
+            'put': CreateShopApiParser(),
         }
     }
 
@@ -44,7 +44,7 @@ class ShopApi(Resource):
 class CreateShopApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': CreateShopApiParser,
+            'post': CreateShopApiParser(),
         }
     }
 
@@ -60,7 +60,7 @@ class CreateShopApi(Resource):
 class ShopSearchApi(Resource):
     meta = {
         'args_parser_dict': {
-            'get': ShopSearchApiParser,
+            'get': ShopSearchApiParser(),
         }
     }
     def get(self):
@@ -77,7 +77,7 @@ class ShopSearchApi(Resource):
 class ShopCompanyApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateShopCompanyApiParser,
+            'put': CreateShopCompanyApiParser(),
         }
     }
 
@@ -107,7 +107,7 @@ class ShopCompanyApi(Resource):
 class CreateShopCompanyApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': CreateShopCompanyApiParser,
+            'post': CreateShopCompanyApiParser(),
         }
     }
 
@@ -123,7 +123,7 @@ class CreateShopCompanyApi(Resource):
 class SearchShopCompanyApi(Resource):
     meta = {
         'args_parser_dict': {
-            'get': SearchShopCompanyApiParser,
+            'get': SearchShopCompanyApiParser(),
         }
     }
 

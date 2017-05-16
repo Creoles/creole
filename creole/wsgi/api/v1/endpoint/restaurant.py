@@ -17,7 +17,7 @@ from creole.exc import ClientError
 class RestaurantApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateRestaurantApiParser,
+            'put': CreateRestaurantApiParser(),
         }
     }
 
@@ -45,7 +45,7 @@ class CreateRestaurantApi(Resource):
     """创建餐饮公司Api"""
     meta = {
         'args_parser_dict': {
-            'post': CreateRestaurantApiParser,
+            'post': CreateRestaurantApiParser(),
         }
     }
 
@@ -61,7 +61,7 @@ class CreateRestaurantApi(Resource):
 class SearchRestaurantApi(Resource):
     meta = {
         'args_parser_dict': {
-            'get': SearchRestaurantApiParser,
+            'get': SearchRestaurantApiParser(),
         }
     }
 
@@ -84,7 +84,7 @@ class RestaurantAccountApi(Resource):
 class EditRestaurantAccountApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': EditRestaurantAccountApiParser,
+            'post': EditRestaurantAccountApiParser(),
         }
     }
 
@@ -113,7 +113,7 @@ class MealApi(Resource):
 class EditMealApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': EditMealApiParser,
+            'post': EditMealApiParser(),
         }
     }
 

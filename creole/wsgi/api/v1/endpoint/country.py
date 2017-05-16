@@ -8,7 +8,7 @@ from creole.exc import ClientError
 class CountryApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CountryApiParser,
+            'put': CountryApiParser(),
         }
     }
 
@@ -45,7 +45,7 @@ class AllCountryApi(Resource):
 class CreateCountryApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': CountryApiParser,
+            'post': CountryApiParser(),
         }
     }
 
@@ -61,7 +61,7 @@ class CreateCountryApi(Resource):
 class CityApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CityApiParser,
+            'put': CityApiParser(),
         }
     }
 
@@ -91,7 +91,7 @@ class CityApi(Resource):
 class CreateCityApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': CityApiParser,
+            'post': CityApiParser(),
         }
     }
 
