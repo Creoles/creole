@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.exc import SQLAlchemyError
 
 from ..model import DBSession
 from ..model.vehicle import (
@@ -14,8 +14,6 @@ from .base import BaseService
 from ..exc import (
     raise_error_json,
     DatabaseError,
-    ClientError,
-    CreoleErrCode,
 )
 
 
@@ -80,9 +78,6 @@ class VehicleCompanyService(BaseService):
         session = DBSession()
         try:
             session.commit()
-        except IntegrityError as e:
-            session.rollback()
-            raise_error_json(ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_DUPLICATED))
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))

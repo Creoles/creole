@@ -12,6 +12,7 @@ from sqlalchemy.dialects.mysql import (
     TINYINT,
     SMALLINT,
 )
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -97,7 +98,12 @@ class VehicleCompany(Base, BaseMixin):
             register_number=register_number
         )
         session.add(company)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_DUPLICATED))
 
     @classmethod
     def update(cls, id, **kwargs):
@@ -109,7 +115,12 @@ class VehicleCompany(Base, BaseMixin):
         for k, v in kwargs.iteritems():
             setattr(company, k, v)
         session.merge(company)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_DUPLICATED))
 
     @classmethod
     def search(cls, name=None, name_en=None, country_id=None,
@@ -187,7 +198,12 @@ class VehicleAccount(Base, AccountMixin):
             payee=payee, account=account, swift_code=swift_code,
             note=note)
         session.add(account)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_ACCOUNT_DUPLICATED))
 
     @classmethod
     def get_by_company_id(cls, company_id):
@@ -214,7 +230,12 @@ class VehicleAccount(Base, AccountMixin):
             setattr(account, k, v)
         session = DBSession()
         session.merge(account)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_ACCOUNT_DUPLICATED))
 
 
 class VehicleType(Base, BaseMixin):
