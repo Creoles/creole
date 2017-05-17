@@ -172,6 +172,7 @@ class VehicleContact(Base, ContactMixin):
         )
         session.add(person)
         session.flush()
+        return person
 
 
 class VehicleAccount(Base, AccountMixin):
@@ -204,6 +205,7 @@ class VehicleAccount(Base, AccountMixin):
             session.rollback()
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.VEHICLE_ACCOUNT_DUPLICATED))
+        return account
 
     @classmethod
     def get_by_company_id(cls, company_id):
@@ -487,6 +489,7 @@ class VehicleFee(Base, BaseMixin):
         )
         session.add(fee)
         session.flush()
+        return fee
 
     @classmethod
     def update(cls, id, **kwargs):

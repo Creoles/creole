@@ -111,7 +111,7 @@ class VehicleAccountService(BaseService):
     def create_account(cls, company_id, currency, bank_name,
                        deposit_bank, payee, account, swift_code=None,
                        note=None):
-        VehicleAccount.create(
+        account = VehicleAccount.create(
             company_id=company_id, currency=currency,
             bank_name=bank_name, deposit_bank=deposit_bank,
             payee=payee, account=account,
@@ -122,6 +122,7 @@ class VehicleAccountService(BaseService):
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
+        return account.id
 
     @classmethod
     def delete_account_by_id(cls, id):
@@ -160,7 +161,7 @@ class VehicleFeeService(BaseService):
                    unit_price, start_time, end_time,
                    confirm_person, attachment_hash):
         session = DBSession()
-        VehicleFee.create(
+        fee = VehicleFee.create(
             vehicle_type_id=vehicle_type_id,
             company_id=company_id, unit_price=unit_price,
             start_time=start_time, end_time=end_time,
@@ -171,6 +172,7 @@ class VehicleFeeService(BaseService):
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
+        return fee.id
 
     @classmethod
     def update_fee_by_id(cls, id, **kwargs):
@@ -218,7 +220,7 @@ class VehicleContactService(BaseService):
     def create_contact(cls, contact, position, telephone,
                        email, company_id):
         session = DBSession()
-        VehicleContact.create(
+        contact = VehicleContact.create(
             contact=contact, position=position,
             telephone=telephone, email=email,
             company_id=company_id)
@@ -227,6 +229,7 @@ class VehicleContactService(BaseService):
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
+        return contact.id
 
     @classmethod
     def update_contact(cls, id, **kwargs):

@@ -134,10 +134,10 @@ class CreateVehicleAccountApi(Resource):
     def post(self):
         parsed_data = self.parsed_data
         try:
-            VehicleAccountService.create_account(**parsed_data)
+            account_id = VehicleAccountService.create_account(**parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
-        return api_response()
+        return api_response(data={'account_id': account_id})
 
 
 class VehicleTypeApi(Resource):
@@ -221,7 +221,7 @@ class VehicleFeeApi(Resource):
         parsed_data['start_time'] = timestamp_to_date(start_time_stamp)
         parsed_data['end_time'] = timestamp_to_date(end_time_stamp)
         try:
-            VehicleTypeService.update_type_by_id(id, **parsed_data)
+            VehicleFeeService.update_fee_by_id(id, **parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
@@ -273,10 +273,10 @@ class CreateVehicleFeeApi(Resource):
         parsed_data['start_time'] = timestamp_to_date(start_time_stamp)
         parsed_data['end_time'] = timestamp_to_date(end_time_stamp)
         try:
-            VehicleFeeService.create_fee(**parsed_data)
+            fee_id = VehicleFeeService.create_fee(**parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
-        return api_response()
+        return api_response(data={'fee_id': fee_id})
 
 
 class GetVehicleContactApi(Resource):
@@ -321,10 +321,11 @@ class CreateVehicleContactApi(Resource):
 
     def post(self):
         try:
-            VehicleContactService.create_contact(**self.parsed_data)
+            contact_id = \
+                VehicleContactService.create_contact(**self.parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
-        return api_response()
+        return api_response(data={'contact_id': contact_id})
 
 
 class VehicleApi(Resource):
