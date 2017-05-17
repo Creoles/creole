@@ -251,7 +251,7 @@ class SearchVehicleFeeApi(Resource):
         if end_time:
             end_time_stamp = int(end_time)
             parsed_data['end_time'] = timestamp_to_datetime(end_time_stamp)
-        vehicle_fee_list, total = VehicleFeeService.search_fee(parsed_data)
+        vehicle_fee_list, total = VehicleFeeService.search_fee(**parsed_data)
         if self.parsed_data['page'] == 1:
             data = {'vehicle_fee_list': vehicle_fee_list, 'total': total}
         else:
