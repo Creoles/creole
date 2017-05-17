@@ -514,9 +514,9 @@ class VehicleFee(Base, BaseMixin):
         if unit_price:
             query = query.filter(cls.unit_price==unit_price)
         if start_time:
-            query = query.filter(cls.start_time==start_time)
+            query = query.filter(cls.start_time>=start_time)
         if end_time:
-            query = query.filter(cls.end_time==end_time)
+            query = query.filter(cls.end_time<=end_time)
         if confirm_person:
             query = query.filter(cls.confirm_person==confirm_person)
         if page == 1:

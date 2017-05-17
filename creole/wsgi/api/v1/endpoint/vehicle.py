@@ -21,7 +21,7 @@ from ..req_param.vehicle import (
     CreateVehicleContactApiParser,
 )
 from creole.exc import ClientError
-from .....util import timestamp_to_datetime
+from .....util import timestamp_to_date
 
 
 class VehicleCompanyApi(Resource):
@@ -218,8 +218,8 @@ class VehicleFeeApi(Resource):
         parsed_data = self.parsed_data
         start_time_stamp = int(parsed_data['start_time'])
         end_time_stamp = int(parsed_data['end_time'])
-        parsed_data['start_time'] = timestamp_to_datetime(start_time_stamp)
-        parsed_data['end_time'] = timestamp_to_datetime(end_time_stamp)
+        parsed_data['start_time'] = timestamp_to_date(start_time_stamp)
+        parsed_data['end_time'] = timestamp_to_date(end_time_stamp)
         try:
             VehicleTypeService.update_type_by_id(id, **parsed_data)
         except ClientError as e:
@@ -247,10 +247,10 @@ class SearchVehicleFeeApi(Resource):
         end_time = parsed_data.get('end_time', None)
         if start_time:
             start_time_stamp = int(start_time)
-            parsed_data['start_time'] = timestamp_to_datetime(start_time_stamp)
+            parsed_data['start_time'] = timestamp_to_date(start_time_stamp)
         if end_time:
             end_time_stamp = int(end_time)
-            parsed_data['end_time'] = timestamp_to_datetime(end_time_stamp)
+            parsed_data['end_time'] = timestamp_to_date(end_time_stamp)
         vehicle_fee_list, total = VehicleFeeService.search_fee(**parsed_data)
         if self.parsed_data['page'] == 1:
             data = {'vehicle_fee_list': vehicle_fee_list, 'total': total}
@@ -270,8 +270,8 @@ class CreateVehicleFeeApi(Resource):
         parsed_data = self.parsed_data
         start_time_stamp = int(parsed_data['start_time'])
         end_time_stamp = int(parsed_data['end_time'])
-        parsed_data['start_time'] = timestamp_to_datetime(start_time_stamp)
-        parsed_data['end_time'] = timestamp_to_datetime(end_time_stamp)
+        parsed_data['start_time'] = timestamp_to_date(start_time_stamp)
+        parsed_data['end_time'] = timestamp_to_date(end_time_stamp)
         try:
             VehicleFeeService.create_fee(**parsed_data)
         except ClientError as e:

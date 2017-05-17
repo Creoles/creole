@@ -5,7 +5,7 @@ import time
 import datetime
 
 
-def timestamp_to_datetime(timestamp):
+def timestamp_to_date(timestamp):
     t = time.localtime(int(timestamp))
     return time.strftime("%Y-%m-%d", t)
 
