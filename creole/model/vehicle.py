@@ -319,7 +319,7 @@ class Vehicle(Base, BaseMixin):
     country_id = Column(Integer, nullable=False, doc=u'国家名')
     city_id = Column(Integer, nullable=False, doc=u'城市名')
     company_id = Column(Integer, nullable=False, doc=u'所属车辆公司')
-    license = Column(String(10), nullable=False, doc=u'车牌号')
+    license = Column(String(10), unique=True, nullable=False, doc=u'车牌号')
     insurance_number = Column(String(30), nullable=False, doc=u'车辆保险号')
     start_use = Column(String(4), nullable=False, doc=u'使用年限')
     register_number = Column(String(20), nullable=False, doc=u'旅游局注册号')
@@ -390,7 +390,12 @@ class Vehicle(Base, BaseMixin):
             insurance_number=insurance_number,
         )
         session.add(vehicle)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_LICENSE_DUPLICATED))
 
     @classmethod
     def update(cls, id, **kwargs):
@@ -405,7 +410,12 @@ class Vehicle(Base, BaseMixin):
             setattr(vehicle, k, v)
         session = DBSession()
         session.merge(vehicle)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_LICENSE_DUPLICATED))
 
     @classmethod
     def delete(cls, id):
@@ -424,17 +434,18 @@ class Vehicle(Base, BaseMixin):
         total = None
         if license:
             vehicle_list = query.filter(cls.license==license).all()
-        if city_id:
-            query = query.filter(cls.city_id==city_id)
-        elif country_id:
-            query = query.filter(cls.country_id==country_id)
-        if company_id:
-            query = query.filter(cls.company_id==company_id)
-        if vehicle_type_id:
-            query = query.filter(cls.vehicle_type_id==vehicle_type_id)
-        if page == 1:
-            total = query.count()
-        vehicle_list = query.offset((page - 1) * number).limit(number).all()
+        else:
+            if city_id:
+                query = query.filter(cls.city_id==city_id)
+            elif country_id:
+                query = query.filter(cls.country_id==country_id)
+            if company_id:
+                query = query.filter(cls.company_id==company_id)
+            if vehicle_type_id:
+                query = query.filter(cls.vehicle_type_id==vehicle_type_id)
+            if page == 1:
+                total = query.count()
+            vehicle_list = query.offset((page - 1) * number).limit(number).all()
         return vehicle_list, total
 
 

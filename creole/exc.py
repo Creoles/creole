@@ -34,6 +34,7 @@ class BaseCreoleErrCode(object):
     VEHICLE_ACCOUNT_DUPLICATED = 3034
     VEHICLE_TYPE_NOT_EXIST = 3035
     VEHICLE_FEE_NOT_EXIST = 3036
+    VEHICLE_LICENSE_DUPLICATED = 3037
 
     # 景点
     ATTRACTION_NOT_EXIST = 3040
@@ -89,6 +90,7 @@ TRANSLATIONS = {
     CreoleErrCode.VEHICLE_ACCOUNT_DUPLICATED: u'vehicle account duplicated',
     CreoleErrCode.VEHICLE_TYPE_NOT_EXIST: u'vehicle type do not exist',
     CreoleErrCode.VEHICLE_FEE_NOT_EXIST: u'vehicle fee do not exist',
+    CreoleErrCode.VEHICLE_LICENSE_DUPLICATED: u'vehicle license duplicated',
 
     CreoleErrCode.ATTRACTION_NOT_EXIST: u'attraction do not exist',
 

@@ -99,7 +99,7 @@ app.add_resource(GetVehicleFeeApi, '/vehicle/fee/company/<int:company_id>', endp
 app.add_resource(CreateVehicleFeeApi, '/vehicle/fee/create', endpoint='create-vehicle-fee')
 app.add_resource(SearchVehicleFeeApi, '/vehicle/fee/search', endpoint='search-vehicle-fee')
 app.add_resource(VehicleContactApi, '/vehicle/contact/<int:id>', endpoint='get-vehicle-contact')
-app.add_resource(GetVehicleContactApi, '/vehicle/contact/<int:company_id>', endpoint='get-company-contact')
+app.add_resource(GetVehicleContactApi, '/vehicle/contact/company/<int:company_id>', endpoint='get-company-contact')
 app.add_resource(CreateVehicleContactApi, '/vehicle/contact/create', endpoint='create-vehicle-contact')
 app.add_resource(VehicleTypeApi, '/vehicle/type/<int:id>', endpoint='get-vehicle-type')
 app.add_resource(CreateVehicleTypeApi, '/vehicle/type/create', endpoint='create-vehicle-type')

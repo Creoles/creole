@@ -470,6 +470,7 @@ CREATE TABLE `vehicle` (
   `register_number` varchar(20) NOT NULL,
   `vehicle_type_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `license` (`license`),
   KEY `ix_updated_at` (`updated_at`),
   KEY `ix_created_at` (`created_at`),
   KEY `idx_country_id_city_id_company_id_vehicle_type_id` (`country_id`,`city_id`,`company_id`,`vehicle_type_id`),
