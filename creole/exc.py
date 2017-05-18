@@ -38,6 +38,9 @@ class BaseCreoleErrCode(object):
 
     # 景点
     ATTRACTION_NOT_EXIST = 3040
+    ATTRACTION_DUPLICATED = 3041
+    ATTRACTION_FEE_DUPLICATED = 3042
+    ATTRACTION_FEE_NOT_EXIST = 3043
 
     # 餐饮
     RESTAURANT_NOT_EXIST = 3050
@@ -93,6 +96,9 @@ TRANSLATIONS = {
     CreoleErrCode.VEHICLE_LICENSE_DUPLICATED: u'vehicle license duplicated',
 
     CreoleErrCode.ATTRACTION_NOT_EXIST: u'attraction do not exist',
+    CreoleErrCode.ATTRACTION_DUPLICATED: u'attraction duplicated',
+    CreoleErrCode.ATTRACTION_FEE_DUPLICATED: u'attraction fee duplicated',
+    CreoleErrCode.ATTRACTION_FEE_NOT_EXIST: u'attraction fee do not exist',
 
     CreoleErrCode.RESTAURANT_NOT_EXIST: u'restaurant do not exist',
     CreoleErrCode.RESTAURANT_MEAL_REACH_LIMIT: u'the meal type of the restaurant has reach the limit.',
