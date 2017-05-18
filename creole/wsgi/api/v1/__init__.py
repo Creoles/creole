@@ -42,6 +42,9 @@ from .endpoint.attraction import (
     AttractionApi,
     CreateAttractionApi,
     SearchAttractionApi,
+    CreateAttractionFeeApi,
+    AttractionFeeApi,
+    GetAttractionFeeApi,
 )
 from .endpoint.restaurant import (
     RestaurantApi,
@@ -109,6 +112,9 @@ app.add_resource(SearchVehicleTypeApi, '/vehicle/type/search', endpoint='search-
 app.add_resource(AttractionApi, '/attraction/<int:id>', endpoint='get-attraction')
 app.add_resource(CreateAttractionApi, '/attraction/create', endpoint='create-attraction')
 app.add_resource(SearchAttractionApi, '/attraction/search', endpoint='search-attraction')
+app.add_resource(CreateAttractionFeeApi, '/attraction/fee/create', endpoint='create-attraction-fee')
+app.add_resource(AttractionFeeApi, '/attraction/fee/<int:id>', endpoint='get-attraction-fee')
+app.add_resource(GetAttractionFeeApi, '/attraction/fee/attraction/<int:attraction_id>', endpoint='get-fee')
 
 # 餐饮
 app.add_resource(RestaurantApi, '/restaurant/<int:id>', endpoint='get-restaurant')

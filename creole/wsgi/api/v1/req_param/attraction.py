@@ -18,7 +18,17 @@ class CreateAttractionApiParser(BaseRequestParser):
     address = Argument('address', nullable=False, required=True)
     name = Argument('name', nullable=False, required=True)
     name_en = Argument('name_en', nullable=False, required=True)
-    adult_fee = Argument('adult_fee', type=float, nullable=False, required=True)
-    child_fee = Argument('child_fee', type=float, nullable=False, required=True)
+    nickname_en = Argument('nickname_en', nullable=False, required=True)
     intro_cn = Argument('intro_cn', required=False)
     intro_en = Argument('intro_en', required=False)
+    note = Argument('note', required=False)
+
+
+class CreateAttractionFeeApiParser(BaseRequestParser):
+    attraction_id = Argument('attraction_id', type=int, nullable=False, required=True)
+    public_price = Argument('public_price', type=float, nullable=False, required=True)
+    company_price = Argument('company_price', type=float, nullable=False, required=True)
+    tour_gudie_price = Argument('tour_gudie_price', type=float, nullable=False, required=True)
+    translator_price = Argument('translator_price', type=float, nullable=False, required=True)
+    child_discount = Argument('child_discount', type=float, nullable=False, required=True)
+    note = Argument('note', required=False)
