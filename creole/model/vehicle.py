@@ -12,6 +12,7 @@ from sqlalchemy.dialects.mysql import (
     TINYINT,
     SMALLINT,
 )
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -97,7 +98,12 @@ class VehicleCompany(Base, BaseMixin):
             register_number=register_number
         )
         session.add(company)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_DUPLICATED))
 
     @classmethod
     def update(cls, id, **kwargs):
@@ -109,7 +115,12 @@ class VehicleCompany(Base, BaseMixin):
         for k, v in kwargs.iteritems():
             setattr(company, k, v)
         session.merge(company)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_COMPANY_DUPLICATED))
 
     @classmethod
     def search(cls, name=None, name_en=None, country_id=None,
@@ -161,6 +172,7 @@ class VehicleContact(Base, ContactMixin):
         )
         session.add(person)
         session.flush()
+        return person
 
 
 class VehicleAccount(Base, AccountMixin):
@@ -187,7 +199,13 @@ class VehicleAccount(Base, AccountMixin):
             payee=payee, account=account, swift_code=swift_code,
             note=note)
         session.add(account)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_ACCOUNT_DUPLICATED))
+        return account
 
     @classmethod
     def get_by_company_id(cls, company_id):
@@ -214,7 +232,12 @@ class VehicleAccount(Base, AccountMixin):
             setattr(account, k, v)
         session = DBSession()
         session.merge(account)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_ACCOUNT_DUPLICATED))
 
 
 class VehicleType(Base, BaseMixin):
@@ -298,7 +321,7 @@ class Vehicle(Base, BaseMixin):
     country_id = Column(Integer, nullable=False, doc=u'国家名')
     city_id = Column(Integer, nullable=False, doc=u'城市名')
     company_id = Column(Integer, nullable=False, doc=u'所属车辆公司')
-    license = Column(String(10), nullable=False, doc=u'车牌号')
+    license = Column(String(10), unique=True, nullable=False, doc=u'车牌号')
     insurance_number = Column(String(30), nullable=False, doc=u'车辆保险号')
     start_use = Column(String(4), nullable=False, doc=u'使用年限')
     register_number = Column(String(20), nullable=False, doc=u'旅游局注册号')
@@ -369,7 +392,12 @@ class Vehicle(Base, BaseMixin):
             insurance_number=insurance_number,
         )
         session.add(vehicle)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_LICENSE_DUPLICATED))
 
     @classmethod
     def update(cls, id, **kwargs):
@@ -384,7 +412,12 @@ class Vehicle(Base, BaseMixin):
             setattr(vehicle, k, v)
         session = DBSession()
         session.merge(vehicle)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.VEHICLE_LICENSE_DUPLICATED))
 
     @classmethod
     def delete(cls, id):
@@ -403,17 +436,18 @@ class Vehicle(Base, BaseMixin):
         total = None
         if license:
             vehicle_list = query.filter(cls.license==license).all()
-        if city_id:
-            query = query.filter(cls.city_id==city_id)
-        elif country_id:
-            query = query.filter(cls.country_id==country_id)
-        if company_id:
-            query = query.filter(cls.company_id==company_id)
-        if vehicle_type_id:
-            query = query.filter(cls.vehicle_type_id==vehicle_type_id)
-        if page == 1:
-            total = query.count()
-        vehicle_list = query.offset((page - 1) * number).limit(number).all()
+        else:
+            if city_id:
+                query = query.filter(cls.city_id==city_id)
+            elif country_id:
+                query = query.filter(cls.country_id==country_id)
+            if company_id:
+                query = query.filter(cls.company_id==company_id)
+            if vehicle_type_id:
+                query = query.filter(cls.vehicle_type_id==vehicle_type_id)
+            if page == 1:
+                total = query.count()
+            vehicle_list = query.offset((page - 1) * number).limit(number).all()
         return vehicle_list, total
 
 
@@ -455,6 +489,7 @@ class VehicleFee(Base, BaseMixin):
         )
         session.add(fee)
         session.flush()
+        return fee
 
     @classmethod
     def update(cls, id, **kwargs):
@@ -482,9 +517,9 @@ class VehicleFee(Base, BaseMixin):
         if unit_price:
             query = query.filter(cls.unit_price==unit_price)
         if start_time:
-            query = query.filter(cls.start_time==start_time)
+            query = query.filter(cls.start_time>=start_time)
         if end_time:
-            query = query.filter(cls.end_time==end_time)
+            query = query.filter(cls.end_time<=end_time)
         if confirm_person:
             query = query.filter(cls.confirm_person==confirm_person)
         if page == 1:
