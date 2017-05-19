@@ -7,7 +7,7 @@ from sqlalchemy import (
     Index,
     Float,
 )
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -18,7 +18,6 @@ from ..exc import (
     raise_error_json,
     CreoleErrCode,
     ClientError,
-    DatabaseError,
     InvalidateError,
 )
 
