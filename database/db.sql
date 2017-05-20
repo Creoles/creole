@@ -31,17 +31,44 @@ CREATE TABLE `attraction` (
   `address` varchar(80) NOT NULL,
   `name` varchar(30) NOT NULL,
   `name_en` varchar(30) NOT NULL,
-  `adult_fee` float NOT NULL,
-  `child_fee` float NOT NULL,
+  `nickname_en` varchar(30) NOT NULL,
   `intro_cn` varchar(128) DEFAULT NULL,
   `intro_en` varchar(128) DEFAULT NULL,
+  `note` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
-  KEY `ix_updated_at` (`updated_at`),
+  UNIQUE KEY `nickname_en` (`nickname_en`),
   KEY `ix_country_id` (`country_id`),
-  KEY `ix_created_at` (`created_at`),
-  KEY `ix_city_id` (`city_id`)
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_city_id` (`city_id`),
+  KEY `ix_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `attraction_fee`
+--
+
+DROP TABLE IF EXISTS `attraction_fee`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `attraction_fee` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `attraction_id` int(11) NOT NULL,
+  `public_price` float NOT NULL,
+  `company_price` float NOT NULL,
+  `tour_guide_price` float NOT NULL,
+  `translator_price` float NOT NULL,
+  `free_policy` int(11) NOT NULL,
+  `child_discount` float NOT NULL,
+  `note` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `attraction_id` (`attraction_id`),
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -65,11 +92,11 @@ CREATE TABLE `city` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
+  KEY `ix_name_en` (`name_en`),
   KEY `ix_country_id` (`country_id`),
   KEY `ix_created_at` (`created_at`),
   KEY `ix_name` (`name`),
-  KEY `ix_updated_at` (`updated_at`),
-  KEY `ix_name_en` (`name_en`)
+  KEY `ix_updated_at` (`updated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -95,9 +122,9 @@ CREATE TABLE `country` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
+  KEY `ix_created_at` (`created_at`),
   KEY `ix_updated_at` (`updated_at`),
   KEY `ix_name_en` (`name_en`),
-  KEY `ix_created_at` (`created_at`),
   KEY `ix_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -470,7 +497,6 @@ CREATE TABLE `vehicle` (
   `register_number` varchar(20) NOT NULL,
   `vehicle_type_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `license` (`license`),
   KEY `ix_updated_at` (`updated_at`),
   KEY `ix_created_at` (`created_at`),
   KEY `idx_country_id_city_id_company_id_vehicle_type_id` (`country_id`,`city_id`,`company_id`,`vehicle_type_id`),
@@ -663,4 +689,4 @@ CREATE TABLE `vehicle_user_account` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-14  9:27:00
+-- Dump completed on 2017-05-19  8:36:25

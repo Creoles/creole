@@ -7,7 +7,7 @@ from sqlalchemy import (
     Index,
     Float,
 )
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -18,9 +18,96 @@ from ..exc import (
     raise_error_json,
     CreoleErrCode,
     ClientError,
-    DatabaseError,
     InvalidateError,
 )
+
+
+class AttractionFee(Base, BaseMixin):
+    __tablename__ = 'attraction_fee'
+
+    attraction_id = Column(Integer, unique=True, nullable=False, doc=u'景点id')
+    public_price = Column(Float(3), nullable=False, doc=u'公开价')
+    company_price = Column(Float(3), nullable=False, doc=u'公司价')
+    tour_guide_price = Column(Float(3), nullable=False, doc=u'导游价')
+    translator_price = Column(Float(3), nullable=False, doc=u'翻译价')
+    free_policy = Column(Integer, nullable=False, doc=u'免票政策')
+    child_discount = Column(Float(3), nullable=False, doc=u'儿童折扣')
+    note = Column(String(100), nullable=True, doc=u'备注')
+
+    @validates('attraction_id')
+    def _validate_attraction_id(self, key, attraction_id):
+        attraction = DBSession().query(Attraction).filter(
+            Attraction.id==attraction_id).first()
+        if not attraction:
+            raise_error_json(InvalidateError(args=('attraction_id', attraction_id,)))
+        return attraction_id
+
+    @validates('child_discount')
+    def _validate_child_discount(self, key, child_discount):
+        if not (child_discount > 0 and child_discount <= 1):
+            raise_error_json(InvalidateError(args=('child_discount', child_discount,)))
+        return child_discount
+
+    @classmethod
+    def get_by_attraction_id(cls, attraction_id):
+        session = DBSession()
+        fee = session.query(cls).filter(
+            cls.attraction_id==attraction_id).first()
+        return fee
+
+    @classmethod
+    def create(cls, attraction_id, public_price, company_price, tour_guide_price,
+               translator_price, free_policy, child_discount, note=None):
+        session = DBSession()
+        fee = cls(
+            attraction_id=attraction_id, public_price=public_price,
+            company_price=company_price, tour_guide_price=tour_guide_price,
+            translator_price=translator_price, free_policy=free_policy,
+            child_discount=child_discount, note=note
+        )
+        session.add(fee)
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.ATTRACTION_FEE_DUPLICATED))
+        return fee
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        fee = cls.get_by_id(id)
+        if not fee:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.ATTRACTION_NOT_EXIST))
+        for k, v in kwargs.iteritems():
+            setattr(fee, k, v)
+        session = DBSession()
+        session.merge(fee)
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.ATTRACTION_FEE_DUPLICATED))
+
+    @classmethod
+    def delete(cls, id):
+        session = DBSession()
+        fee = session.query(cls).filter(cls.id==id).first()
+        if not fee:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.ATTRACTION_FEE_NOT_EXIST))
+        session.delete(fee)
+        session.flush()
+
+    @classmethod
+    def delete_by_attraction_id(cls, attraction_id):
+        session = DBSession()
+        fee = cls.get_by_attraction_id(attraction_id)
+        if fee:
+            session.delete(fee)
+            session.flush()
 
 
 class Attraction(Base, BaseMixin):
@@ -31,10 +118,10 @@ class Attraction(Base, BaseMixin):
     address = Column(String(80), nullable=False, doc=u'景点地址')
     name = Column(Unicode(30), unique=True, nullable=False, doc=u'中文名称')
     name_en = Column(String(30), unique=True, nullable=False, doc=u'英文名称')
-    adult_fee = Column(Float(precision=3), nullable=False, doc=u'成人门票')
-    child_fee = Column(Float(precision=3), nullable=False, doc=u'儿童门票')
+    nickname_en = Column(String(30), unique=True, nullable=False, doc=u' 英文简称')
     intro_cn = Column(Unicode(128), nullable=True, doc=u'中文简介')
     intro_en = Column(String(128), nullable=True, doc=u'英文简介')
+    note = Column(String(100), nullable=True, doc=u'备注')
 
     @declared_attr
     def __table_args__(self):
@@ -62,21 +149,21 @@ class Attraction(Base, BaseMixin):
 
     @classmethod
     def create(cls, country_id, city_id, address, name,
-               name_en, adult_fee, child_fee, intro_cn, intro_en):
+               name_en, nickname_en, intro_cn, intro_en, note=None):
         cls._validate_country_and_city(country_id, city_id)
         session = DBSession()
         attraction = cls(
             country_id=country_id, city_id=city_id,
             address=address, name=name, name_en=name_en,
-            adult_fee=adult_fee, child_fee=child_fee,
+            nickname_en=nickname_en, note=note,
             intro_cn=intro_cn, intro_en=intro_en)
+        session.add(attraction)
         try:
-            session.add(attraction)
-            session.commit()
-        except SQLAlchemyError as e:
+            session.flush()
+        except IntegrityError:
             session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
-
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.ATTRACTION_DUPLICATED))
 
     @classmethod
     def update(cls, id, **kwargs):
@@ -90,12 +177,13 @@ class Attraction(Base, BaseMixin):
         for k, v in kwargs.iteritems():
             setattr(attraction, k, v)
         session = DBSession()
+        session.merge(attraction)
         try:
-            session.merge(attraction)
-            session.commit()
-        except SQLAlchemyError as e:
+            session.flush()
+        except IntegrityError:
             session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.ATTRACTION_DUPLICATED))
 
     @classmethod
     def delete(cls, id):
@@ -105,24 +193,21 @@ class Attraction(Base, BaseMixin):
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.ATTRACTION_NOT_EXIST))
         session.delete(attraction)
-        try:
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
+        session.flush()
 
     @classmethod
     def search(cls, country_id=None, city_id=None, name=None, page=1, number=20):
         """根据国家或者城市id查找"""
         query = DBSession().query(cls)
         total = None
-        if city_id:
-            query = query.filter(cls.city_id==city_id)
-        elif country_id:
-            query = query.filter(cls.country_id==country_id)
         if name:
-            query = query.filter(cls.name==name)
-        if page == 1:
-            total = query.count()
-        attraction_list = query.offset((page - 1) * number).limit(number).all()
+            attraction_list = query.filter(cls.name==name).all()
+        else:
+            if city_id:
+                query = query.filter(cls.city_id==city_id)
+            elif country_id:
+                query = query.filter(cls.country_id==country_id)
+            if page == 1:
+                total = query.count()
+            attraction_list = query.offset((page - 1) * number).limit(number).all()
         return attraction_list, total
