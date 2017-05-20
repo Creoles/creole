@@ -12,6 +12,11 @@ from ..exc import (
 
 class AttractionService(BaseService):
     @classmethod
+    def get_by_id(cls, id):
+        attraction = Attraction.get_by_id(id)
+        return cls._get_db_obj_data_dict(attraction)
+
+    @classmethod
     def create_attraction(cls, country_id, city_id, address, name, name_en,
                           nickname_en, intro_cn, intro_en, note=None):
         Attraction.create(
