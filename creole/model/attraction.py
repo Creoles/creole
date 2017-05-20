@@ -104,10 +104,10 @@ class AttractionFee(Base, BaseMixin):
     @classmethod
     def delete_by_attraction_id(cls, attraction_id):
         session = DBSession()
-        fee_list = cls.get_by_attraction_id(attraction_id)
-        for item in fee_list:
-            session.delete(item)
-        session.flush()
+        fee = cls.get_by_attraction_id(attraction_id)
+        if fee:
+            session.delete(fee)
+            session.flush()
 
 
 class Attraction(Base, BaseMixin):

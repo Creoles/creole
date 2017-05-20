@@ -100,14 +100,14 @@ class AttractionFeeApi(Resource):
 
 class GetAttractionFeeApi(Resource):
     def get(self, attraction_id):
-        fee = AttractionFeeService.get_by_attraction_id(id)
+        fee = AttractionFeeService.get_by_attraction_id(attraction_id)
         return api_response(data=fee)
 
 
 class CreateAttractionFeeApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateAttractionFeeApiParser(),
+            'post': CreateAttractionFeeApiParser(),
         }
     }
 

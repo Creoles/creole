@@ -66,6 +66,11 @@ class AttractionService(BaseService):
 
 class AttractionFeeService(BaseService):
     @classmethod
+    def get_by_id(cls, id):
+        fee = AttractionFee.get_by_id(id)
+        return cls._get_db_obj_data_dict(fee)
+
+    @classmethod
     def create_attraction_fee(cls, attraction_id, public_price, company_price,
                               tour_guide_price, translator_price, free_policy,
                               child_discount, note=None):
