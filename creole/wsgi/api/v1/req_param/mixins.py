@@ -29,6 +29,16 @@ class ContactParserMixin(object):
     email = Argument('email', required=True, nullable=False)
 
 
+class CompanyParserMixin(object):
+    country_id = Argument(
+        'country_id', type=int, nullable=False, required=True)
+    city_id = Argument('city_id', type=int, nullable=False, required=True)
+    name = Argument('name', nullable=False, required=True)
+    name_en = Argument('name_en', nullable=False, required=True)
+    nickname_en = Argument('nickname_en', nullable=False, required=True)
+    register_number = Argument('register_number', nullable=False, required=True)
+
+
 def dict_parser_func(param_mapping):
     def wrapper(item_dict):
         _item_dict = {}

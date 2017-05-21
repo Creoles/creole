@@ -144,6 +144,14 @@ class ShopContact(Base, ContactMixin):
         session.flush()
         return person
 
+    @classmethod
+    def delete_by_company_id(cls, company_id):
+        contact_list = cls.get_by_company_id(company_id)
+        session = DBSession()
+        for item in contact_list:
+            session.delete(item)
+        session.flush()
+
 
 class Shop(Base, BaseMixin):
     """购物店"""
@@ -300,6 +308,14 @@ class Shop(Base, BaseMixin):
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def delete_by_company_id(cls, company_id):
+        shop_list = cls.get_by_company_id(company_id)
+        session = DBSession()
+        for item in shop_list:
+            session.delete(item)
+        session.flush()
 
 
 class ShopImage(Base, BaseMixin):

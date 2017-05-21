@@ -2,7 +2,7 @@
 from sqlalchemy.exc import SQLAlchemyError
 
 from ..model import DBSession
-from ..model.shop import Shop, ShopCompany
+from ..model.shop import Shop, ShopCompany, ShopContact
 from .base import BaseService
 from ..exc import (
     raise_error_json,
@@ -51,31 +51,21 @@ class ShopService(BaseService):
 class ShopCompanyService(BaseService):
     @classmethod
     def get_by_id(cls, id):
-        company_info = {}
         company = ShopCompany.get_by_id(id)
-        shop_list = Shop.get_by_company_id(id)
-        if not company:
-            return company_info
-        company_info['id'] = company.id
-        company_info['name'] = company.name
-        company_info['name_en'] = company.name_en
-        company_info['shop_list'] = \
-            [cls._get_db_obj_data_dict(item) for item in shop_list]
-        return company_info
+        return cls._get_db_obj_data_dict(company)
 
     @classmethod
     def delete_shop_company_by_id(cls, id):
-        """删除商店公司, 有两个步骤:
+        """删除商店公司, 有三个步骤:
         1. 删除公司
         2. 删除公司名下所有商店
+        3. 删除公司联系人
         """
         session = DBSession()
         ShopCompany.delete(id)
-        shop_list = Shop.get_by_company_id(id)
-        for shop in shop_list:
-            session.delete(shop)
+        ShopContact.delete_by_company_id(id)
+        Shop.delete_by_company_id(id)
         try:
-            session.flush()
             session.commit()
         except SQLAlchemyError as e:
             session.rollback()
@@ -83,14 +73,80 @@ class ShopCompanyService(BaseService):
 
     @classmethod
     def update_shop_company_by_id(cls, id, **kwargs):
-        return ShopCompany.update(id, **kwargs)
+        ShopCompany.update(id, **kwargs)
+        session = DBSession()
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def create_shop_company(cls, name, name_en):
-        return ShopCompany.create(name=name, name_en=name_en)
+    def create_shop_company(cls, company_type, country_id, city_id,
+                            name, name_en, nickname_en, register_number,
+                            intro=None):
+        ShopCompany.create(
+            company_type=company_type, country_id=country_id,
+            city_id=city_id, name=name, name_en=name_en,
+            nickname_en=nickname_en, register_number=register_number,
+            intro=intro
+        )
+        session = DBSession()
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def search_company(cls, name=None, name_en=None, is_all=False):
         shop_company = \
             ShopCompany.search(name=name, name_en=name_en, is_all=is_all)
         return [cls._get_db_obj_data_dict(item) for item in shop_company]
+
+
+class ShopContactService(BaseService):
+    @classmethod
+    def get_by_id(cls, id):
+        contact = ShopContact.get_by_id(id)
+        return cls._get_db_obj_data_dict(contact)
+
+    @classmethod
+    def get_by_company_id(cls, company_id):
+        contact_list = ShopContact.get_by_company_id(company_id)
+        return [cls._get_db_obj_data_dict(item) for item in contact_list]
+
+    @classmethod
+    def create_contact(cls, contact, position, telephone,
+                       email, company_id):
+        session = DBSession()
+        contact = ShopContact.create(
+            contact=contact, position=position,
+            telephone=telephone, email=email,
+            company_id=company_id)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+        return contact.id
+
+    @classmethod
+    def update_contact(cls, id, **kwargs):
+        session = DBSession()
+        ShopContact.update(id, **kwargs)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def delete_contact(cls, id):
+        session = DBSession()
+        ShopContact.delete(id)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
