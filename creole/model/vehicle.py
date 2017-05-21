@@ -2,7 +2,6 @@
 from sqlalchemy import (
     Column,
     DateTime,
-    Unicode,
     String,
     Integer,
     Float,
@@ -18,7 +17,8 @@ from sqlalchemy.ext.declarative import declared_attr
 
 from ..util import Enum
 from . import Base, DBSession
-from .mixins import BaseMixin, AccountMixin, ContactMixin
+from .base import BaseMixin
+from .mixins import AccountMixin, ContactMixin, CompanyMixin
 from .country import Country, City
 from ..exc import (
     raise_error_json,
@@ -28,7 +28,7 @@ from ..exc import (
 )
 
 
-class VehicleCompany(Base, BaseMixin):
+class VehicleCompany(Base, CompanyMixin):
     """车辆公司"""
     __tablename__ = 'vehicle_company'
     COMPANY_TYPE = Enum(
@@ -37,44 +37,13 @@ class VehicleCompany(Base, BaseMixin):
     )
 
     company_type = Column(TINYINT, nullable=False, doc=u'公司类型')
-    country_id = Column(Integer, nullable=False, doc=u'国家名')
-    city_id = Column(Integer, nullable=False, doc=u'城市名')
-    name = Column(Unicode(40), unique=True, nullable=False, doc=u'中文集团名')
-    name_en = Column(String(60), unique=True, nullable=False, doc=u'英文集团名')
-    nickname_en = Column(String(30), unique=True, nullable=False, doc=u'英文简称')
     vehicle_number = Column(SMALLINT, nullable=False, doc=u'车辆数量')
-    register_number = Column(String(30), nullable=False, doc=u'公司注册编号')
-
-    @declared_attr
-    def __table_args__(self):
-        table_args = (
-            Index('idx_name_name_en', 'name', 'name_en', unique=True),
-            Index('ix_name', 'name'),
-            Index('ix_name_en', 'name_en'),
-        )
-        return table_args + BaseMixin.__table_args__
 
     @validates('company_type')
     def _validate_company_type(self, key, company_type):
         if company_type not in self.COMPANY_TYPE.values():
             raise_error_json(InvalidateError(args=('company_type', company_type,)))
         return company_type
-
-    @validates('country_id')
-    def _validate_country_id(self, key, country_id):
-        country = DBSession().query(Country).filter(
-            Country.id==country_id).first()
-        if not country:
-            raise_error_json(InvalidateError(args=('country_id', country_id,)))
-        return country_id
-
-    @classmethod
-    def _validate_country_and_city(cls, country_id, city_id):
-        city = DBSession().query(City).filter(City.id==city_id).first()
-        if not city:
-            raise_error_json(ClientError(errcode=CreoleErrCode.CITY_NOT_EXIST))
-        elif city.country_id != country_id:
-            raise_error_json(InvalidateError(errcode=CreoleErrCode.COUNTRY_NOT_EXIST))
 
     @classmethod
     def delete(cls, id):

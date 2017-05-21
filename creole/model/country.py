@@ -11,7 +11,7 @@ from sqlalchemy.orm import validates
 from sqlalchemy.ext.declarative import declared_attr
 
 from . import Base, DBSession
-from .mixins import BaseMixin
+from .base import BaseMixin
 from ..exc import (
     raise_error_json,
     ParameterError,

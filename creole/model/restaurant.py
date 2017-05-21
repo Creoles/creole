@@ -15,7 +15,8 @@ from sqlalchemy.orm import validates
 from sqlalchemy.ext.declarative import declared_attr
 
 from . import Base, DBSession
-from .mixins import AccountMixin, BaseMixin
+from .base import BaseMixin
+from .mixins import AccountMixin
 from ..util import Enum
 from .country import Country, City
 from ..exc import (

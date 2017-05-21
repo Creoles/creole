@@ -3,8 +3,6 @@ from sqlalchemy import (
     Column,
     Unicode,
     Integer,
-    DateTime,
-    text,
     Index,
     String,
 )
@@ -15,6 +13,8 @@ from sqlalchemy.dialects.mysql import (
 )
 
 from . import DBSession
+from .base import BaseMixin
+from .country import Country, City
 from ..util import Enum
 from ..exc import (
     raise_error_json,
@@ -22,34 +22,6 @@ from ..exc import (
     ClientError,
     InvalidateError,
 )
-
-
-class BaseMixin(object):
-    FIELD_STATUS = Enum(
-        ('FIELD_STATUS_DELETED', 1, u'已删除'),
-        ('FIELD_STATUS_NO_DELETE', 0, u'未删除'),
-    )
-
-    @declared_attr
-    def __table_args__(self):
-        return (
-            Index('ix_created_at', 'created_at'),
-            Index('ix_updated_at', 'updated_at'),
-        )
-
-    id = Column(Integer, primary_key=True)
-    created_at = Column(DateTime, nullable=False,
-                        server_default=text('CURRENT_TIMESTAMP'))
-    updated_at = Column(DateTime, nullable=False,
-                        server_default=text(
-                            'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
-                        ))
-
-    @classmethod
-    def get_by_id(cls, id):
-        session = DBSession()
-        obj = session.query(cls).filter(cls.id==id).first()
-        return obj
 
 
 class AccountMixin(BaseMixin):
@@ -102,3 +74,37 @@ class ContactMixin(BaseMixin):
                 ClientError(errcode=CreoleErrCode.CONTACT_PERSON_NOT_EXIST))
         session.delete(person)
         session.flush()
+
+
+class CompanyMixin(BaseMixin):
+    country_id = Column(Integer, nullable=False, doc=u'国家名')
+    city_id = Column(Integer, nullable=False, doc=u'城市名')
+    name = Column(Unicode(40), unique=True, nullable=False, doc=u'中文集团名')
+    name_en = Column(String(60), unique=True, nullable=False, doc=u'英文集团名')
+    nickname_en = Column(String(30), unique=True, nullable=False, doc=u'英文简称')
+    register_number = Column(String(30), nullable=False, doc=u'公司注册编号')
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('idx_name_name_en', 'name', 'name_en', unique=True),
+            Index('ix_name', 'name'),
+            Index('ix_name_en', 'name_en'),
+        )
+        return table_args + BaseMixin.__table_args__
+
+    @validates('country_id')
+    def _validate_country_id(self, key, country_id):
+        country = DBSession().query(Country).filter(
+            Country.id==country_id).first()
+        if not country:
+            raise_error_json(InvalidateError(args=('country_id', country_id,)))
+        return country_id
+
+    @classmethod
+    def _validate_country_and_city(cls, country_id, city_id):
+        city = DBSession().query(City).filter(City.id==city_id).first()
+        if not city:
+            raise_error_json(ClientError(errcode=CreoleErrCode.CITY_NOT_EXIST))
+        elif city.country_id != country_id:
+            raise_error_json(InvalidateError(errcode=CreoleErrCode.COUNTRY_NOT_EXIST))
