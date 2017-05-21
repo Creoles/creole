@@ -90,6 +90,9 @@ class CompanyMixin(BaseMixin):
             Index('idx_name_name_en', 'name', 'name_en', unique=True),
             Index('ix_name', 'name'),
             Index('ix_name_en', 'name_en'),
+            Index('idx_country_id_city_id', 'country_id', 'city_id'),
+            Index('ix_country_id', 'country_id'),
+            Index('ix_city_id', 'city_id'),
         )
         return table_args + BaseMixin.__table_args__
 

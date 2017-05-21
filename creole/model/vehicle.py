@@ -39,6 +39,15 @@ class VehicleCompany(Base, CompanyMixin):
     company_type = Column(TINYINT, nullable=False, doc=u'公司类型')
     vehicle_number = Column(SMALLINT, nullable=False, doc=u'车辆数量')
 
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_company_type', 'company_type'),
+            Index('idx_country_id_city_id_company_type',
+                  'country_id', 'city_id', 'company_type')
+        )
+        return table_args + CompanyMixin.__table_args__
+
     @validates('company_type')
     def _validate_company_type(self, key, company_type):
         if company_type not in self.COMPANY_TYPE.values():

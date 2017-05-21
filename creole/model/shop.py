@@ -16,7 +16,8 @@ from sqlalchemy.ext.declarative import declared_attr
 
 from . import Base, DBSession
 from .country import Country, City
-from .mixins import BaseMixin
+from .base import BaseMixin
+from .mixins import CompanyMixin, ContactMixin
 from ..exc import (
     raise_error_json,
     InvalidateError,
@@ -27,21 +28,34 @@ from ..exc import (
 from ..util import Enum
 
 
-class ShopCompany(Base, BaseMixin):
+class ShopCompany(Base, CompanyMixin):
     """购物集团"""
     __tablename__ = 'shop_company'
 
-    name = Column(Unicode(40), unique=True, nullable=False, doc=u'中文集团名')
-    name_en = Column(String(60), unique=True, nullable=False, doc=u'英文集团名')
+    COMPANY_TYPE = Enum(
+        ('JEWELRY', 1, u'珠宝'),
+        ('TEA', 2, u'红茶'),
+        ('OTHER', 3, u'其他'),
+    )
+
+    company_type = Column(TINYINT, nullable=False, doc=u'公司类型')
+    intro = Column(String(500), nullable=False, doc=u'公司简介')
 
     @declared_attr
     def __table_args__(self):
         table_args = (
-            Index('idx_name_name_en', 'name', 'name_en', unique=True),
-            Index('ix_name', 'name'),
-            Index('ix_name_en', 'name_en'),
+            Index('ix_company_type', 'company_type'),
+            Index('idx_country_id_city_id_company_type',
+                  'country_id', 'city_id', 'company_type')
         )
-        return table_args + BaseMixin.__table_args__
+        return table_args + CompanyMixin.__table_args__
+
+    @validates('company_type')
+    def _validate_company_type(self, key, company_type):
+        if company_type not in self.COMPANY_TYPE.values():
+            raise_error_json(
+                InvalidateError(args=('company_type', company_type,)))
+        return company_type
 
     @classmethod
     def delete(cls, id):
@@ -54,19 +68,21 @@ class ShopCompany(Base, BaseMixin):
         session.flush()
 
     @classmethod
-    def create(cls, name, name_en):
+    def create(cls, company_type, country_id, city_id, name, name_en,
+               nickname_en, register_number, intro=None):
         session = DBSession()
-        company = cls(name=name, name_en=name_en)
+        company = cls(
+            company_type=company_type, country_id=country_id,
+            city_id=city_id, name=name, name_en=name_en,
+            nickname_en=nickname_en, register_number=register_number,
+            intro=intro)
         session.add(company)
         try:
-            session.commit()
-        except IntegrityError as e:
+            session.flush()
+        except IntegrityError:
             session.rollback()
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.SHOP_COMPANY_DUPLICATED))
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def update(cls, id, **kwargs):
@@ -79,14 +95,11 @@ class ShopCompany(Base, BaseMixin):
             setattr(company, k, v)
         try:
             session.merge(company)
-            session.commit()
-        except IntegrityError as e:
+            session.flush()
+        except IntegrityError:
             session.rollback()
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.SHOP_COMPANY_DUPLICATED))
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
     def search(cls, name=None, name_en=None, is_all=False):
@@ -102,15 +115,39 @@ class ShopCompany(Base, BaseMixin):
         return shop_company
 
 
+class ShopContact(Base, ContactMixin):
+    __tablename__ = 'shop_contact'
+
+    company_id = Column(Integer, nullable=False, doc=u'公司id')
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_company_id', 'company_id'),
+        )
+        return table_args + ContactMixin.__table_args__
+
+    @classmethod
+    def get_by_company_id(cls, company_id):
+        session = DBSession()
+        return session.query(cls).filter(cls.company_id==company_id).all()
+
+    @classmethod
+    def create(cls, contact, position, telephone, email, company_id):
+        session = DBSession()
+        person = cls(
+            contact=contact, position=position,
+            telephone=telephone, email=email,
+            company_id=company_id
+        )
+        session.add(person)
+        session.flush()
+        return person
+
+
 class Shop(Base, BaseMixin):
     """购物店"""
     __tablename__ = 'shop'
-
-    SHOP_TYPE = Enum(
-        ('JEWELRY', 1, u'珠宝'),
-        ('TEA', 2, u'红茶'),
-        ('OTHER', 3, u'其他'),
-    )
 
     name = Column(Unicode(40), nullable=False, doc=u'中文店名')
     name_en = Column(String(60), nullable=False, doc=u'英文店名')
