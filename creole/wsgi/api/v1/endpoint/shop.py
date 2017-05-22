@@ -3,14 +3,14 @@ from ...util import Resource, api_response
 from .....service.shop import (
     ShopService,
     ShopCompanyService,
-    ShopContactService,
+    ShopCompanyContactService,
 )
 from ..req_param.shop import (
     CreateShopApiParser,
     CreateShopCompanyApiParser,
     SearchShopCompanyApiParser,
     ShopSearchApiParser,
-    CreateShopContactApiParser,
+    CreateShopCompanyContactApiParser,
 )
 from creole.exc import ClientError, CreoleErrCode
 from creole.model.shop import Shop
@@ -89,7 +89,7 @@ class ShopCompanyApi(Resource):
     def get(self, id):
         """根据ID查询公司"""
         company = ShopCompanyService.get_by_id(id)
-        contact_list = ShopContactService.get_by_company_id(id)
+        contact_list = ShopCompanyContactService.get_by_company_id(id)
         company['contact_list'] = contact_list
         return api_response(data=company)
 
@@ -140,50 +140,50 @@ class SearchShopCompanyApi(Resource):
         return api_response(data=shop_company)
 
 
-class CreateShopContactApi(Resource):
+class CreateShopCompanyContactApi(Resource):
     meta = {
         'args_parser_dict': {
-            'post': CreateShopContactApiParser(),
+            'post': CreateShopCompanyContactApiParser(),
         }
     }
 
     def post(self):
         try:
             contact_id = \
-                ShopContactService.create_contact(**self.parsed_data)
+                ShopCompanyContactService.create_contact(**self.parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response(data={'contact_id': contact_id})
 
 
-class ShopContactApi(Resource):
+class ShopCompanyContactApi(Resource):
     meta = {
         'args_parser_dict': {
-            'put': CreateShopContactApiParser(),
+            'put': CreateShopCompanyContactApiParser(),
         }
     }
 
     def get(self, id):
-        contact = ShopContactService.get_by_id(id)
+        contact = ShopCompanyContactService.get_by_id(id)
         return api_response(data=contact)
 
     def put(self, id):
         try:
-            ShopContactService.update_contact(id, **self.parsed_data)
+            ShopCompanyContactService.update_contact(id, **self.parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
 
     def delete(self, id):
         try:
-            ShopContactService.delete_contact(id)
+            ShopCompanyContactService.delete_contact(id)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
 
 
-class GetShopContactApi(Resource):
+class GetShopCompanyContactApi(Resource):
     def get(self, company_id):
         contact_list = \
-            ShopContactService.get_by_company_id(company_id)
+            ShopCompanyContactService.get_by_company_id(company_id)
         return api_response(data=contact_list)

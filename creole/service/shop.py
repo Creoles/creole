@@ -2,7 +2,7 @@
 from sqlalchemy.exc import SQLAlchemyError
 
 from ..model import DBSession
-from ..model.shop import Shop, ShopCompany, ShopContact
+from ..model.shop import Shop, ShopCompany, ShopCompanyContact
 from .base import BaseService
 from ..exc import (
     raise_error_json,
@@ -63,7 +63,7 @@ class ShopCompanyService(BaseService):
         """
         session = DBSession()
         ShopCompany.delete(id)
-        ShopContact.delete_by_company_id(id)
+        ShopCompanyContact.delete_by_company_id(id)
         Shop.delete_by_company_id(id)
         try:
             session.commit()
@@ -82,14 +82,12 @@ class ShopCompanyService(BaseService):
             raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def create_shop_company(cls, company_type, country_id, city_id,
-                            name, name_en, nickname_en, register_number,
-                            intro=None):
+    def create_shop_company(cls, country_id, city_id, name, name_en,
+                            nickname_en, register_number, intro=None):
         ShopCompany.create(
-            company_type=company_type, country_id=country_id,
-            city_id=city_id, name=name, name_en=name_en,
-            nickname_en=nickname_en, register_number=register_number,
-            intro=intro
+            country_id=country_id, city_id=city_id, name=name,
+            name_en=name_en, nickname_en=nickname_en,
+            register_number=register_number, intro=intro
         )
         session = DBSession()
         try:
@@ -105,22 +103,22 @@ class ShopCompanyService(BaseService):
         return [cls._get_db_obj_data_dict(item) for item in shop_company]
 
 
-class ShopContactService(BaseService):
+class ShopCompanyContactService(BaseService):
     @classmethod
     def get_by_id(cls, id):
-        contact = ShopContact.get_by_id(id)
+        contact = ShopCompanyContact.get_by_id(id)
         return cls._get_db_obj_data_dict(contact)
 
     @classmethod
     def get_by_company_id(cls, company_id):
-        contact_list = ShopContact.get_by_company_id(company_id)
+        contact_list = ShopCompanyContact.get_by_company_id(company_id)
         return [cls._get_db_obj_data_dict(item) for item in contact_list]
 
     @classmethod
     def create_contact(cls, contact, position, telephone,
                        email, company_id):
         session = DBSession()
-        contact = ShopContact.create(
+        contact = ShopCompanyContact.create(
             contact=contact, position=position,
             telephone=telephone, email=email,
             company_id=company_id)
@@ -134,7 +132,7 @@ class ShopContactService(BaseService):
     @classmethod
     def update_contact(cls, id, **kwargs):
         session = DBSession()
-        ShopContact.update(id, **kwargs)
+        ShopCompanyContact.update(id, **kwargs)
         try:
             session.commit()
         except SQLAlchemyError as e:
@@ -144,7 +142,7 @@ class ShopContactService(BaseService):
     @classmethod
     def delete_contact(cls, id):
         session = DBSession()
-        ShopContact.delete(id)
+        ShopCompanyContact.delete(id)
         try:
             session.commit()
         except SQLAlchemyError as e:

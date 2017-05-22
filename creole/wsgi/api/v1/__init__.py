@@ -17,9 +17,9 @@ from .endpoint.shop import (
     ShopSearchApi,
     CreateShopCompanyApi,
     SearchShopCompanyApi,
-    CreateShopContactApi,
-    ShopContactApi,
-    GetShopContactApi,
+    CreateShopCompanyContactApi,
+    ShopCompanyContactApi,
+    GetShopCompanyContactApi,
 )
 from .endpoint.vehicle import (
     VehicleApi,
@@ -90,9 +90,9 @@ app.add_resource(CreateShopApi, '/shop/create', endpoint='create-shop')
 app.add_resource(ShopCompanyApi, '/shop/company/<int:id>', endpoint='get-shop-company')
 app.add_resource(CreateShopCompanyApi, '/shop/company/create', endpoint='create-shop-company')
 app.add_resource(SearchShopCompanyApi, '/shop/company/search', endpoint='search-shop-company')
-app.add_resource(CreateShopContactApi, '/shop/company/contact/create', endpoint='create-shop-contact')
-app.add_resource(ShopContactApi, '/shop/company/contact/<int:id>', endpoint='get-shop-contact')
-app.add_resource(GetShopContactApi, '/shop/company/contact/company/<int:company_id>', endpoint='get-shop-company-contact')
+app.add_resource(CreateShopCompanyContactApi, '/shop/company/contact/create', endpoint='create-shop-contact')
+app.add_resource(ShopCompanyContactApi, '/shop/company/contact/<int:id>', endpoint='get-shop-contact')
+app.add_resource(GetShopCompanyContactApi, '/shop/company/contact/company/<int:company_id>', endpoint='get-shop-company-contact')
 
 # 车辆
 app.add_resource(VehicleApi, '/vehicle/<int:id>', endpoint='get-vehicle')

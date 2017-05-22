@@ -1,4 +1,4 @@
-# coding: utf-8
+ # coding: utf-8
 from flask_restful.reqparse import Argument
 
 from creole.util import Enum
@@ -31,14 +31,7 @@ class ShopSearchApiParser(BaseRequestParser):
     number = Argument('number', type=int, default=20, required=False)
 
 class CreateShopCompanyApiParser(CompanyParserMixin, BaseRequestParser):
-    COMPANY_TYPE = Enum(
-        ('JEWELRY', 1, u'珠宝'),
-        ('TEA', 2, u'红茶'),
-        ('OTHER', 3, u'其他'),
-    )
-    company_type = Argument(
-        'company_type', choices=COMPANY_TYPE.values(), type=int,
-        nullable=False, required=True)
+    intro = Argument('intro')
 
 
 class SearchShopCompanyApiParser(BaseRequestParser):
@@ -47,7 +40,7 @@ class SearchShopCompanyApiParser(BaseRequestParser):
     name_en = Argument('name_en', required=False)
 
 
-class CreateShopContactApiParser(ContactParserMixin, BaseRequestParser):
+class CreateShopCompanyContactApiParser(ContactParserMixin, BaseRequestParser):
     company_id = Argument(
         'company_id', required=True, nullable=False,
         type=int, location=('json', 'form'))
