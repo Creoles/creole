@@ -7,7 +7,7 @@ from sqlalchemy import (
     Float,
     Index,
 )
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.mysql import (
     TINYINT,
 )
@@ -22,7 +22,6 @@ from ..exc import (
     raise_error_json,
     InvalidateError,
     CreoleErrCode,
-    DatabaseError,
     ClientError,
 )
 from ..util import Enum
@@ -32,30 +31,7 @@ class ShopCompany(Base, CompanyMixin):
     """购物集团"""
     __tablename__ = 'shop_company'
 
-    COMPANY_TYPE = Enum(
-        ('JEWELRY', 1, u'珠宝'),
-        ('TEA', 2, u'红茶'),
-        ('OTHER', 3, u'其他'),
-    )
-
-    company_type = Column(TINYINT, nullable=False, doc=u'公司类型')
     intro = Column(String(500), nullable=False, doc=u'公司简介')
-
-    @declared_attr
-    def __table_args__(self):
-        table_args = (
-            Index('ix_company_type', 'company_type'),
-            Index('idx_country_id_city_id_company_type',
-                  'country_id', 'city_id', 'company_type')
-        )
-        return table_args + CompanyMixin.__table_args__
-
-    @validates('company_type')
-    def _validate_company_type(self, key, company_type):
-        if company_type not in self.COMPANY_TYPE.values():
-            raise_error_json(
-                InvalidateError(args=('company_type', company_type,)))
-        return company_type
 
     @classmethod
     def delete(cls, id):
@@ -68,14 +44,13 @@ class ShopCompany(Base, CompanyMixin):
         session.flush()
 
     @classmethod
-    def create(cls, company_type, country_id, city_id, name, name_en,
+    def create(cls, country_id, city_id, name, name_en,
                nickname_en, register_number, intro=None):
         session = DBSession()
         company = cls(
-            company_type=company_type, country_id=country_id,
-            city_id=city_id, name=name, name_en=name_en,
-            nickname_en=nickname_en, register_number=register_number,
-            intro=intro)
+            country_id=country_id, city_id=city_id, name=name,
+            name_en=name_en, nickname_en=nickname_en,
+            register_number=register_number, intro=intro)
         session.add(company)
         try:
             session.flush()
@@ -115,8 +90,8 @@ class ShopCompany(Base, CompanyMixin):
         return shop_company
 
 
-class ShopContact(Base, ContactMixin):
-    __tablename__ = 'shop_contact'
+class ShopCompanyContact(Base, ContactMixin):
+    __tablename__ = 'shop_company_contact'
 
     company_id = Column(Integer, nullable=False, doc=u'公司id')
 
@@ -153,26 +128,81 @@ class ShopContact(Base, ContactMixin):
         session.flush()
 
 
+class ShopFee(Base, BaseMixin):
+    __tablename__ = 'shop_fee'
+    ACCOUNT_PERIOD = Enum(
+        ('NOW', 1, u'现结'),
+        ('MONTH', 2, u'月结'),
+    )
+    ACCOUNT_WAY = Enum(
+        ('CASH', 1, u'现金'),
+        ('CHECK', 2, u'支票'),
+        ('TRANSFER', 3, u'转账'),
+    )
+
+    shop_id = Column(Integer, nullable=False, doc=u'商店ID')
+    fee_person = Column(Float(precision=3), nullable=False, doc=u'人头费')
+    company_ratio = Column(Float(precision=3), nullable=False, doc=u'公司返佣比例')
+    tour_guide_ratio = Column(Float(precision=3), nullable=False, doc=u'导游返佣比例')
+    account_period = Column(TINYINT, nullable=False, doc=u'结算周期')
+    account_way = Column(TINYINT, nullable=False, doc=u'结算方式')
+    note = Column(String(100), nullable=True, doc=u'备注')
+
+    @validates('shop_id')
+    def _validate_shop_id(self, key, shop_id):
+        shop = DBSession().query(Shop).filter(Shop.id==shop_id).first()
+        if not shop:
+            raise_error_json(InvalidateError(args=('shop_id' ,shop_id,)))
+        return shop_id
+
+    @validates('account_way')
+    def _validate_account_way(self, key, account_way):
+        if account_way not in self.ACCOUNT_WAY.values():
+            raise_error_json(InvalidateError(args=('account_way', account_way,)))
+        return account_way
+
+    @validates('account_period')
+    def _validate_account_period(self, key, account_period):
+        if account_period not in self.ACCOUNT_PERIOD.values():
+            raise_error_json(InvalidateError(args=('account_period', account_period,)))
+        return account_period
+
+    @validates('company_ratio')
+    def _validate_company_ratio(self, key, company_ratio):
+        if company_ratio > 1 or company_ratio < 0:
+            raise_error_json(
+                InvalidateError(args=('company_ratio', company_ratio,)))
+        return company_ratio
+
+    @validates('tour_guide_ratio')
+    def _validate_tour_guide_ratio(self, key, tour_guide_ratio):
+        if tour_guide_ratio > 1 or tour_guide_ratio < 0:
+            raise_error_json(
+                InvalidateError(args=('tour_guide_ratio', tour_guide_ratio,)))
+        return tour_guide_ratio
+
+
 class Shop(Base, BaseMixin):
     """购物店"""
     __tablename__ = 'shop'
+    SHOP_TYPE = Enum(
+        ('JEWELRY', 1, u'珠宝'),
+        ('TEA', 2, u'红茶'),
+        ('OTHER', 3, u'其他'),
+    )
 
-    name = Column(Unicode(40), nullable=False, doc=u'中文店名')
-    name_en = Column(String(60), nullable=False, doc=u'英文店名')
-    address = Column(Unicode(100), nullable=False, doc=u'店铺地址')
-    telephone = Column(String(20), nullable=False, doc=u'联系电话')
     country_id = Column(Integer, nullable=False, doc=u'国家名')
     city_id = Column(Integer, nullable=False, doc=u'城市名')
-    company_id = Column(Integer, nullable=True, doc=u'所属购物集团')
+    address = Column(Unicode(100), nullable=False, doc=u'店铺地址')
     shop_type = Column(TINYINT, nullable=False, doc=u'购物类型')
+    company_id = Column(Integer, nullable=True, doc=u'所属购物集团')
+    name = Column(Unicode(40), unique=True, nullable=False, doc=u'中文店名')
+    name_en = Column(String(60), unique=True, nullable=False, doc=u'英文店名')
+    nickname_en = Column(String(20), nullable=False, doc=u'英文简称')
 
-    contact = Column(Unicode(16), nullable=False, doc=u'联系人')
-    fee_person = Column(Float(precision=3), nullable=False, doc=u'人头费')
-    commission_ratio = Column(Float(precision=3), nullable=False, doc=u'佣金比例')
-
-    average_score = Column(Float(precision=2), doc=u'平均评分')
-    intro_cn = Column(Unicode(160), doc=u'中文介绍')
-    intro_en = Column(String(160), doc=u'英文介绍')
+    intro_cn = Column(Unicode(500), doc=u'中文介绍')
+    intro_en = Column(String(500), doc=u'英文介绍')
+    note = Column(String(100), nullable=True, doc=u'备注')
 
     @declared_attr
     def __table_args__(self):
@@ -196,24 +226,11 @@ class Shop(Base, BaseMixin):
             raise_error_json(InvalidateError(args=('company_id' ,company_id,)))
         return company_id
 
-    @validates('average_score')
-    def _validate_average_score(self, key, average_score):
-        if average_score > 5 or average_score < 0:
-            raise_error_json(InvalidateError(msg='average score is invalid.'))
-        return average_score
-
     @validates('shop_type')
     def _validate_shop_type(self, key, shop_type):
         if shop_type not in self.SHOP_TYPE.values():
             raise_error_json(InvalidateError(args=('shop_type', shop_type,)))
         return shop_type
-
-    @validates('commission_ratio')
-    def _validate_commission_ratio(self, key, commission_ratio):
-        if commission_ratio > 100 or commission_ratio < 0:
-            raise_error_json(
-                InvalidateError(args=('commission_ratio', commission_ratio,)))
-        return commission_ratio
 
     @validates('country_id')
     def _validate_country_id(self, key, country_id):
@@ -259,23 +276,23 @@ class Shop(Base, BaseMixin):
         return shop_list, total
 
     @classmethod
-    def create(cls, name, name_en, address, telephone, country_id,
-               city_id, company_id, shop_type, contact, fee_person,
-               commission_ratio, intro_cn='', intro_en=''):
+    def create(cls, name, name_en, nickname_en, address, country_id,
+               city_id, company_id, shop_type, intro_cn='', intro_en='',
+               note=None):
         cls._validate_country_and_city(country_id, city_id)
         session = DBSession()
         shop = cls(
             name=name, name_en=name_en, address=address,
-            telephone=telephone, country_id=country_id,
+            nickname_en=nickname_en, country_id=country_id,
             city_id=city_id, company_id=company_id, shop_type=shop_type,
-            contact=contact, fee_person=fee_person, intro_cn=intro_cn,
-            intro_en=intro_en, commission_ratio=commission_ratio)
+            intro_cn=intro_cn, intro_en=intro_en, note=note)
         session.add(shop)
         try:
-            session.commit()
-        except SQLAlchemyError as e:
+            session.flush()
+        except IntegrityError:
             session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.SHOP_DUPLICATED))
 
     @classmethod
     def update(cls, id, **kwargs):
@@ -290,10 +307,11 @@ class Shop(Base, BaseMixin):
             setattr(shop, k, v)
         try:
             session.merge(shop)
-            session.commit()
-        except SQLAlchemyError as e:
+            session.flush()
+        except IntegrityError:
             session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.SHOP_DUPLICATED))
 
     @classmethod
     def delete(cls, id):
@@ -303,11 +321,7 @@ class Shop(Base, BaseMixin):
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.SHOP_NOT_EXIST))
         session.delete(shop)
-        try:
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise_error_json(DatabaseError(msg=repr(e)))
+        session.flush()
 
     @classmethod
     def delete_by_company_id(cls, company_id):

@@ -7,17 +7,20 @@ from .mixins import CompanyParserMixin, ContactParserMixin
 
 
 class CreateShopApiParser(BaseRequestParser):
+    SHOP_TYPE = Enum(
+        ('JEWELRY', 1, u'珠宝'),
+        ('TEA', 2, u'红茶'),
+        ('OTHER', 3, u'其他'),
+    )
     name = Argument('name', nullable=False, required=True)
     name_en = Argument('name_en', nullable=False, required=True)
+    nickname_en = Argument('nickname_en', nullable=False, required=True)
     address = Argument('address', nullable=False, required=True)
-    telephone = Argument('telephone', nullable=False, required=True)
     country_id = Argument('country_id', type=int, nullable=False, required=True)
     city_id = Argument('city_id', type=int, nullable=False, required=True)
-    company_id = Argument('company_id')
-    shop_type = Argument('shop_type', type=int, nullable=False, required=True)
-    contact = Argument('contact', nullable=False, required=True)
-    fee_person = Argument('fee_person', nullable=False, required=True, type=float)
-    commission_ratio = Argument('commission_ratio', nullable=False, required=True, type=float)
+    company_id = Argument('company_id', type=int, nullable=False, required=True)
+    shop_type = Argument(
+        'shop_type', type=int, choices=SHOP_TYPE, nullable=False, required=True)
     intro_cn = Argument('intro_cn')
     intro_en = Argument('intro_en')
 
