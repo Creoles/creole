@@ -47,3 +47,27 @@ class CreateShopCompanyContactApiParser(ContactParserMixin, BaseRequestParser):
     company_id = Argument(
         'company_id', required=True, nullable=False,
         type=int, location=('json', 'form'))
+
+
+class CreateShopFeeApiParser(BaseRequestParser):
+    ACCOUNT_PERIOD = Enum(
+        ('NOW', 1, u'现结'),
+        ('MONTH', 2, u'月结'),
+    )
+    ACCOUNT_WAY = Enum(
+        ('CASH', 1, u'现金'),
+        ('CHECK', 2, u'支票'),
+        ('TRANSFER', 3, u'转账'),
+    )
+    shop_id = Argument('shop_id', type=int, required=True, nullable=False)
+    fee_person = Argument('fee_person', type=float, required=True, nullable=False)
+    company_ratio = Argument('company_ratio', type=float, required=True, nullable=False)
+    tour_guide_ratio = Argument(
+        'tour_guide_ratio', type=float, required=True, nullable=False)
+    account_period = Argument(
+        'account_period', type=int, choices=ACCOUNT_PERIOD.values(),
+        required=True, nullable=False)
+    account_way = Argument(
+        'account_way', type=int, choices=ACCOUNT_WAY.values(),
+        required=True, nullable=False)
+    note = Argument('note')

@@ -2,7 +2,12 @@
 from sqlalchemy.exc import SQLAlchemyError
 
 from ..model import DBSession
-from ..model.shop import Shop, ShopCompany, ShopCompanyContact
+from ..model.shop import (
+    Shop,
+    ShopCompany,
+    ShopCompanyContact,
+    ShopFee,
+)
 from .base import BaseService
 from ..exc import (
     raise_error_json,
@@ -63,6 +68,54 @@ class ShopService(BaseService):
         for shop in shop_list:
             raw_data.append(cls._get_db_obj_data_dict(shop))
         return raw_data, total
+
+
+class ShopFeeService(BaseService):
+    @classmethod
+    def get_fee_by_id(cls, id):
+        fee = ShopFee.get_by_id(id)
+        return cls._get_db_obj_data_dict(fee)
+
+    @classmethod
+    def get_fee_by_shop_id(cls, shop_id):
+        fee_list = ShopFee.get_by_shop_id(shop_id)
+        return [cls._get_db_obj_data_dict(fee_list)]
+
+    @classmethod
+    def create_fee(cls, shop_id, fee_person, company_ratio,
+                   tour_guide_ratio, account_period, account_way, note=None):
+        fee = ShopFee.create(
+            shop_id=shop_id, fee_person=fee_person, company_ratio=company_ratio,
+            tour_guide_ratio=tour_guide_ratio, account_period=account_period,
+            account_way=account_way, note=note
+        )
+        session = DBSession()
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+        return fee.id
+
+    @classmethod
+    def update_fee_by_id(cls, id, **kwargs):
+        ShopFee.update(id, **kwargs)
+        session = DBSession()
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def delete_by_id(cls, id):
+        ShopFee.delete(id)
+        session = DBSession()
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
 
 class ShopCompanyService(BaseService):

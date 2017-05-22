@@ -4,6 +4,7 @@ from .....service.shop import (
     ShopService,
     ShopCompanyService,
     ShopCompanyContactService,
+    ShopFeeService,
 )
 from ..req_param.shop import (
     CreateShopApiParser,
@@ -11,6 +12,7 @@ from ..req_param.shop import (
     SearchShopCompanyApiParser,
     ShopSearchApiParser,
     CreateShopCompanyContactApiParser,
+    CreateShopFeeApiParser,
 )
 from creole.exc import ClientError, CreoleErrCode
 from creole.model.shop import Shop
@@ -187,3 +189,50 @@ class GetShopCompanyContactApi(Resource):
         contact_list = \
             ShopCompanyContactService.get_by_company_id(company_id)
         return api_response(data=contact_list)
+
+
+class CreateShopFeeApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'post': CreateShopFeeApiParser(),
+        }
+    }
+
+    def post(self):
+        try:
+            fee_id = ShopFeeService.create_fee(**self.parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response(data={'fee_id': fee_id})
+
+
+class ShopFeeApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'put': CreateShopFeeApiParser(),
+        }
+    }
+
+    def get(self, id):
+        fee = ShopFeeService.get_fee_by_id(id)
+        return api_response(data=fee)
+
+    def put(self, id):
+        try:
+            ShopFeeService.update_fee_by_id(id, **self.parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
+
+    def delete(self, id):
+        try:
+            ShopFeeService.delete_by_id(id)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
+
+
+class GetShopFeeApi(Resource):
+    def get(self, shop_id):
+        fee_list = ShopFeeService.get_fee_by_shop_id(shop_id)
+        return api_response(data=fee_list)
