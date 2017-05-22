@@ -140,7 +140,7 @@ class ShopFee(Base, BaseMixin):
         ('TRANSFER', 3, u'转账'),
     )
 
-    shop_id = Column(Integer, nullable=False, doc=u'商店ID')
+    shop_id = Column(Integer, unique=True, nullable=False, doc=u'商店ID')
     fee_person = Column(Float(precision=3), nullable=False, doc=u'人头费')
     company_ratio = Column(Float(precision=3), nullable=False, doc=u'公司返佣比例')
     tour_guide_ratio = Column(Float(precision=3), nullable=False, doc=u'导游返佣比例')
@@ -180,6 +180,63 @@ class ShopFee(Base, BaseMixin):
             raise_error_json(
                 InvalidateError(args=('tour_guide_ratio', tour_guide_ratio,)))
         return tour_guide_ratio
+
+    @classmethod
+    def get_by_shop_id(cls, shop_id):
+        session = DBSession()
+        fee_list = session.query(cls).filter(cls.shop_id==shop_id).all()
+        return fee_list
+
+    @classmethod
+    def create(cls, shop_id, fee_person, company_ratio, tour_guide_ratio,
+               account_period, account_way, note=None):
+        session = DBSession()
+        fee = cls(
+            shop_id=shop_id, fee_person=fee_person, company_ratio=company_ratio,
+            tour_guide_ratio=tour_guide_ratio, account_period=account_period,
+            account_way=account_way, note=note
+        )
+        session.add(fee)
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.SHOP_FEE_DUPLICATED))
+        return fee
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        fee = cls.get_by_id(id)
+        if not fee:
+            raise_error_json(ClientError(errcode=CreoleErrCode.SHOP_FEE_NOT_EXIST))
+        for k, v in kwargs.iteritems():
+            setattr(fee, k, v)
+        session = DBSession()
+        session.add(fee)
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.SHOP_FEE_DUPLICATED))
+
+    @classmethod
+    def delete(cls, id):
+        fee = cls.get_by_id(id)
+        if not fee:
+            raise_error_json(ClientError(errcode=CreoleErrCode.SHOP_FEE_NOT_EXIST))
+        session = DBSession()
+        session.delete(fee)
+        session.flush()
+
+    @classmethod
+    def delete_by_shop_id(cls, shop_id):
+        fee_list = cls.get_by_shop_id(shop_id)
+        session = DBSession()
+        for fee in fee_list:
+            session.delete(fee)
+        session.flush()
 
 
 class Shop(Base, BaseMixin):
