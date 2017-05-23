@@ -23,6 +23,9 @@ from .endpoint.shop import (
     CreateShopFeeApi,
     ShopFeeApi,
     GetShopFeeApi,
+    CreateShopContactApi,
+    ShopContactApi,
+    GetShopContactApi,
 )
 from .endpoint.vehicle import (
     VehicleApi,
@@ -95,10 +98,13 @@ app.add_resource(CreateShopCompanyApi, '/shop/company/create', endpoint='create-
 app.add_resource(SearchShopCompanyApi, '/shop/company/search', endpoint='search-shop-company')
 app.add_resource(CreateShopCompanyContactApi, '/shop/company/contact/create', endpoint='create-shop-company-contact')
 app.add_resource(ShopCompanyContactApi, '/shop/company/contact/<int:id>', endpoint='get-shop-company-contact')
-app.add_resource(GetShopCompanyContactApi, '/shop/company/contact/company/<int:company_id>', endpoint='get-all-shop-company-contact')
+app.add_resource(GetShopCompanyContactApi, '/shop/company/contact/company/<int:company_id>', endpoint='get-shop-company-contact-by-company-id')
 app.add_resource(CreateShopFeeApi, '/shop/fee/create', endpoint='create-shop-fee')
 app.add_resource(ShopFeeApi, '/shop/fee/<int:id>', endpoint='get-shop-fee')
-app.add_resource(GetShopFeeApi, '/shop/fee/<int:shop_id>', endpoint='get-all-shop-fee')
+app.add_resource(GetShopFeeApi, '/shop/fee/<int:shop_id>', endpoint='get-shop-fee-by-shop-id')
+app.add_resource(CreateShopContactApi, '/shop/contact/create', endpoint='create-shop-contact')
+app.add_resource(ShopContactApi, '/shop/contact/<int:id>', endpoint='get-shop-contact')
+app.add_resource(GetShopContactApi, '/shop/contact/shop/<int:shop_id>', endpoint='get-shop-contact-by-shop-id')
 
 # 车辆
 app.add_resource(VehicleApi, '/vehicle/<int:id>', endpoint='get-vehicle')

@@ -239,6 +239,44 @@ class ShopFee(Base, BaseMixin):
         session.flush()
 
 
+class ShopContact(Base, ContactMixin):
+    __tablename__ = 'shop_contact'
+
+    shop_id = Column(Integer, nullable=False, doc=u'商店id')
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_shop_id', 'shop_id'),
+        )
+        return table_args + ContactMixin.__table_args__
+
+    @classmethod
+    def get_by_shop_id(cls, shop_id):
+        session = DBSession()
+        return session.query(cls).filter(cls.shop_id==shop_id).all()
+
+    @classmethod
+    def create(cls, contact, position, telephone, email, shop_id):
+        session = DBSession()
+        person = cls(
+            contact=contact, position=position,
+            telephone=telephone, email=email,
+            shop_id=shop_id
+        )
+        session.add(person)
+        session.flush()
+        return person
+
+    @classmethod
+    def delete_by_shop_id(cls, shop_id):
+        contact_list = cls.get_by_shop_id(shop_id)
+        session = DBSession()
+        for item in contact_list:
+            session.delete(item)
+        session.flush()
+
+
 class Shop(Base, BaseMixin):
     """购物店"""
     __tablename__ = 'shop'

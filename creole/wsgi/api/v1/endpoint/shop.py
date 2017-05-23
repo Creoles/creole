@@ -5,6 +5,7 @@ from .....service.shop import (
     ShopCompanyService,
     ShopCompanyContactService,
     ShopFeeService,
+    ShopContactService,
 )
 from ..req_param.shop import (
     CreateShopApiParser,
@@ -13,6 +14,7 @@ from ..req_param.shop import (
     ShopSearchApiParser,
     CreateShopCompanyContactApiParser,
     CreateShopFeeApiParser,
+    CreateShopContactApiParser,
 )
 from creole.exc import ClientError, CreoleErrCode
 from creole.model.shop import Shop
@@ -80,6 +82,56 @@ class ShopSearchApi(Resource):
         else:
             data = {'shop_data': shop_data}
         return api_response(data=data)
+
+
+class CreateShopContactApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'post': CreateShopContactApiParser(),
+        }
+    }
+
+    def post(self):
+        try:
+            contact_id = \
+                ShopContactService.create_contact(**self.parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response(data={'contact_id': contact_id})
+
+
+class ShopContactApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'put': CreateShopContactApiParser(),
+        }
+    }
+
+    def get(self, id):
+        contact = ShopContactService.get_by_id(id)
+        return api_response(data=contact)
+
+    def put(self, id):
+        try:
+            ShopContactService.update_contact(id, **self.parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
+
+    def delete(self, id):
+        try:
+            ShopContactService.delete_contact(id)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
+
+
+class GetShopContactApi(Resource):
+    def get(self, shop_id):
+        contact_list = \
+            ShopCompanyContactService.get_by_shop_id(shop_id)
+        return api_response(data=contact_list)
+
 
 class ShopCompanyApi(Resource):
     meta = {

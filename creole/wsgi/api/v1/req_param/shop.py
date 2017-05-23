@@ -49,6 +49,12 @@ class CreateShopCompanyContactApiParser(ContactParserMixin, BaseRequestParser):
         type=int, location=('json', 'form'))
 
 
+class CreateShopContactApiParser(ContactParserMixin, BaseRequestParser):
+    shop_id = Argument(
+        'shop_id', required=True, nullable=False,
+        type=int, location=('json', 'form'))
+
+
 class CreateShopFeeApiParser(BaseRequestParser):
     ACCOUNT_PERIOD = Enum(
         ('NOW', 1, u'现结'),

@@ -7,6 +7,7 @@ from ..model.shop import (
     ShopCompany,
     ShopCompanyContact,
     ShopFee,
+    ShopContact,
 )
 from .base import BaseService
 from ..exc import (
@@ -68,6 +69,53 @@ class ShopService(BaseService):
         for shop in shop_list:
             raw_data.append(cls._get_db_obj_data_dict(shop))
         return raw_data, total
+
+
+class ShopContactService(BaseService):
+    @classmethod
+    def get_by_id(cls, id):
+        contact = ShopContact.get_by_id(id)
+        return cls._get_db_obj_data_dict(contact)
+
+    @classmethod
+    def get_by_shop_id(cls, shop_id):
+        contact_list = ShopContact.get_by_shop_id(shop_id)
+        return [cls._get_db_obj_data_dict(item) for item in contact_list]
+
+    @classmethod
+    def create_contact(cls, contact, position, telephone,
+                       email, shop_id):
+        session = DBSession()
+        contact = ShopContact.create(
+            contact=contact, position=position,
+            telephone=telephone, email=email,
+            shop_id=shop_id)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+        return contact.id
+
+    @classmethod
+    def update_contact(cls, id, **kwargs):
+        session = DBSession()
+        ShopContact.update(id, **kwargs)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def delete_contact(cls, id):
+        session = DBSession()
+        ShopContact.delete(id)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
 
 class ShopFeeService(BaseService):
