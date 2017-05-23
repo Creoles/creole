@@ -111,10 +111,10 @@ class VehicleCompany(Base, CompanyMixin):
         elif name_en:
             company_list = query.filter(cls.name_en==name_en).all()
         else:
-            if country_id:
-                query = query.filter(cls.country_id==country_id)
             if city_id:
                 query = query.filter(cls.city_id==city_id)
+            elif country_id:
+                query = query.filter(cls.country_id==country_id)
             if company_type:
                 query = query.filter(cls.company_type==company_type)
             if page == 1:

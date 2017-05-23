@@ -193,9 +193,17 @@ class SearchShopCompanyApi(Resource):
     }
 
     def get(self):
-        shop_company = \
-            ShopCompanyService.search_company(**self.parsed_data)
-        return api_response(data=shop_company)
+        try:
+            shop_company_list, total = \
+                ShopCompanyService.search_company(**self.parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        if self.parsed_data['page'] == 1:
+            data = {'shop_company_list': shop_company_list, 'total': total}
+        else:
+            data = {'shop_company_list': shop_company_list}
+
+        return api_response(data=data)
 
 
 class CreateShopCompanyContactApi(Resource):

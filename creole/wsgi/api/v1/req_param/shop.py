@@ -38,9 +38,12 @@ class CreateShopCompanyApiParser(CompanyParserMixin, BaseRequestParser):
 
 
 class SearchShopCompanyApiParser(BaseRequestParser):
-    is_all = Argument('is_all', type=bool, default=False, required=True)
     name = Argument('name', required=False)
     name_en = Argument('name_en', required=False)
+    country_id = Argument('country_id', type=int, required=False)
+    city_id = Argument('city_id', type=int, required=False)
+    page = Argument('page', type=int, default=1, required=False)
+    number = Argument('number', type=int, default=20, required=False)
 
 
 class CreateShopCompanyContactApiParser(ContactParserMixin, BaseRequestParser):

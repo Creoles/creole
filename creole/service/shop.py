@@ -215,10 +215,13 @@ class ShopCompanyService(BaseService):
             raise_error_json(DatabaseError(msg=repr(e)))
 
     @classmethod
-    def search_company(cls, name=None, name_en=None, is_all=False):
-        shop_company = \
-            ShopCompany.search(name=name, name_en=name_en, is_all=is_all)
-        return [cls._get_db_obj_data_dict(item) for item in shop_company]
+    def search_company(cls, name=None, name_en=None, country_id=None,
+                       city_id=None, page=1, number=20):
+        shop_company, total = \
+            ShopCompany.search(
+                name=name, name_en=name_en, country_id=country_id,
+                city_id=city_id, page=page, number=number)
+        return [cls._get_db_obj_data_dict(item) for item in shop_company], total
 
 
 class ShopCompanyContactService(BaseService):

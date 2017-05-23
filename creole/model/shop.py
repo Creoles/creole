@@ -77,17 +77,24 @@ class ShopCompany(Base, CompanyMixin):
                 ClientError(errcode=CreoleErrCode.SHOP_COMPANY_DUPLICATED))
 
     @classmethod
-    def search(cls, name=None, name_en=None, is_all=False):
+    def search(cls, name=None, name_en=None, country_id=None,
+               city_id=None, page=1, number=20):
         session = DBSession()
-        shop_company = None
         query = session.query(cls)
-        if is_all:
-            shop_company = query.all()
-        elif name:
-            shop_company = query.filter(cls.name==name).first()
+        total = None
+        if name:
+            company_list = query.filter(cls.name==name).all()
         elif name_en:
-            shop_company = query.filter(cls.name_en==name_en).first()
-        return shop_company
+            company_list = query.filter(cls.name_en==name_en).all()
+        else:
+            if city_id:
+                query = query.filter(cls.city_id==city_id)
+            elif country_id:
+                query = query.filter(cls.country_id==country_id)
+            if page == 1:
+                total = query.count()
+            company_list = query.offset((page - 1) * number).limit(number).all()
+        return company_list, total
 
 
 class ShopCompanyContact(Base, ContactMixin):
