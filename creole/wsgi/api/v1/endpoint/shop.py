@@ -30,6 +30,10 @@ class ShopApi(Resource):
     def get(self, id):
         """根据ID查询店铺"""
         shop = ShopService.get_by_id(id)
+        contact_list = ShopContactService.get_by_shop_id(id)
+        fee_list = ShopFeeService.get_fee_by_shop_id(id)
+        shop['contact_list'] = contact_list
+        shop['fee_list'] = fee_list
         return api_response(data=shop)
 
     def put(self, id):

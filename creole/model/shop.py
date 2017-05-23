@@ -305,7 +305,6 @@ class Shop(Base, BaseMixin):
             Index('idx_name_name_en', 'name', 'name_en'),
             Index('idx_country_id_city_id_company_id_shop_type',
                   'country_id', 'city_id', 'company_id', 'shop_type'),
-            Index('ix_average_score', 'average_score'),
             Index('ix_company_id', 'company_id'),
             Index('ix_country_id', 'country_id'),
             Index('ix_city_id', 'city_id'),
