@@ -20,9 +20,11 @@ class CreateShopApiParser(BaseRequestParser):
     city_id = Argument('city_id', type=int, nullable=False, required=True)
     company_id = Argument('company_id', type=int, nullable=False, required=True)
     shop_type = Argument(
-        'shop_type', type=int, choices=SHOP_TYPE, nullable=False, required=True)
+        'shop_type', type=int, choices=SHOP_TYPE.values(),
+        nullable=False, required=True)
     intro_cn = Argument('intro_cn')
     intro_en = Argument('intro_en')
+    note = Argument('note')
 
 
 class ShopSearchApiParser(BaseRequestParser):

@@ -101,7 +101,7 @@ app.add_resource(ShopCompanyContactApi, '/shop/company/contact/<int:id>', endpoi
 app.add_resource(GetShopCompanyContactApi, '/shop/company/contact/company/<int:company_id>', endpoint='get-shop-company-contact-by-company-id')
 app.add_resource(CreateShopFeeApi, '/shop/fee/create', endpoint='create-shop-fee')
 app.add_resource(ShopFeeApi, '/shop/fee/<int:id>', endpoint='get-shop-fee')
-app.add_resource(GetShopFeeApi, '/shop/fee/<int:shop_id>', endpoint='get-shop-fee-by-shop-id')
+app.add_resource(GetShopFeeApi, '/shop/fee/shop/<int:shop_id>', endpoint='get-shop-fee-by-shop-id')
 app.add_resource(CreateShopContactApi, '/shop/contact/create', endpoint='create-shop-contact')
 app.add_resource(ShopContactApi, '/shop/contact/<int:id>', endpoint='get-shop-contact')
 app.add_resource(GetShopContactApi, '/shop/contact/shop/<int:shop_id>', endpoint='get-shop-contact-by-shop-id')

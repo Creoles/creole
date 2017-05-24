@@ -127,7 +127,7 @@ class ShopFeeService(BaseService):
     @classmethod
     def get_fee_by_shop_id(cls, shop_id):
         fee_list = ShopFee.get_by_shop_id(shop_id)
-        return [cls._get_db_obj_data_dict(fee_list)]
+        return [cls._get_db_obj_data_dict(fee) for fee in fee_list]
 
     @classmethod
     def create_fee(cls, shop_id, fee_person, company_ratio,

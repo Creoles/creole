@@ -133,7 +133,7 @@ class ShopContactApi(Resource):
 class GetShopContactApi(Resource):
     def get(self, shop_id):
         contact_list = \
-            ShopCompanyContactService.get_by_shop_id(shop_id)
+            ShopContactService.get_by_shop_id(shop_id)
         return api_response(data=contact_list)
 
 
