@@ -25,6 +25,9 @@ class BaseCreoleErrCode(object):
     SHOP_NOT_EXIST = 3020
     SHOP_COMPANY_DUPLICATED = 3021
     SHOP_COMPANY_NOT_EXIST = 3022
+    SHOP_DUPLICATED = 3023
+    SHOP_FEE_NOT_EXIST = 3024
+    SHOP_FEE_DUPLICATED = 3025
 
     # 车辆
     VEHICLE_COMPANY_DUPLICATED = 3030
@@ -85,6 +88,9 @@ TRANSLATIONS = {
     CreoleErrCode.SHOP_NOT_EXIST: u'shop do not exist',
     CreoleErrCode.SHOP_COMPANY_DUPLICATED: u'shop company name or name_en duplicated',
     CreoleErrCode.SHOP_COMPANY_NOT_EXIST: u'shop company do not exist',
+    CreoleErrCode.SHOP_DUPLICATED: u'shop duplicated',
+    CreoleErrCode.SHOP_FEE_NOT_EXIST: u'shop fee do not exist',
+    CreoleErrCode.SHOP_FEE_DUPLICATED: u'shop fee duplicated',
 
     CreoleErrCode.VEHICLE_COMPANY_DUPLICATED: u'vehicle company name or name_en duplicated',
     CreoleErrCode.VEHICLE_COMPANY_NOT_EXIST: u'vehicle company do not exist',

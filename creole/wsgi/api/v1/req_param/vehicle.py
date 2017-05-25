@@ -1,7 +1,11 @@
 # coding: utf-8
 from flask_restful.reqparse import Argument
 
-from .mixins import AccountParserMixin, ContactParserMixin
+from .mixins import (
+    AccountParserMixin,
+    ContactParserMixin,
+    CompanyParserMixin,
+)
 from ...util import BaseRequestParser
 from creole.util import Enum
 
@@ -17,7 +21,7 @@ class CreateVehicleApiParser(BaseRequestParser):
     vehicle_type_id = Argument('vehicle_type_id', type=int, nullable=False, required=True)
 
 
-class CreateVehicleCompanyApiParser(BaseRequestParser):
+class CreateVehicleCompanyApiParser(CompanyParserMixin, BaseRequestParser):
     COMPANY_TYPE = Enum(
         ('COMPANY', 1, u'公司'),
         ('PERSON', 2, u'个人'),
@@ -25,14 +29,7 @@ class CreateVehicleCompanyApiParser(BaseRequestParser):
     company_type = Argument(
         'company_type', choices=COMPANY_TYPE.values(), type=int,
         nullable=False, required=True)
-    country_id = Argument(
-        'country_id', type=int, nullable=False, required=True)
-    city_id = Argument('city_id', type=int, nullable=False, required=True)
-    name = Argument('name', nullable=False, required=True)
-    name_en = Argument('name_en', nullable=False, required=True)
-    nickname_en = Argument('nickname_en', nullable=False, required=True)
     vehicle_number = Argument('vehicle_number', type=int, nullable=False, required=True)
-    register_number = Argument('register_number', nullable=False, required=True)
 
 
 class SearchVehicleCompanyApiParser(BaseRequestParser):

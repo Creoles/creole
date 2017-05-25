@@ -92,11 +92,11 @@ CREATE TABLE `city` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
-  KEY `ix_name_en` (`name_en`),
-  KEY `ix_country_id` (`country_id`),
   KEY `ix_created_at` (`created_at`),
   KEY `ix_name` (`name`),
-  KEY `ix_updated_at` (`updated_at`)
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_name_en` (`name_en`),
+  KEY `ix_country_id` (`country_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -123,8 +123,8 @@ CREATE TABLE `country` (
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
   KEY `ix_created_at` (`created_at`),
-  KEY `ix_updated_at` (`updated_at`),
   KEY `ix_name_en` (`name_en`),
+  KEY `ix_updated_at` (`updated_at`),
   KEY `ix_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -274,30 +274,28 @@ CREATE TABLE `shop` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `name` varchar(40) NOT NULL,
-  `name_en` varchar(60) NOT NULL,
-  `address` varchar(100) NOT NULL,
-  `telephone` varchar(20) NOT NULL,
   `country_id` int(11) NOT NULL,
   `city_id` int(11) NOT NULL,
-  `company_id` int(11) DEFAULT NULL,
+  `address` varchar(100) NOT NULL,
   `shop_type` tinyint(4) NOT NULL,
-  `contact` varchar(16) NOT NULL,
-  `fee_person` float NOT NULL,
-  `commission_ratio` float NOT NULL,
-  `average_score` float DEFAULT NULL,
-  `intro_cn` varchar(160) DEFAULT NULL,
-  `intro_en` varchar(160) DEFAULT NULL,
+  `company_id` int(11) DEFAULT NULL,
+  `name` varchar(40) NOT NULL,
+  `name_en` varchar(60) NOT NULL,
+  `nickname_en` varchar(20) NOT NULL,
+  `intro_cn` varchar(500) DEFAULT NULL,
+  `intro_en` varchar(500) DEFAULT NULL,
+  `note` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `ix_company_id` (`company_id`),
-  KEY `idx_country_id_city_id_company_id_shop_type` (`country_id`,`city_id`,`company_id`,`shop_type`),
-  KEY `ix_created_at` (`created_at`),
-  KEY `ix_country_id` (`country_id`),
-  KEY `ix_average_score` (`average_score`),
-  KEY `ix_city_id` (`city_id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `name_en` (`name_en`),
   KEY `ix_shop_type` (`shop_type`),
   KEY `ix_updated_at` (`updated_at`),
-  KEY `idx_name_name_en` (`name`,`name_en`)
+  KEY `idx_name_name_en` (`name`,`name_en`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_company_id` (`company_id`),
+  KEY `ix_country_id` (`country_id`),
+  KEY `ix_city_id` (`city_id`),
+  KEY `idx_country_id_city_id_company_id_shop_type` (`country_id`,`city_id`,`company_id`,`shop_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -312,17 +310,97 @@ CREATE TABLE `shop_company` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `country_id` int(11) NOT NULL,
+  `city_id` int(11) NOT NULL,
   `name` varchar(40) NOT NULL,
   `name_en` varchar(60) NOT NULL,
+  `nickname_en` varchar(30) NOT NULL,
+  `register_number` varchar(30) NOT NULL,
+  `intro` varchar(500) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
+  UNIQUE KEY `nickname_en` (`nickname_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
+  KEY `ix_country_id` (`country_id`),
   KEY `ix_created_at` (`created_at`),
-  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_city_id` (`city_id`),
+  KEY `ix_name` (`name`),
   KEY `ix_name_en` (`name_en`),
-  KEY `ix_name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `idx_country_id_city_id` (`country_id`,`city_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `shop_company_contact`
+--
+
+DROP TABLE IF EXISTS `shop_company_contact`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `shop_company_contact` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `contact` varchar(16) NOT NULL,
+  `position` varchar(30) NOT NULL,
+  `telephone` varchar(20) NOT NULL,
+  `email` varchar(30) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_company_id` (`company_id`),
+  KEY `ix_updated_at` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `shop_contact`
+--
+
+DROP TABLE IF EXISTS `shop_contact`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `shop_contact` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `contact` varchar(16) NOT NULL,
+  `position` varchar(30) NOT NULL,
+  `telephone` varchar(20) NOT NULL,
+  `email` varchar(30) NOT NULL,
+  `shop_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ix_shop_id` (`shop_id`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `shop_fee`
+--
+
+DROP TABLE IF EXISTS `shop_fee`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `shop_fee` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `shop_id` int(11) NOT NULL,
+  `fee_person` float NOT NULL,
+  `company_ratio` float NOT NULL,
+  `tour_guide_ratio` float NOT NULL,
+  `account_period` tinyint(4) NOT NULL,
+  `account_way` tinyint(4) NOT NULL,
+  `note` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `shop_id` (`shop_id`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -339,8 +417,8 @@ CREATE TABLE `shop_image` (
   `shop_id` int(11) NOT NULL,
   `image_hash` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `ix_created_at` (`created_at`),
-  KEY `ix_updated_at` (`updated_at`)
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -689,4 +767,4 @@ CREATE TABLE `vehicle_user_account` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-19  8:36:25
+-- Dump completed on 2017-05-23 11:09:40

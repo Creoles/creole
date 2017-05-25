@@ -19,7 +19,8 @@ from sqlalchemy.exc import IntegrityError
 
 from . import Base, DBSession
 from .country import Country
-from .mixins import BaseMixin, AccountMixin
+from .base import BaseMixin
+from .mixins import AccountMixin
 from ..exc import (
     raise_error_json,
     InvalidateError,
