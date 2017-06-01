@@ -73,6 +73,11 @@ from .endpoint.tour_guide import (
     TourGuideAccountApi,
     EditTourGuideAccountApi,
 )
+from .endpoint.hotel import (
+    HotelApi,
+    CreateHotelApi,
+    GetHotelApi,
+)
 
 
 blue_print = Blueprint('api_v1', __name__)
@@ -151,3 +156,8 @@ app.add_resource(TourGuideFeeApi, '/tour_guide/fee/<int:id>', endpoint='get-tour
 app.add_resource(CreateTourGuideFeeApi, '/tour_guide/fee/create', endpoint='create-tour-guide-fee')
 app.add_resource(TourGuideAccountApi, '/tour_guide/account/<int:tour_guide_id>', endpoint='get-tour-guide-account')
 app.add_resource(EditTourGuideAccountApi, '/tour_guide/account/edit', endpoint='edit-tour-guide-account')
+
+# 酒店
+app.add_resource(HotelApi, '/hotel/<int:id>', endpoint='get-hotel')
+app.add_resource(CreateHotelApi, '/hotel/create', endpoint='create-hotel')
+app.add_resource(GetHotelApi, '/hotel/get/<int:company>', endpoint='get-hotel-by-company')
