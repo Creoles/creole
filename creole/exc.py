@@ -61,6 +61,11 @@ class BaseCreoleErrCode(object):
     # 联系人
     CONTACT_PERSON_NOT_EXIST = 3070
 
+    # 酒店
+    HOTEL_NOT_EXIST = 3080
+    HOTEL_DUPLICATED = 3081
+
+
 class CreoleErrCode(BaseCreoleErrCode):
     pass
 
@@ -118,6 +123,9 @@ TRANSLATIONS = {
     CreoleErrCode.TOUR_GUIDE_FEE_NOT_EXIST: u'the tour guide fee do not exist',
 
     CreoleErrCode.CONTACT_PERSON_NOT_EXIST: u'the contact person do not exist',
+
+    CreoleErrCode.HOTEL_NOT_EXIST: u'the hotel does not exist',
+    CreoleErrCode.HOTEL_DUPLICATED: u'the hotel duplicated',
 }
 
 
