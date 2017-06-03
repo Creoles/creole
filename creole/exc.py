@@ -64,6 +64,11 @@ class BaseCreoleErrCode(object):
     # 酒店
     HOTEL_NOT_EXIST = 3080
     HOTEL_DUPLICATED = 3081
+    HOTEL_FEE_NOT_EXIST = 3082
+    ROOM_PRICE_NOT_EXIST = 3083
+    MEAL_PRICE_NOT_EXIST = 3084
+    FESTIVAL_PRICE_NOT_EXIST = 3085
+    ROOM_ADDITIONAL_PRICE_NOT_EXIST = 3086
 
 
 class CreoleErrCode(BaseCreoleErrCode):
@@ -126,6 +131,12 @@ TRANSLATIONS = {
 
     CreoleErrCode.HOTEL_NOT_EXIST: u'the hotel does not exist',
     CreoleErrCode.HOTEL_DUPLICATED: u'the hotel duplicated',
+
+    CreoleErrCode.HOTEL_FEE_NOT_EXIST: u'the hotel fee does not exist',
+    CreoleErrCode.ROOM_PRICE_NOT_EXIST: u'the room price does not exist',
+    CreoleErrCode.MEAL_PRICE_NOT_EXIST: u'the meal price does not exist',
+    CreoleErrCode.FESTIVAL_PRICE_NOT_EXIST: u'the festival price does not exist',
+    CreoleErrCode.ROOM_ADDITIONAL_PRICE_NOT_EXIST: u'the room additional price does not exist',
 }
 
 

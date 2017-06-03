@@ -1,10 +1,12 @@
 # coding: utf-8
 from sqlalchemy import (
     Column,
+    DateTime,
     Unicode,
     String,
     Integer,
     Index,
+    Float,
 )
 from sqlalchemy.dialects.mysql import (
     TINYINT,
@@ -166,3 +168,342 @@ class Hotel(Base, BaseMixin):
     def get_by_company_id(cls, company_id):
         session = DBSession()
         return session.query(cls).filter(cls.company_id==company_id).all()
+
+
+class HotelFee(Base, BaseMixin):
+    __tablename__ = 'hotel_fee'
+
+    FREE_TYPE = Enum(
+        ('PEOPLE', 1, u'按客户数'),
+        ('ROOM', 2, u'按房间数'),
+    )
+
+    hotel_id = Column(Integer, nullable=False, doc=u'酒店ID')
+    free_policy = Column(TINYINT, nullable=True, doc=u'免房费政策')
+    free = Column(Integer, nullable=True, doc=u'多少免一')
+    note = Column(String(100), nullable=True)
+    confirm_person = Column(String(30), nullable=False, doc=u'确认人')
+    attachment_hash = Column(String(128), nullable=True, doc=u'附件哈希值')
+
+    @validates('free_policy')
+    def _validate_free_policy(self, key, free_policy):
+        if free_policy not in self.FREE_TYPE.values():
+            raise_error_json(InvalidateError(args=('free_policy', free_policy,)))
+        return free_policy
+
+    @classmethod
+    def create(cls, hotel_id, confirm_person, free_policy=None,
+               free=None, note=None, attachment_hash=None):
+        session = DBSession()
+        price = cls(
+            hotel_id=hotel_id, confirm_person=confirm_person,
+            free_policy=free_policy, free=free, note=note,
+            attachment_hash=attachment_hash
+        )
+        session.add(price)
+        session.flush()
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        price = cls.get_by_id(id)
+        if not price:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.HOTEL_FEE_NOT_EXIST))
+        for k, v in kwargs.iteritems():
+            setattr(price, k, v)
+        session = DBSession()
+        session.merge(price)
+        session.flush()
+
+    @classmethod
+    def delete(cls, id):
+        price = cls.get_by_id(id)
+        if not price:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.HOTEL_FEE_NOT_EXIST))
+        session = DBSession()
+        session.delete(price)
+        session.flush()
+
+
+class RoomPrice(Base, BaseMixin):
+    __tablename__ = 'room_price'
+
+    ROOM_TYPE = Enum(
+        ('SINGLE', 1, u'单人间'),
+        ('DOUBLE', 2, u'双人间'),
+        ('TRIPLE', 3, u'三人间'),
+        ('SUITE', 4, u'套间'),
+        ('TOUR_GUIDE', 5, u'导游房'),
+    )
+
+    hotel_fee_id = Column(Integer, nullable=False, doc=u'费用ID')
+    room_type = Column(TINYINT, nullable=False, doc=u'房型')
+    start_time = Column(DateTime, nullable=False, doc=u'开始时间')
+    end_time = Column(DateTime, nullable=False, doc=u'结束时间')
+    price = Column(Float(3), nullable=False, doc=u'房价')
+    note = Column(String(100), nullable=True)
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_hotel_fee_id', 'hotel_fee_id'),
+        )
+        return table_args + BaseMixin.__table_args__
+
+    @validates('room_type')
+    def _validate_room_type(self, key, room_type):
+        if room_type not in self.ROOM_TYPE.values():
+            raise_error_json(InvalidateError(args=('room_type', room_type,)))
+        return room_type
+
+    @classmethod
+    def get_by_hotel_fee_id(cls, hotel_fee_id):
+        session = DBSession()
+        _list = session.query(cls).filter(cls.hotel_fee_id==hotel_fee_id).all()
+        return _list
+
+    @classmethod
+    def create(cls, hotel_fee_id, room_type,
+               start_time, end_time, price, note=None):
+        session = DBSession()
+        price = cls(
+            hotel_fee_id=hotel_fee_id, room_type=room_type,
+            start_time=start_time, end_time=end_time,
+            price=price, note=note
+        )
+        session.add(price)
+        session.flush()
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        price = cls.get_by_id(id)
+        if not price:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.ROOM_PRICE_NOT_EXIST))
+        for k, v in kwargs.iteritems():
+            setattr(price, k, v)
+        session = DBSession()
+        session.merge(price)
+        session.flush()
+
+    @classmethod
+    def delete(cls, id):
+        price = cls.get_by_id(id)
+        if not price:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.ROOM_PRICE_NOT_EXIST))
+        session = DBSession()
+        session.delete(price)
+        session.flush()
+
+
+class MealPrice(Base, BaseMixin):
+    __tablename__ = 'meal_price'
+
+    MEAL_TYPE = Enum(
+        ('BREAKFAST', 1, u'早餐'),
+        ('LUNCH', 2, u'午餐'),
+        ('DINNER', 3, u'晚餐'),
+    )
+
+    hotel_fee_id = Column(Integer, nullable=False, doc=u'费用ID')
+    meal_type = Column(TINYINT, nullable=False, doc=u'餐饮类型')
+    start_time = Column(DateTime, nullable=False, doc=u'开始时间')
+    end_time = Column(DateTime, nullable=False, doc=u'结束时间')
+    price = Column(Float(3), nullable=False, doc=u'餐饮价格')
+    note = Column(String(100), nullable=True)
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_hotel_fee_id', 'hotel_fee_id'),
+        )
+        return table_args + BaseMixin.__table_args__
+
+    @validates('meal_type')
+    def _validate_meal_type(self, key, meal_type):
+        if meal_type not in self.MEAL_TYPE.values():
+            raise_error_json(InvalidateError(args=('meal_type', meal_type,)))
+        return meal_type
+
+    @classmethod
+    def get_by_hotel_fee_id(cls, hotel_fee_id):
+        session = DBSession()
+        _list = session.query(cls).filter(cls.hotel_fee_id==hotel_fee_id).all()
+        return _list
+
+    @classmethod
+    def create(cls, hotel_fee_id, meal_type,
+               start_time, end_time, price, note=None):
+        session = DBSession()
+        price = cls(
+            hotel_fee_id=hotel_fee_id, meal_type=meal_type,
+            start_time=start_time, end_time=end_time,
+            price=price, note=note
+        )
+        session.add(price)
+        session.flush()
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        price = cls.get_by_id(id)
+        if not price:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.MEAL_PRICE_NOT_EXIST))
+        for k, v in kwargs.iteritems():
+            setattr(price, k, v)
+        session = DBSession()
+        session.merge(price)
+        session.flush()
+
+    @classmethod
+    def delete(cls, id):
+        price = cls.get_by_id(id)
+        if not price:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.MEAL_PRICE_NOT_EXIST))
+        session = DBSession()
+        session.delete(price)
+        session.flush()
+
+
+class RoomAdditionalCharge(Base, BaseMixin):
+    __tablename__ = 'room_additional_charge'
+
+    ROOM_LEVEL = Enum(
+        ('STANDARD', 1, '标准间'),
+        ('DELUXE', 2, u'豪华间'),
+        ('SUITE', 3, u'套间'),
+    )
+
+    hotel_fee_id = Column(Integer, nullable=False, doc=u'费用ID')
+    room_level = Column(TINYINT, nullable=False, doc=u'房间级别')
+    start_time = Column(DateTime, nullable=False, doc=u'开始时间')
+    end_time = Column(DateTime, nullable=False, doc=u'结束时间')
+    price = Column(Float(3), nullable=False, doc=u'餐饮价格')
+    note = Column(String(100), nullable=True)
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_hotel_fee_id', 'hotel_fee_id'),
+        )
+        return table_args + BaseMixin.__table_args__
+
+    @validates('room_level')
+    def _validate_room_level(self, key, room_level):
+        if room_level not in self.ROOM_LEVEL.values():
+            raise_error_json(InvalidateError(args=('room_level', room_level,)))
+        return room_level
+
+    @classmethod
+    def get_by_hotel_fee_id(cls, hotel_fee_id):
+        session = DBSession()
+        _list = session.query(cls).filter(cls.hotel_fee_id==hotel_fee_id).all()
+        return _list
+
+    @classmethod
+    def create(cls, hotel_fee_id, room_level,
+               start_time, end_time, price, note=None):
+        session = DBSession()
+        price = cls(
+            hotel_fee_id=hotel_fee_id, room_level=room_level,
+            start_time=start_time, end_time=end_time,
+            price=price, note=note
+        )
+        session.add(price)
+        session.flush()
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        price = cls.get_by_id(id)
+        if not price:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.ROOM_ADDITIONAL_PRICE_NOT_EXIST))
+        for k, v in kwargs.iteritems():
+            setattr(price, k, v)
+        session = DBSession()
+        session.merge(price)
+        session.flush()
+
+    @classmethod
+    def delete(cls, id):
+        price = cls.get_by_id(id)
+        if not price:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.ROOM_ADDITIONAL_PRICE_NOT_EXIST))
+        session = DBSession()
+        session.delete(price)
+        session.flush()
+
+
+class FestivalAdditionalCharge(Base, BaseMixin):
+    __tablename__ = 'festival_additional_charge'
+
+    FESTIVAL_TYPE = Enum(
+        ('CHRISTMAS_EVE', 1, u'平安夜'),
+        ('CHRISTMAS', 1, u'圣诞节'),
+        ('NEW_YEAR', 3, u'新年'),
+        ('CHINEASE_NEW_YEAR', 4, u'中国新年'),
+    )
+
+    hotel_fee_id = Column(Integer, nullable=False, doc=u'费用ID')
+    festival_type = Column(TINYINT, nullable=False, doc=u'节日类型')
+    start_time = Column(DateTime, nullable=False, doc=u'开始时间')
+    end_time = Column(DateTime, nullable=False, doc=u'结束时间')
+    price = Column(Float(3), nullable=False, doc=u'节日附加价格')
+    note = Column(String(100), nullable=True)
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_hotel_fee_id', 'hotel_fee_id'),
+        )
+        return table_args + BaseMixin.__table_args__
+
+    @validates('festival_type')
+    def _validate_festival_type(self, key, festival_type):
+        if festival_type not in self.FESTIVAL_TYPE.values():
+            raise_error_json(InvalidateError(args=('festival_type', festival_type,)))
+        return festival_type
+
+    @classmethod
+    def get_by_hotel_fee_id(cls, hotel_fee_id):
+        session = DBSession()
+        _list = session.query(cls).filter(cls.hotel_fee_id==hotel_fee_id).all()
+        return _list
+
+    @classmethod
+    def create(cls, hotel_fee_id, festival_type,
+               start_time, end_time, price, note=None):
+        session = DBSession()
+        price = cls(
+            hotel_fee_id=hotel_fee_id, festival_type=festival_type,
+            start_time=start_time, end_time=end_time,
+            price=price, note=note
+        )
+        session.add(price)
+        session.flush()
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        price = cls.get_by_id(id)
+        if not price:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.FESTIVAL_PRICE_NOT_EXIST))
+        for k, v in kwargs.iteritems():
+            setattr(price, k, v)
+        session = DBSession()
+        session.merge(price)
+        session.flush()
+
+    @classmethod
+    def delete(cls, id):
+        price = cls.get_by_id(id)
+        if not price:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.FESTIVAL_PRICE_NOT_EXIST))
+        session = DBSession()
+        session.delete(price)
+        session.flush()
