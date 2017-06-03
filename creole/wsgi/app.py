@@ -37,7 +37,9 @@ class CreoleApp(Flask):
         pass
 
 
+_wsgi_app = CreoleApp('creole')
+
+
 def wsgi_app(environ, start_response):
     """The application for gunicorn"""
-    app = CreoleApp('creole')
-    return app(environ, start_response)
+    return _wsgi_app(environ, start_response)
