@@ -192,6 +192,12 @@ class HotelFee(Base, BaseMixin):
         return free_policy
 
     @classmethod
+    def get_by_hotel_id(cls, hotel_id):
+        session = DBSession()
+        fee = session.query(cls.hotel_id==hotel_id).first()
+        return fee
+
+    @classmethod
     def create(cls, hotel_id, confirm_person, free_policy=None,
                free=None, note=None, attachment_hash=None):
         session = DBSession()
@@ -202,6 +208,7 @@ class HotelFee(Base, BaseMixin):
         )
         session.add(price)
         session.flush()
+        return price.id
 
     @classmethod
     def update(cls, id, **kwargs):
