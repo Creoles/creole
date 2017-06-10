@@ -92,11 +92,11 @@ CREATE TABLE `city` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
-  KEY `ix_created_at` (`created_at`),
   KEY `ix_name` (`name`),
   KEY `ix_updated_at` (`updated_at`),
   KEY `ix_name_en` (`name_en`),
-  KEY `ix_country_id` (`country_id`)
+  KEY `ix_country_id` (`country_id`),
+  KEY `ix_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -122,10 +122,204 @@ CREATE TABLE `country` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `name_en` (`name_en`),
   UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
-  KEY `ix_created_at` (`created_at`),
-  KEY `ix_name_en` (`name_en`),
   KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_name_en` (`name_en`),
+  KEY `ix_created_at` (`created_at`),
   KEY `ix_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `festival_additional_charge`
+--
+
+DROP TABLE IF EXISTS `festival_additional_charge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `festival_additional_charge` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `hotel_fee_id` int(11) NOT NULL,
+  `festival_type` tinyint(4) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `price` float NOT NULL,
+  `note` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_hotel_fee_id` (`hotel_fee_id`),
+  KEY `ix_updated_at` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `hotel`
+--
+
+DROP TABLE IF EXISTS `hotel`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hotel` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `country_id` int(11) NOT NULL,
+  `city_id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `address` varchar(100) NOT NULL,
+  `name` varchar(30) NOT NULL,
+  `name_en` varchar(30) NOT NULL,
+  `nickname_en` varchar(20) NOT NULL,
+  `star_level` tinyint(4) NOT NULL,
+  `comment_level` tinyint(4) NOT NULL,
+  `standard_room_number` smallint(6) NOT NULL,
+  `standard_double_room_number` smallint(6) NOT NULL,
+  `triple_room_number` smallint(6) NOT NULL,
+  `suite_room_number` smallint(6) NOT NULL,
+  `tour_guide_room_number` smallint(6) NOT NULL,
+  `start_year` smallint(6) NOT NULL,
+  `telephone` varchar(20) NOT NULL,
+  `email` varchar(30) NOT NULL,
+  `intro_cn` varchar(500) DEFAULT NULL,
+  `intro_en` varchar(800) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `name_en` (`name_en`),
+  UNIQUE KEY `nickname_en` (`nickname_en`),
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_company_id` (`company_id`),
+  KEY `ix_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `hotel_account`
+--
+
+DROP TABLE IF EXISTS `hotel_account`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hotel_account` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `currency` tinyint(4) NOT NULL,
+  `bank_name` varchar(30) NOT NULL,
+  `deposit_bank` varchar(30) NOT NULL,
+  `payee` varchar(20) NOT NULL,
+  `account` varchar(20) NOT NULL,
+  `swift_code` varchar(20) DEFAULT NULL,
+  `note` varchar(40) NOT NULL,
+  `hotel_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `account` (`account`),
+  KEY `ix_hotel_id` (`hotel_id`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `hotel_company`
+--
+
+DROP TABLE IF EXISTS `hotel_company`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hotel_company` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `country_id` int(11) NOT NULL,
+  `city_id` int(11) NOT NULL,
+  `name` varchar(40) NOT NULL,
+  `name_en` varchar(60) NOT NULL,
+  `nickname_en` varchar(30) NOT NULL,
+  `register_number` varchar(30) NOT NULL,
+  `intro` varchar(200) DEFAULT NULL,
+  `note` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `name_en` (`name_en`),
+  UNIQUE KEY `nickname_en` (`nickname_en`),
+  UNIQUE KEY `idx_name_name_en` (`name`,`name_en`),
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_country_id` (`country_id`),
+  KEY `ix_name` (`name`),
+  KEY `ix_city_id` (`city_id`),
+  KEY `ix_name_en` (`name_en`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `idx_country_id_city_id` (`country_id`,`city_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `hotel_company_contact`
+--
+
+DROP TABLE IF EXISTS `hotel_company_contact`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hotel_company_contact` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `contact` varchar(16) NOT NULL,
+  `position` varchar(30) NOT NULL,
+  `telephone` varchar(20) NOT NULL,
+  `email` varchar(30) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ix_updated_at` (`updated_at`),
+  KEY `ix_company_id` (`company_id`),
+  KEY `ix_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `hotel_contact`
+--
+
+DROP TABLE IF EXISTS `hotel_contact`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hotel_contact` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `contact` varchar(16) NOT NULL,
+  `position` varchar(30) NOT NULL,
+  `telephone` varchar(20) NOT NULL,
+  `email` varchar(30) NOT NULL,
+  `hotel_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ix_hotel_id` (`hotel_id`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `hotel_fee`
+--
+
+DROP TABLE IF EXISTS `hotel_fee`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hotel_fee` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `hotel_id` int(11) NOT NULL,
+  `free_policy` tinyint(4) DEFAULT NULL,
+  `free` int(11) DEFAULT NULL,
+  `note` varchar(100) DEFAULT NULL,
+  `confirm_person` varchar(30) NOT NULL,
+  `attachment_hash` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -151,6 +345,30 @@ CREATE TABLE `meal` (
   KEY `ix_restaurant_id` (`restaurant_id`),
   KEY `ix_created_at` (`created_at`),
   KEY `idx_restaurant_id_meal_type` (`restaurant_id`,`meal_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `meal_price`
+--
+
+DROP TABLE IF EXISTS `meal_price`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `meal_price` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `hotel_fee_id` int(11) NOT NULL,
+  `meal_type` tinyint(4) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `price` float NOT NULL,
+  `note` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ix_hotel_fee_id` (`hotel_fee_id`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -260,6 +478,54 @@ CREATE TABLE `restaurant_company` (
   KEY `ix_updated_at` (`updated_at`),
   KEY `ix_name_en` (`name_en`),
   KEY `ix_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `room_additional_charge`
+--
+
+DROP TABLE IF EXISTS `room_additional_charge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `room_additional_charge` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `hotel_fee_id` int(11) NOT NULL,
+  `room_level` tinyint(4) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `price` float NOT NULL,
+  `note` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ix_hotel_fee_id` (`hotel_fee_id`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_updated_at` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `room_price`
+--
+
+DROP TABLE IF EXISTS `room_price`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `room_price` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `hotel_fee_id` int(11) NOT NULL,
+  `room_type` tinyint(4) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `price` float NOT NULL,
+  `note` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ix_created_at` (`created_at`),
+  KEY `ix_hotel_fee_id` (`hotel_fee_id`),
+  KEY `ix_updated_at` (`updated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -767,4 +1033,4 @@ CREATE TABLE `vehicle_user_account` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-23 11:09:40
+-- Dump completed on 2017-06-10  9:25:56

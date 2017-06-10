@@ -689,7 +689,7 @@ class FestivalAdditionalCharge(Base, BaseMixin):
 
     FESTIVAL_TYPE = Enum(
         ('CHRISTMAS_EVE', 1, u'平安夜'),
-        ('CHRISTMAS', 1, u'圣诞节'),
+        ('CHRISTMAS', 2, u'圣诞节'),
         ('NEW_YEAR', 3, u'新年'),
         ('CHINEASE_NEW_YEAR', 4, u'中国新年'),
     )

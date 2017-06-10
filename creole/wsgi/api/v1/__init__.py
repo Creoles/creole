@@ -189,7 +189,7 @@ app.add_resource(EditFestivalAdditionalChargeApi, '/hotel/festival_additional_ch
 app.add_resource(HotelCompanyApi, '/hotel/company/<int:id>', endpoint='get-hotel-company')
 app.add_resource(CreateHotelCompanyApi, '/hotel/company/create', endpoint='create-hotel-company')
 app.add_resource(HotelCompanyContactApi, '/hotel/company/contact/<int:id>', endpoint='get-hotel-company-contact')
-app.add_resource(GetHotelCompanyContactApi, '/hotel/company/contact/company/<int:company_id', endpoint='get-hotel-company-contact-by-company-id')
+app.add_resource(GetHotelCompanyContactApi, '/hotel/company/contact/company/<int:company_id>', endpoint='get-hotel-company-contact-by-company-id')
 app.add_resource(CreateHotelCompanyContactApi, '/hotel/company/contact/create', endpoint='create-hotel-company-contact')
 app.add_resource(HotelContactApi, '/hotel/contact/<int:id>', endpoint='get-hotel-contact')
 app.add_resource(GetHotelContactApi, '/hotel/contact/hotel/<int:hotel_id>', endpoint='get-hotel-contact-by-hotel-id')
