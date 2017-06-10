@@ -3,9 +3,24 @@ import datetime
 
 from flask_restful.reqparse import Argument
 
-from .mixins import dict_parser_func
+from .mixins import (
+    dict_parser_func, 
+    ContactParserMixin,
+    CompanyParserMixin,
+)
 from ...util import BaseRequestParser
 from creole.util import Enum
+
+
+class CreateHotelCompanyContactApiParser(ContactParserMixin, BaseRequestParser):
+    company_id = Argument(
+        'company_id', required=True, nullable=False,
+        type=int, location=('json', 'form'))
+
+
+class CreateHotelCompanyApiParser(CompanyParserMixin, BaseRequestParser):
+    intro = Argument('intro')
+    note = Argument('intro')
 
 
 class CreateHotelApiParser(BaseRequestParser):
@@ -41,6 +56,12 @@ class CreateHotelApiParser(BaseRequestParser):
     email = Argument('email', nullable=False, required=True)
     intro_cn = Argument('intro_cn')
     intro_en = Argument('intro_en')
+
+
+class CreateHotelContactApiParser(ContactParserMixin, BaseRequestParser):
+    hotel_id = Argument(
+        'hotel_id', required=True, nullable=False,
+        type=int, location=('json', 'form'))
 
 
 class CreateHotelFeeApiParser(BaseRequestParser):

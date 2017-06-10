@@ -74,9 +74,17 @@ from .endpoint.tour_guide import (
     EditTourGuideAccountApi,
 )
 from .endpoint.hotel import (
+    HotelCompanyApi,
+    CreateHotelCompanyApi,
+    HotelCompanyContactApi,
+    GetHotelCompanyContactApi,
+    CreateHotelCompanyContactApi,
     HotelApi,
     CreateHotelApi,
     GetHotelApi,
+    HotelContactApi,
+    GetHotelContactApi,
+    CreateHotelContactApi,
     CreateHotelFeeApi,
     HotelFeeApi,
     GetHotelFeeApi,
@@ -175,3 +183,11 @@ app.add_resource(EditRoomPriceApi, '/hotel/room_price/edit', endpoint='edit-room
 app.add_resource(EditMealPriceApi, '/hotel/meal_price/edit', endpoint='edit-meal-price')
 app.add_resource(EditRoomAdditionalChargeApi, '/hotel/room_additional_charge', endpoint='edit-room-additional-charge')
 app.add_resource(EditFestivalAdditionalChargeApi, '/hotel/festival_additional_charge/edit', endpoint='edit-festival-additional-charge')
+app.add_resource(HotelCompanyApi, '/hotel/company/<int:id>', endpoint='get-hotel-company')
+app.add_resource(CreateHotelCompanyApi, '/hotel/company/create', endpoint='create-hotel-company')
+app.add_resource(HotelCompanyContactApi, '/hotel/company/contact/<int:id>', endpoint='get-hotel-company-contact')
+app.add_resource(GetHotelCompanyContactApi, '/hotel/company/contact/company/<int:company_id', endpoint='get-hotel-company-contact-by-company-id')
+app.add_resource(CreateHotelCompanyContactApi, '/hotel/company/contact/create', endpoint='create-hotel-company-contact')
+app.add_resource(HotelContactApi, '/hotel/contact/<int:id>', endpoint='get-hotel-contact')
+app.add_resource(GetHotelContactApi, '/hotel/contact/hotel/<int:hotel_id>', endpoint='get-hotel-contact-by-hotel-id')
+app.add_resource(CreateHotelContactApi, '/hotel/contact/create', endpoint='create-hotel-contact')

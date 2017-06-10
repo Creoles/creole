@@ -3,7 +3,10 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from ..model import DBSession
 from ..model.hotel import (
+    HotelCompanyContact,
+    HotelCompany,
     Hotel,
+    HotelContact,
     HotelFee,
     RoomPrice,
     MealPrice,
@@ -15,6 +18,122 @@ from ..exc import (
     raise_error_json,
     DatabaseError,
 )
+
+
+class HotelCompanyContactService(BaseService):
+    @classmethod
+    def get_contact_by_id(cls, id):
+        contact = HotelCompanyContact.get_by_id(id)
+        return cls._get_db_obj_data_dict(contact)
+
+    @classmethod
+    def get_contact_list_by_company_id(cls, company_id):
+        contact_list = HotelCompanyContact.get_by_company_id(company_id)
+        return [cls._get_db_obj_data_dict(item) for item in contact_list]
+
+    @classmethod
+    def create_contact(cls, contact, position, telephone,
+                       email, company_id):
+        session = DBSession()
+        contact = HotelCompanyContact.create(
+            contact=contact, position=position,
+            telephone=telephone, email=email,
+            company_id=company_id)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+        return contact.id
+
+    @classmethod
+    def update_contact(cls, id, **kwargs):
+        session = DBSession()
+        HotelCompanyContact.update(id, **kwargs)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def delete_contact(cls, id):
+        session = DBSession()
+        HotelCompanyContact.delete(id)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+
+class HotelCompanyService(BaseService):
+    @classmethod
+    def get_by_id(cls, company_id):
+        company = HotelCompany.get_by_id(company_id)
+        return cls._get_db_obj_data_dict(company)
+
+    @classmethod
+    def create_hotel_company(cls, country_id, city_id, name, name_en,
+                             nickname_en, register_number, intro=None,
+                             note=None):
+        HotelCompany.create(
+            country_id=country_id, city_id=city_id,
+            name=name, name_en=name_en, nickname_en=nickname_en,
+            register_number=register_number,
+            intro=intro, note=note
+        )
+        session = DBSession()
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def update_hotel_company(cls, id, **kwargs):
+        HotelCompany.update(id, **kwargs)
+        session = DBSession()
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def delete_hotel_company(cls, id):
+        """删除酒店公司, 有以下几步:
+        
+        1. 删除公司
+        2. 删除公司联系人
+        3. 删除公司下所有酒店
+        4. 删除公司对应的费率
+        """
+        # 删除所有费率信息
+        hotel_id_list = Hotel.get_by_company_id(id)
+        for hotel_id in hotel_id_list:
+            fee_id = HotelFee.get_by_hotel_id(hotel_id)
+            HotelFee.delete(fee_id)
+            RoomPrice.delete_by_hotel_fee_id(fee_id)
+            MealPrice.delete_by_hotel_fee_id(fee_id)
+            RoomAdditionalCharge.delete_by_hotel_fee_id(fee_id)
+            FestivalAdditionalCharge.delete_by_hotel_fee_id(fee_id)
+
+        # 删除酒店
+        Hotel.delete_by_company_id(id)
+
+        # 删除公司联系人
+        HotelCompanyContact.delete_by_company_id(id)
+
+        # 删除公司
+        HotelCompany.delete(id)
+
+        session = DBSession()
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
 
 
 class HotelService(BaseService):
@@ -65,8 +184,70 @@ class HotelService(BaseService):
 
     @classmethod
     def delete_hotel(cls, id):
+        """删除酒店, 有以下几个步骤:
+            
+        1. 删除酒店
+        2. 删除酒店费率信息
+        """
+        # 删除酒店费率信息
+        fee_id = HotelFee.get_by_hotel_id(id)
+        HotelFee.delete(fee_id)
+        RoomPrice.delete_by_hotel_fee_id(fee_id)
+        MealPrice.delete_by_hotel_fee_id(fee_id)
+        RoomAdditionalCharge.delete_by_hotel_fee_id(fee_id)
+        FestivalAdditionalCharge.delete_by_hotel_fee_id(fee_id)
+
+        # 删除酒店
         Hotel.delete(id)
+
         session = DBSession()
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+
+class HotelContactService(BaseService):
+    @classmethod
+    def get_contact_by_id(cls, id):
+        contact = HotelContact.get_by_id(id)
+        return cls._get_db_obj_data_dict(contact)
+
+    @classmethod
+    def get_contact_list_by_hotel_id(cls, hotel_id):
+        contact_list = HotelContact.get_by_hotel_id(hotel_id)
+        return [cls._get_db_obj_data_dict(item) for item in contact_list]
+
+    @classmethod
+    def create_contact(cls, contact, position, telephone,
+                       email, hotel_id):
+        session = DBSession()
+        contact = HotelContact.create(
+            contact=contact, position=position,
+            telephone=telephone, email=email,
+            hotel_id=hotel_id)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+        return contact.id
+
+    @classmethod
+    def update_contact(cls, id, **kwargs):
+        session = DBSession()
+        HotelContact.update(id, **kwargs)
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def delete_contact(cls, id):
+        session = DBSession()
+        HotelContact.delete(id)
         try:
             session.commit()
         except SQLAlchemyError as e:
@@ -113,7 +294,12 @@ class HotelFeeService(BaseService):
 
     @classmethod
     def delete_fee(cls, id):
+        """删除酒店费率信息"""
         HotelFee.delete(id)
+        RoomPrice.delete_by_hotel_fee_id(id)
+        MealPrice.delete_by_hotel_fee_id(id)
+        RoomAdditionalCharge.delete_by_hotel_fee_id(id)
+        FestivalAdditionalCharge.delete_by_hotel_fee_id(id)
         session = DBSession()
         try:
             session.commit()

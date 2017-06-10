@@ -19,6 +19,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from ..util import Enum
 from . import Base, DBSession
 from .base import BaseMixin
+from .mixins import CompanyMixin, ContactMixin
 from .country import Country, City
 from ..exc import (
     raise_error_json,
@@ -28,8 +29,96 @@ from ..exc import (
 )
 
 
-class HotelCompany(Base, BaseMixin):
+class HotelCompany(Base, CompanyMixin):
     __tablename__ = 'hotel_company'
+
+    intro = Column(String(200), doc=u'公司介绍')
+    note = Column(String(200), doc=u'备注')
+
+    @classmethod
+    def create(cls, country_id, city_id, name, name_en,
+               nickname_en, register_number, intro=None, note=None):
+        cls._validate_country_and_city(country_id, city_id)
+        session = DBSession()
+        company = cls(
+            country_id=country_id, city_id=city_id,
+            name=name, name_en=name_en, nickname_en=nickname_en,
+            register_number=register_number,
+            intro=intro, note=note
+        )
+        session.add(company)
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.HOTEL_COMPANY_DUPLICATED))
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        session = DBSession()
+        company = cls.get_by_id(id)
+        if not company:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.HOTEL_COMPANY_NOT_EXIST))
+        for k, v in kwargs.iteritems():
+            setattr(company, k, v)
+        session.merge(company)
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.HOTEL_COMPANY_DUPLICATED))
+
+
+    @classmethod
+    def delete(cls, id):
+        session = DBSession()
+        company = cls.get_by_id(id)
+        if not company:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.HOTEL_COMPANY_NOT_EXIST))
+        session.delete(company)
+        session.flush()
+
+
+class HotelCompanyContact(Base, ContactMixin):
+    __tablename__ = 'hotel_company_contact'
+
+    company_id = Column(Integer, nullable=False, doc=u'公司ID')
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_company_id', 'company_id'),
+        )
+        return table_args + ContactMixin.__table_args__
+
+    @classmethod
+    def get_by_company_id(cls, company_id):
+        session = DBSession()
+        return session.query(cls).filter(cls.company_id==company_id).all()
+
+    @classmethod
+    def create(cls, contact, position, telephone, email, company_id):
+        session = DBSession()
+        person = cls(
+            contact=contact, position=position,
+            telephone=telephone, email=email,
+            company_id=company_id
+        )
+        session.add(person)
+        session.flush()
+        return person
+
+    @classmethod
+    def delet_by_company_id(cls, company_id):
+        session = DBSession()
+        company_list = cls.get_by_company_id(company_id)
+        for company in company_list:
+            session.delete(company)
+        session.flush()
 
 
 class Hotel(Base, BaseMixin):
@@ -58,8 +147,8 @@ class Hotel(Base, BaseMixin):
     suite_room_number = Column(SMALLINT, nullable=False, doc=u'套间数')
     tour_guide_room_number = Column(SMALLINT, nullable=False, doc=u'导游房数')
     start_year = Column(SMALLINT, nullable=False, doc=u'开业年份')
-    telephone = Column(String(20), nullable=False, doc=u'联系电话')
-    email = Column(String(30), nullable=False, doc=u'邮箱')
+    telephone = Column(String(20), nullable=False, doc=u'预定电话')
+    email = Column(String(30), nullable=False, doc=u'预定邮箱')
 
     intro_cn = Column(Unicode(500), nullable=True, doc=u'中文介绍')
     intro_en = Column(String(800), nullable=True, doc=u'英文介绍')
@@ -165,9 +254,55 @@ class Hotel(Base, BaseMixin):
         session.flush()
 
     @classmethod
+    def delete_by_company_id(cls, company_id):
+        session = DBSession()
+        hotel_list = cls.get_by_company_id(company_id)
+        for hotel in hotel_list:
+            session.delete(hotel)
+        session.flush()
+
+    @classmethod
     def get_by_company_id(cls, company_id):
         session = DBSession()
         return session.query(cls).filter(cls.company_id==company_id).all()
+
+
+class HotelContact(Base, ContactMixin):
+    __tablename__ = 'hotel_contact'
+
+    hotel_id= Column(Integer, nullable=False, doc=u'酒店ID')
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_hotel_id', 'hotel_id'),
+        )
+        return table_args + ContactMixin.__table_args__
+
+    @classmethod
+    def get_by_hotel_id(cls, hotel_id):
+        session = DBSession()
+        return session.query(cls).filter(cls.hotel_id==hotel_id).all()
+
+    @classmethod
+    def create(cls, contact, position, telephone, email, hotel_id):
+        session = DBSession()
+        person = cls(
+            contact=contact, position=position,
+            telephone=telephone, email=email,
+            hotel_id=hotel_id
+        )
+        session.add(person)
+        session.flush()
+        return person
+
+    @classmethod
+    def delet_by_hotel_id(cls, hotel_id):
+        session = DBSession()
+        hotel_list = cls.get_by_hotel_id(hotel_id)
+        for hotel in hotel_list:
+            session.delete(hotel)
+        session.flush()
 
 
 class HotelFee(Base, BaseMixin):
@@ -230,6 +365,14 @@ class HotelFee(Base, BaseMixin):
                 ClientError(errcode=CreoleErrCode.HOTEL_FEE_NOT_EXIST))
         session = DBSession()
         session.delete(price)
+        session.flush()
+
+    @classmethod
+    def delete_by_hotel_id(cls, hotel_id):
+        session = DBSession()
+        price = cls.get_by_hotel_id(hotel_id)
+        if price:
+            session.delete(price)
         session.flush()
 
 
@@ -304,6 +447,14 @@ class RoomPrice(Base, BaseMixin):
         session.delete(price)
         session.flush()
 
+    @classmethod
+    def delete_by_hotel_fee_id(cls, hotel_fee_id):
+        session = DBSession()
+        price_list = cls.get_by_hotel_fee_id(hotel_fee_id)
+        for price in price_list:
+            session.delete(price)
+        session.flush()
+
 
 class MealPrice(Base, BaseMixin):
     __tablename__ = 'meal_price'
@@ -372,6 +523,14 @@ class MealPrice(Base, BaseMixin):
                 ClientError(errcode=CreoleErrCode.MEAL_PRICE_NOT_EXIST))
         session = DBSession()
         session.delete(price)
+        session.flush()
+
+    @classmethod
+    def delete_by_hotel_fee_id(cls, hotel_fee_id):
+        session = DBSession()
+        price_list = cls.get_by_hotel_fee_id(hotel_fee_id)
+        for price in price_list:
+            session.delete(price)
         session.flush()
 
 
@@ -444,6 +603,14 @@ class RoomAdditionalCharge(Base, BaseMixin):
         session.delete(price)
         session.flush()
 
+    @classmethod
+    def delete_by_hotel_fee_id(cls, hotel_fee_id):
+        session = DBSession()
+        price_list = cls.get_by_hotel_fee_id(hotel_fee_id)
+        for price in price_list:
+            session.delete(price)
+        session.flush()
+
 
 class FestivalAdditionalCharge(Base, BaseMixin):
     __tablename__ = 'festival_additional_charge'
@@ -513,4 +680,12 @@ class FestivalAdditionalCharge(Base, BaseMixin):
                 ClientError(errcode=CreoleErrCode.FESTIVAL_PRICE_NOT_EXIST))
         session = DBSession()
         session.delete(price)
+        session.flush()
+
+    @classmethod
+    def delete_by_hotel_fee_id(cls, hotel_fee_id):
+        session = DBSession()
+        price_list = cls.get_by_hotel_fee_id(hotel_fee_id)
+        for price in price_list:
+            session.delete(price)
         session.flush()
