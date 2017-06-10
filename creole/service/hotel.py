@@ -122,7 +122,7 @@ class HotelFeeService(BaseService):
             raise_error_json(DatabaseError(msg=repr(e)))
 
 
-class RoomPriceSevice(BaseService):
+class RoomPriceService(BaseService):
     @classmethod
     def get_by_hotel_fee_id(cls, fee_id):
         fee_list = RoomPrice.get_by_hotel_fee_id(fee_id)
@@ -160,7 +160,7 @@ class RoomPriceSevice(BaseService):
             RoomPrice.delete(id)
 
 
-class MealPriceSevice(BaseService):
+class MealPriceService(BaseService):
     @classmethod
     def get_by_hotel_fee_id(cls, fee_id):
         fee_list = MealPrice.get_by_hotel_fee_id(fee_id)
@@ -198,7 +198,7 @@ class MealPriceSevice(BaseService):
             MealPrice.delete(id)
 
 
-class RoomAdditionalChargeSevice(BaseService):
+class RoomAdditionalChargeService(BaseService):
     @classmethod
     def get_by_hotel_fee_id(cls, fee_id):
         fee_list = RoomAdditionalCharge.get_by_hotel_fee_id(fee_id)

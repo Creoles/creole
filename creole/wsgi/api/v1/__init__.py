@@ -77,6 +77,13 @@ from .endpoint.hotel import (
     HotelApi,
     CreateHotelApi,
     GetHotelApi,
+    CreateHotelFeeApi,
+    HotelFeeApi,
+    GetHotelFeeApi,
+    EditRoomPriceApi,
+    EditMealPriceApi,
+    EditRoomAdditionalChargeApi,
+    EditFestivalAdditionalChargeApi,
 )
 
 
@@ -161,3 +168,10 @@ app.add_resource(EditTourGuideAccountApi, '/tour_guide/account/edit', endpoint='
 app.add_resource(HotelApi, '/hotel/<int:id>', endpoint='get-hotel')
 app.add_resource(CreateHotelApi, '/hotel/create', endpoint='create-hotel')
 app.add_resource(GetHotelApi, '/hotel/get/<int:company>', endpoint='get-hotel-by-company')
+app.add_resource(CreateHotelFeeApi, '/hotel/fee/create', endpoint='create-hotel-fee')
+app.add_resource(HotelFeeApi, '/hotel/fee/<int:id>', endpoint='get-hotel-fee')
+app.add_resource(GetHotelFeeApi, '/hotel/fee/hotel/<int:hotel_id>', endpoint='get-hotel-fee-by-hotel-id')
+app.add_resource(EditRoomPriceApi, '/hotel/room_price/edit', endpoint='edit-room-price')
+app.add_resource(EditMealPriceApi, '/hotel/meal_price/edit', endpoint='edit-meal-price')
+app.add_resource(EditRoomAdditionalChargeApi, '/hotel/room_additional_charge', endpoint='edit-room-additional-charge')
+app.add_resource(EditFestivalAdditionalChargeApi, '/hotel/festival_additional_charge/edit', endpoint='edit-festival-additional-charge')

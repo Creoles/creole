@@ -1,6 +1,9 @@
 # coding: utf-8
+import datetime
+
 from flask_restful.reqparse import Argument
 
+from .mixins import dict_parser_func
 from ...util import BaseRequestParser
 from creole.util import Enum
 
@@ -38,3 +41,107 @@ class CreateHotelApiParser(BaseRequestParser):
     email = Argument('email', nullable=False, required=True)
     intro_cn = Argument('intro_cn')
     intro_en = Argument('intro_en')
+
+
+class CreateHotelFeeApiParser(BaseRequestParser):
+    FREE_TYPE = Enum(
+        ('PEOPLE', 1, u'按客户数'),
+        ('ROOM', 2, u'按房间数'),
+    )
+
+    hotel_id = Argument('hotel_id', type=int, nullable=False, required=True)
+    confirm_person = Argument('confirm_person', nullable=False, required=True)
+    free_policy = Argument(
+        'free_policy', type=int, choices=FREE_TYPE.values(),
+        nullable=False, required=True)
+    free = Argument('free', type=int)
+    note = Argument('note')
+    attachment_hash = Argument('attachment_hash')
+
+
+class EditRoomPriceApiParser(BaseRequestParser):
+    _CREATE_PARAM_MAPPING = {
+        'hotel_fee_id': (int, True),
+        'room_type': (int, True),
+        'start_time': (datetime.datetime, True),
+        'end_time': (datetime.datetime, True),
+        'price': (float, True),
+        'note': (str, False),
+    }
+    _UPDATE_PARAM_MAPPING = \
+        _CREATE_PARAM_MAPPING.copy().update({'id': (int, True)})
+
+    create_list = Argument(
+        'create_list', required=False, action='append',
+        type=dict_parser_func(param_mapping=_CREATE_PARAM_MAPPING))
+    update_list = Argument(
+        'update_list', required=False, action='append',
+        type=dict_parser_func(param_mapping=_UPDATE_PARAM_MAPPING))
+    delete_id_list = Argument(
+        'delete_id_list', type=int, required=False, action='append')
+
+
+class EditMealPriceApiParser(BaseRequestParser):
+    _CREATE_PARAM_MAPPING = {
+        'hotel_fee_id': (int, True),
+        'meal_type': (int, True),
+        'start_time': (datetime.datetime, True),
+        'end_time': (datetime.datetime, True),
+        'price': (float, True),
+        'note': (str, False),
+    }
+    _UPDATE_PARAM_MAPPING = \
+        _CREATE_PARAM_MAPPING.copy().update({'id': (int, True)})
+
+    create_list = Argument(
+        'create_list', required=False, action='append',
+        type=dict_parser_func(param_mapping=_CREATE_PARAM_MAPPING))
+    update_list = Argument(
+        'update_list', required=False, action='append',
+        type=dict_parser_func(param_mapping=_UPDATE_PARAM_MAPPING))
+    delete_id_list = Argument(
+        'delete_id_list', type=int, required=False, action='append')
+
+
+class EditRoomAdditionalChargeApiParser(BaseRequestParser):
+    _CREATE_PARAM_MAPPING = {
+        'hotel_fee_id': (int, True),
+        'room_level': (int, True),
+        'start_time': (datetime.datetime, True),
+        'end_time': (datetime.datetime, True),
+        'price': (float, True),
+        'note': (str, False),
+    }
+    _UPDATE_PARAM_MAPPING = \
+        _CREATE_PARAM_MAPPING.copy().update({'id': (int, True)})
+
+    create_list = Argument(
+        'create_list', required=False, action='append',
+        type=dict_parser_func(param_mapping=_CREATE_PARAM_MAPPING))
+    update_list = Argument(
+        'update_list', required=False, action='append',
+        type=dict_parser_func(param_mapping=_UPDATE_PARAM_MAPPING))
+    delete_id_list = Argument(
+        'delete_id_list', type=int, required=False, action='append')
+
+
+class EditFestivalAdditionalChargeApiParser(BaseRequestParser):
+    _CREATE_PARAM_MAPPING = {
+        'hotel_fee_id': (int, True),
+        'festival_type': (int, True),
+        'start_time': (datetime.datetime, True),
+        'end_time': (datetime.datetime, True),
+        'price': (float, True),
+        'note': (str, False),
+    }
+    _UPDATE_PARAM_MAPPING = \
+        _CREATE_PARAM_MAPPING.copy().update({'id': (int, True)})
+
+    create_list = Argument(
+        'create_list', required=False, action='append',
+        type=dict_parser_func(param_mapping=_CREATE_PARAM_MAPPING))
+    update_list = Argument(
+        'update_list', required=False, action='append',
+        type=dict_parser_func(param_mapping=_UPDATE_PARAM_MAPPING))
+    delete_id_list = Argument(
+        'delete_id_list', type=int, required=False, action='append')
