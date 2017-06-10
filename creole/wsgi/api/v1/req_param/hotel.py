@@ -1,6 +1,4 @@
 # coding: utf-8
-import datetime
-
 from flask_restful.reqparse import Argument
 
 from .mixins import (
@@ -84,8 +82,8 @@ class EditRoomPriceApiParser(BaseRequestParser):
     _CREATE_PARAM_MAPPING = {
         'hotel_fee_id': (int, True),
         'room_type': (int, True),
-        'start_time': (datetime.datetime, True),
-        'end_time': (datetime.datetime, True),
+        'start_time': (str, True),
+        'end_time': (str, True),
         'price': (float, True),
         'note': (str, False),
     }
@@ -106,8 +104,8 @@ class EditMealPriceApiParser(BaseRequestParser):
     _CREATE_PARAM_MAPPING = {
         'hotel_fee_id': (int, True),
         'meal_type': (int, True),
-        'start_time': (datetime.datetime, True),
-        'end_time': (datetime.datetime, True),
+        'start_time': (str, True),
+        'end_time': (str, True),
         'price': (float, True),
         'note': (str, False),
     }
@@ -128,8 +126,8 @@ class EditRoomAdditionalChargeApiParser(BaseRequestParser):
     _CREATE_PARAM_MAPPING = {
         'hotel_fee_id': (int, True),
         'room_level': (int, True),
-        'start_time': (datetime.datetime, True),
-        'end_time': (datetime.datetime, True),
+        'start_time': (str, True),
+        'end_time': (str, True),
         'price': (float, True),
         'note': (str, False),
     }
@@ -150,8 +148,8 @@ class EditFestivalAdditionalChargeApiParser(BaseRequestParser):
     _CREATE_PARAM_MAPPING = {
         'hotel_fee_id': (int, True),
         'festival_type': (int, True),
-        'start_time': (datetime.datetime, True),
-        'end_time': (datetime.datetime, True),
+        'start_time': (str, True),
+        'end_time': (str, True),
         'price': (float, True),
         'note': (str, False),
     }

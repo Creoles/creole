@@ -113,7 +113,7 @@ class HotelCompanyContact(Base, ContactMixin):
         return person
 
     @classmethod
-    def delet_by_company_id(cls, company_id):
+    def delete_by_company_id(cls, company_id):
         session = DBSession()
         company_list = cls.get_by_company_id(company_id)
         for company in company_list:
@@ -297,7 +297,7 @@ class HotelContact(Base, ContactMixin):
         return person
 
     @classmethod
-    def delet_by_hotel_id(cls, hotel_id):
+    def delete_by_hotel_id(cls, hotel_id):
         session = DBSession()
         hotel_list = cls.get_by_hotel_id(hotel_id)
         for hotel in hotel_list:

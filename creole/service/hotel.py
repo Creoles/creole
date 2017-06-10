@@ -18,6 +18,7 @@ from ..exc import (
     raise_error_json,
     DatabaseError,
 )
+from ..util import timestamp_to_date
 
 
 class HotelCompanyContactService(BaseService):
@@ -107,17 +108,21 @@ class HotelCompanyService(BaseService):
         1. 删除公司
         2. 删除公司联系人
         3. 删除公司下所有酒店
-        4. 删除公司对应的费率
+        4. 删除公司对应酒店的所有联系人
+        5. 删除公司对应酒店的所有费率
         """
-        # 删除所有费率信息
         hotel_id_list = Hotel.get_by_company_id(id)
         for hotel_id in hotel_id_list:
+            # 删除所有费率信息
             fee_id = HotelFee.get_by_hotel_id(hotel_id)
             HotelFee.delete(fee_id)
             RoomPrice.delete_by_hotel_fee_id(fee_id)
             MealPrice.delete_by_hotel_fee_id(fee_id)
             RoomAdditionalCharge.delete_by_hotel_fee_id(fee_id)
             FestivalAdditionalCharge.delete_by_hotel_fee_id(fee_id)
+
+            # 删除所有酒店联系人
+            HotelContact.delete_by_hotel_id(hotel_id)
 
         # 删除酒店
         Hotel.delete_by_company_id(id)
@@ -188,6 +193,7 @@ class HotelService(BaseService):
             
         1. 删除酒店
         2. 删除酒店费率信息
+        3. 删除酒店联系人
         """
         # 删除酒店费率信息
         fee_id = HotelFee.get_by_hotel_id(id)
@@ -196,6 +202,9 @@ class HotelService(BaseService):
         MealPrice.delete_by_hotel_fee_id(fee_id)
         RoomAdditionalCharge.delete_by_hotel_fee_id(fee_id)
         FestivalAdditionalCharge.delete_by_hotel_fee_id(fee_id)
+
+        # 删除所有酒店联系人
+        HotelContact.delete_by_hotel_id(id)
 
         # 删除酒店
         Hotel.delete(id)
@@ -333,11 +342,19 @@ class RoomPriceService(BaseService):
     @classmethod
     def create_room_price(cls, price_list):
         for price_dict in price_list:
+            start_time_stamp = int(price_dict['start_time'])
+            end_time_stamp = int(price_dict['end_time'])
+            price_dict['start_time'] = timestamp_to_date(start_time_stamp)
+            price_dict['end_time'] = timestamp_to_date(end_time_stamp)
             RoomPrice.create(**price_dict)
 
     @classmethod
     def update_room_price(cls, price_list):
         for price_dict in price_list:
+            start_time_stamp = int(price_dict['start_time'])
+            end_time_stamp = int(price_dict['end_time'])
+            price_dict['start_time'] = timestamp_to_date(start_time_stamp)
+            price_dict['end_time'] = timestamp_to_date(end_time_stamp)
             RoomPrice.update(**price_dict)
 
     @classmethod
@@ -371,11 +388,19 @@ class MealPriceService(BaseService):
     @classmethod
     def create_meal_price(cls, price_list):
         for price_dict in price_list:
+            start_time_stamp = int(price_dict['start_time'])
+            end_time_stamp = int(price_dict['end_time'])
+            price_dict['start_time'] = timestamp_to_date(start_time_stamp)
+            price_dict['end_time'] = timestamp_to_date(end_time_stamp)
             MealPrice.create(**price_dict)
 
     @classmethod
     def update_meal_price(cls, price_list):
         for price_dict in price_list:
+            start_time_stamp = int(price_dict['start_time'])
+            end_time_stamp = int(price_dict['end_time'])
+            price_dict['start_time'] = timestamp_to_date(start_time_stamp)
+            price_dict['end_time'] = timestamp_to_date(end_time_stamp)
             MealPrice.update(**price_dict)
 
     @classmethod
@@ -410,11 +435,19 @@ class RoomAdditionalChargeService(BaseService):
     @classmethod
     def create_additional_charge_price(cls, price_list):
         for price_dict in price_list:
+            start_time_stamp = int(price_dict['start_time'])
+            end_time_stamp = int(price_dict['end_time'])
+            price_dict['start_time'] = timestamp_to_date(start_time_stamp)
+            price_dict['end_time'] = timestamp_to_date(end_time_stamp)
             RoomAdditionalCharge.create(**price_dict)
 
     @classmethod
     def update_additional_charge_price(cls, price_list):
         for price_dict in price_list:
+            start_time_stamp = int(price_dict['start_time'])
+            end_time_stamp = int(price_dict['end_time'])
+            price_dict['start_time'] = timestamp_to_date(start_time_stamp)
+            price_dict['end_time'] = timestamp_to_date(end_time_stamp)
             RoomAdditionalCharge.update(**price_dict)
 
     @classmethod
@@ -449,11 +482,19 @@ class FestivalAdditionalChargeService(BaseService):
     @classmethod
     def create_additional_charge_price(cls, price_list):
         for price_dict in price_list:
+            start_time_stamp = int(price_dict['start_time'])
+            end_time_stamp = int(price_dict['end_time'])
+            price_dict['start_time'] = timestamp_to_date(start_time_stamp)
+            price_dict['end_time'] = timestamp_to_date(end_time_stamp)
             FestivalAdditionalCharge.create(**price_dict)
 
     @classmethod
     def update_additional_charge_price(cls, price_list):
         for price_dict in price_list:
+            start_time_stamp = int(price_dict['start_time'])
+            end_time_stamp = int(price_dict['end_time'])
+            price_dict['start_time'] = timestamp_to_date(start_time_stamp)
+            price_dict['end_time'] = timestamp_to_date(end_time_stamp)
             FestivalAdditionalCharge.update(**price_dict)
 
     @classmethod
