@@ -5,6 +5,7 @@ from .mixins import (
     dict_parser_func, 
     ContactParserMixin,
     CompanyParserMixin,
+    AccountParserMixin,
 )
 from ...util import BaseRequestParser
 from creole.util import Enum
@@ -54,6 +55,12 @@ class CreateHotelApiParser(BaseRequestParser):
     email = Argument('email', nullable=False, required=True)
     intro_cn = Argument('intro_cn')
     intro_en = Argument('intro_en')
+
+
+class CreateHotelAccountApiParser(AccountParserMixin, BaseRequestParser):
+    hotel_id = Argument(
+        'hotel_id', required=True, nullable=False,
+        type=int, location=('json', 'form'))
 
 
 class CreateHotelContactApiParser(ContactParserMixin, BaseRequestParser):

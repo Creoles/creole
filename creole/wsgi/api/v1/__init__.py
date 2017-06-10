@@ -82,6 +82,9 @@ from .endpoint.hotel import (
     HotelApi,
     CreateHotelApi,
     GetHotelApi,
+    HotelAccountApi,
+    CreateHotelAccountApi,
+    GetHotelAccountApi,
     HotelContactApi,
     GetHotelContactApi,
     CreateHotelContactApi,
@@ -191,3 +194,6 @@ app.add_resource(CreateHotelCompanyContactApi, '/hotel/company/contact/create', 
 app.add_resource(HotelContactApi, '/hotel/contact/<int:id>', endpoint='get-hotel-contact')
 app.add_resource(GetHotelContactApi, '/hotel/contact/hotel/<int:hotel_id>', endpoint='get-hotel-contact-by-hotel-id')
 app.add_resource(CreateHotelContactApi, '/hotel/contact/create', endpoint='create-hotel-contact')
+app.add_resource(HotelAccountApi, '/hotel/account/<int:id>', endpoint='get-hotel-account')
+app.add_resource(CreateHotelAccountApi, '/hotel/account/create', endpoint='create-hotel-account')
+app.add_resource(GetHotelAccountApi, '/hotel/account/hotel/<int:hotel_id>', endpoint='get-hotel-account-by-hotel-id')

@@ -19,7 +19,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from ..util import Enum
 from . import Base, DBSession
 from .base import BaseMixin
-from .mixins import CompanyMixin, ContactMixin
+from .mixins import CompanyMixin, ContactMixin, AccountMixin
 from .country import Country, City
 from ..exc import (
     raise_error_json,
@@ -265,6 +265,78 @@ class Hotel(Base, BaseMixin):
     def get_by_company_id(cls, company_id):
         session = DBSession()
         return session.query(cls).filter(cls.company_id==company_id).all()
+
+
+class HotelAccount(Base, AccountMixin):
+    __tablename__ = 'hotel_account'
+
+    hotel_id = Column(Integer, nullable=False, doc=u'所属酒店id')
+
+    @declared_attr
+    def __table_args__(self):
+        table_args = (
+            Index('ix_hotel_id', 'hotel_id'),
+        )
+        return table_args + AccountMixin.__table_args__
+
+    @classmethod
+    def create(cls, hotel_id, currency, bank_name,
+               deposit_bank, payee, account,
+               swift_code=None, note=None):
+        session = DBSession()
+        account = cls(
+            hotel_id=hotel_id, currency=currency,
+            bank_name=bank_name, deposit_bank=deposit_bank,
+            payee=payee, account=account, swift_code=swift_code,
+            note=note)
+        session.add(account)
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.HOTEL_ACCOUNT_DUPLICATED))
+        return account
+
+    @classmethod
+    def get_by_hotel_id(cls, hotel_id):
+        return DBSession().query(cls).\
+            filter(cls.hotel_id==hotel_id).all()
+
+    @classmethod
+    def delete(cls, id):
+        session = DBSession()
+        account = session.query(cls).filter(cls.id==id).first()
+        if not account:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.HOTEL_ACCOUNT_NOT_EXIST))
+        session.delete(account)
+        session.flush()
+
+    @classmethod
+    def delete_by_hotel_id(cls, hotel_id):
+        session = DBSession()
+        account_list = cls.get_by_hotel_id(hotel_id)
+        for account in account_list:
+            session.delete(account)
+        session.flush()
+
+    @classmethod
+    def update(cls, id, **kwargs):
+        account = cls.get_by_id(id)
+        if not account:
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.HOTEL_ACCOUNT_NOT_EXIST))
+        for k, v in kwargs.iteritems():
+            setattr(account, k, v)
+        session = DBSession()
+        session.merge(account)
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            raise_error_json(
+                ClientError(errcode=CreoleErrCode.HOTEL_ACCOUNT_DUPLICATED))
 
 
 class HotelContact(Base, ContactMixin):

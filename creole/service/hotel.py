@@ -6,6 +6,7 @@ from ..model.hotel import (
     HotelCompanyContact,
     HotelCompany,
     Hotel,
+    HotelAccount,
     HotelContact,
     HotelFee,
     RoomPrice,
@@ -110,6 +111,7 @@ class HotelCompanyService(BaseService):
         3. 删除公司下所有酒店
         4. 删除公司对应酒店的所有联系人
         5. 删除公司对应酒店的所有费率
+        6. 删除公司对应酒店的所有账户
         """
         hotel_id_list = Hotel.get_by_company_id(id)
         for hotel_id in hotel_id_list:
@@ -123,6 +125,9 @@ class HotelCompanyService(BaseService):
 
             # 删除所有酒店联系人
             HotelContact.delete_by_hotel_id(hotel_id)
+
+            # 删除所有酒店账户
+            HotelAccount.delete_by_hotel_id(hotel_id)
 
         # 删除酒店
         Hotel.delete_by_company_id(id)
@@ -194,6 +199,7 @@ class HotelService(BaseService):
         1. 删除酒店
         2. 删除酒店费率信息
         3. 删除酒店联系人
+        4. 删除酒店账户信息
         """
         # 删除酒店费率信息
         fee_id = HotelFee.get_by_hotel_id(id)
@@ -206,9 +212,60 @@ class HotelService(BaseService):
         # 删除所有酒店联系人
         HotelContact.delete_by_hotel_id(id)
 
+        # 删除所有酒店账户
+        HotelAccount.delete_by_hotel_id(id)
+
         # 删除酒店
         Hotel.delete(id)
 
+        session = DBSession()
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+
+class HotelAccountService(BaseService):
+    @classmethod
+    def get_by_id(cls, id):
+        account = HotelAccount.get_by_id(id)
+        return cls._get_db_obj_data_dict(account)
+
+    @classmethod
+    def get_by_hotel_id(cls, hotel_id):
+        account_list = HotelAccount.get_by_hotel_id(hotel_id)
+        return [cls._get_db_obj_data_dict(account) for account in account_list]
+
+    @classmethod
+    def create_account(cls, hotel_id, currency, bank_name,
+                       deposit_bank, payee, account,
+                       swift_code=None, note=None):
+        HotelAccount.create(
+            hotel_id=hotel_id, currency=currency,
+            bank_name=bank_name, deposit_bank=deposit_bank,
+            payee=payee, account=account, swift_code=swift_code,
+            note=note)
+        session = DBSession()
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def update_account(cls, id, **kwargs):
+        HotelAccount.update(id, **kwargs)
+        session = DBSession()
+        try:
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise_error_json(DatabaseError(msg=repr(e)))
+
+    @classmethod
+    def delete_account(cls, id):
+        HotelAccount.delete(id)
         session = DBSession()
         try:
             session.commit()

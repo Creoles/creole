@@ -4,6 +4,7 @@ from .....service.hotel import (
     HotelCompanyContactService,
     HotelCompanyService,
     HotelService,
+    HotelAccountService,
     HotelContactService,
     HotelFeeService,
     RoomPriceService,
@@ -15,6 +16,7 @@ from ..req_param.hotel import (
     CreateHotelCompanyContactApiParser,
     CreateHotelCompanyApiParser,
     CreateHotelApiParser,
+    CreateHotelAccountApiParser,
     CreateHotelContactApiParser,
     CreateHotelFeeApiParser,
     EditRoomPriceApiParser,
@@ -129,9 +131,9 @@ class HotelApi(Resource):
 
     def get(self, id):
         hotel = HotelService.get_by_id(id)
-        contact_list = HotelContactService. \
-            get_contact_list_by_hotel_id(id)
-        hotel['contact_list'] = contact_list
+        hotel['contact_list'] = \
+            HotelContactService.get_contact_list_by_hotel_id(id)
+        hotel['account_list'] = HotelAccountService.get_by_hotel_id(id)
         return api_response(data=hotel)
 
     def put(self, id):
@@ -169,6 +171,54 @@ class CreateHotelApi(Resource):
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
+
+
+class HotelAccountApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'put': CreateHotelAccountApiParser(),
+        }
+    }
+
+    def get(self, id):
+        contact = HotelAccountService.get_by_id(id)
+        return api_response(data=contact)
+
+    def put(self, id):
+        try:
+            HotelAccountService.update_account(id, **self.parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
+
+    def delete(self, id):
+        try:
+            HotelAccountService.delete_account(id)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response()
+
+
+class CreateHotelAccountApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'post': CreateHotelAccountApiParser(),
+        }
+    }
+
+    def post(self):
+        try:
+            contact_id = \
+                HotelAccountService.create_account(**self.parsed_data)
+        except ClientError as e:
+            return api_response(code=e.errcode, message=e.msg)
+        return api_response(data={'contact_id': contact_id})
+
+
+class GetHotelAccountApi(Resource):
+    def get(self, hotel_id):
+        account_list = HotelAccountService.get_by_hotel_id(hotel_id)
+        return api_response(data=account_list)
 
 
 class HotelContactApi(Resource):
