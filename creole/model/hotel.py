@@ -401,7 +401,7 @@ class HotelFee(Base, BaseMixin):
     @classmethod
     def get_by_hotel_id(cls, hotel_id):
         session = DBSession()
-        fee = session.query(cls.hotel_id==hotel_id).first()
+        fee = session.query(cls).filter(cls.hotel_id==hotel_id).first()
         return fee
 
     @classmethod

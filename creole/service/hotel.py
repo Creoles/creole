@@ -184,7 +184,7 @@ class HotelService(BaseService):
 
     @classmethod
     def update_hotel(cls, id, **kwargs):
-        Hotel.updated(id, **kwargs)
+        Hotel.update(id, **kwargs)
         session = DBSession()
         try:
             session.commit()

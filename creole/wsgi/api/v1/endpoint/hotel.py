@@ -114,7 +114,7 @@ class CreateHotelCompanyApi(Resource):
         }
     }
     
-    def post(self, id):
+    def post(self):
         try:
             HotelCompanyService.create_hotel_company(**self.parsed_data)
         except ClientError as e:
