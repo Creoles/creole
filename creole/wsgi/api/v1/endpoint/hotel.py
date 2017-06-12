@@ -321,6 +321,14 @@ class HotelFeeApi(Resource):
 class GetHotelFeeApi(Resource):
     def get(cls, hotel_id):
         fee = HotelFeeService.get_by_hotel_id(hotel_id)
+        id = fee.get('id', None)
+        if id:
+            fee['room_price'] = RoomPriceService.get_by_hotel_fee_id(id)
+            fee['meal_price'] = MealPriceService.get_by_hotel_fee_id(id)
+            fee['room_additional_charge'] = \
+                RoomAdditionalChargeService.get_by_hotel_fee_id(id)
+            fee['festival_additional_charge'] = \
+                FestivalAdditionalChargeService.get_by_hotel_fee_id(id)
         return api_response(data=fee)
 
 

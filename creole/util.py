@@ -5,6 +5,9 @@ import time
 import datetime
 
 
+_func = lambda x: x is not None and len(x) != 0
+
+
 def timestamp_to_date(timestamp):
     t = time.localtime(int(timestamp))
     return time.strftime("%Y-%m-%d", t)

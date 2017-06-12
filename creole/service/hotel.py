@@ -19,7 +19,7 @@ from ..exc import (
     raise_error_json,
     DatabaseError,
 )
-from ..util import timestamp_to_date
+from ..util import timestamp_to_date, _func
 
 
 class HotelCompanyContactService(BaseService):
@@ -385,9 +385,9 @@ class RoomPriceService(BaseService):
                           delete_id_list=None):
         session = DBSession()
         if create_list:
-            cls.create_room_price(create_list)
+            cls.create_room_price(filter(_func, create_list))
         if update_list:
-            cls.update_room_price(update_list)
+            cls.update_room_price(filter(_func, update_list))
         if delete_id_list:
             cls.delete_room_price(delete_id_list)
         try:
@@ -431,9 +431,9 @@ class MealPriceService(BaseService):
                           delete_id_list=None):
         session = DBSession()
         if create_list:
-            cls.create_meal_price(create_list)
+            cls.create_meal_price(filter(_func, create_list))
         if update_list:
-            cls.update_meal_price(update_list)
+            cls.update_meal_price(filter(_func, update_list))
         if delete_id_list:
             cls.delete_meal_price(delete_id_list)
         try:
@@ -478,9 +478,9 @@ class RoomAdditionalChargeService(BaseService):
             delete_id_list=None):
         session = DBSession()
         if create_list:
-            cls.create_additional_charge_price(create_list)
+            cls.create_additional_charge_price(filter(_func, create_list))
         if update_list:
-            cls.update_additional_charge_price(update_list)
+            cls.update_additional_charge_price(filter(_func, update_list))
         if delete_id_list:
             cls.delete_additional_charge_price(delete_id_list)
         try:
@@ -525,9 +525,9 @@ class FestivalAdditionalChargeService(BaseService):
             delete_id_list=None):
         session = DBSession()
         if create_list:
-            cls.create_additional_charge_price(create_list)
+            cls.create_additional_charge_price(filter(_func, create_list))
         if update_list:
-            cls.update_additional_charge_price(update_list)
+            cls.update_additional_charge_price(filter(_func, update_list))
         if delete_id_list:
             cls.delete_additional_charge_price(delete_id_list)
         try:

@@ -14,6 +14,7 @@ from ..exc import (
     ClientError,
     CreoleErrCode,
 )
+from ..util import _func
 
 
 class TourGuideService(BaseService):
@@ -156,9 +157,9 @@ class TourGuideAccountService(BaseService):
         """
         session = DBSession()
         if create_list:
-            cls.create_tour_guide_account(create_list)
+            cls.create_tour_guide_account(filter(_func, create_list))
         if update_list:
-            cls.update_tour_guide_account(update_list)
+            cls.update_tour_guide_account(filter(_func, update_list))
         if delete_id_list:
             cls.delete_tour_guide_account(delete_id_list)
         try:
