@@ -1,4 +1,6 @@
 # coding: utf-8
+import copy
+
 from flask_restful.reqparse import Argument
 
 from .mixins import (
@@ -94,8 +96,8 @@ class EditRoomPriceApiParser(BaseRequestParser):
         'price': (float, True),
         'note': (str, False),
     }
-    _UPDATE_PARAM_MAPPING = \
-        _CREATE_PARAM_MAPPING.copy().update({'id': (int, True)})
+    _UPDATE_PARAM_MAPPING = copy.deepcopy(_CREATE_PARAM_MAPPING)
+    _UPDATE_PARAM_MAPPING.update({'id': (int, True)})
 
     create_list = Argument(
         'create_list', required=False, action='append',
@@ -116,8 +118,8 @@ class EditMealPriceApiParser(BaseRequestParser):
         'price': (float, True),
         'note': (str, False),
     }
-    _UPDATE_PARAM_MAPPING = \
-        _CREATE_PARAM_MAPPING.copy().update({'id': (int, True)})
+    _UPDATE_PARAM_MAPPING = copy.deepcopy(_CREATE_PARAM_MAPPING)
+    _UPDATE_PARAM_MAPPING.update({'id': (int, True)})
 
     create_list = Argument(
         'create_list', required=False, action='append',
@@ -138,8 +140,8 @@ class EditRoomAdditionalChargeApiParser(BaseRequestParser):
         'price': (float, True),
         'note': (str, False),
     }
-    _UPDATE_PARAM_MAPPING = \
-        _CREATE_PARAM_MAPPING.copy().update({'id': (int, True)})
+    _UPDATE_PARAM_MAPPING = copy.deepcopy(_CREATE_PARAM_MAPPING)
+    _UPDATE_PARAM_MAPPING.update({'id': (int, True)})
 
     create_list = Argument(
         'create_list', required=False, action='append',
@@ -160,8 +162,8 @@ class EditFestivalAdditionalChargeApiParser(BaseRequestParser):
         'price': (float, True),
         'note': (str, False),
     }
-    _UPDATE_PARAM_MAPPING = \
-        _CREATE_PARAM_MAPPING.copy().update({'id': (int, True)})
+    _UPDATE_PARAM_MAPPING = copy.deepcopy(_CREATE_PARAM_MAPPING)
+    _UPDATE_PARAM_MAPPING.update({'id': (int, True)})
 
     create_list = Argument(
         'create_list', required=False, action='append',
