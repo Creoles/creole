@@ -145,6 +145,16 @@ class HotelCompanyService(BaseService):
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
 
+    @classmethod
+    def search_hotel_company(cls, country_id=None, city_id=None,
+                             page=1, number=20):
+        company_list, total = \
+            HotelCompany.search(
+                country_id=country_id, city_id=city_id,
+                page=page, number=number
+            )
+        return [cls._get_db_obj_data_dict(item) for item in company_list], total
+
 
 class HotelService(BaseService):
     @classmethod

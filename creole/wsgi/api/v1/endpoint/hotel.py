@@ -15,6 +15,7 @@ from .....service.hotel import (
 from ..req_param.hotel import (
     CreateHotelCompanyContactApiParser,
     CreateHotelCompanyApiParser,
+    SearchHotelCompanyApiParser,
     CreateHotelApiParser,
     SearchHotelApiParser,
     CreateHotelAccountApiParser,
@@ -106,6 +107,23 @@ class HotelCompanyApi(Resource):
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
         return api_response()
+
+
+class SearchHotelCompanyApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'get': SearchHotelCompanyApiParser(),
+        }
+    }
+
+    def get(self):
+        company_data, total = \
+            HotelCompanyService.search_hotel_company(**self.parsed_data)
+        if self.parsed_data['page'] == 1:
+            data = {'company_data': company_data, 'total': total}
+        else:
+            data = {'company_data': company_data}
+        return api_response(data=data)
 
 
 class CreateHotelCompanyApi(Resource):
