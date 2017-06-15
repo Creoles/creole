@@ -266,6 +266,30 @@ class Hotel(Base, BaseMixin):
         session = DBSession()
         return session.query(cls).filter(cls.company_id==company_id).all()
 
+    @classmethod
+    def search(cls, country_id=None, city_id=None, company_id=None,
+               name=None, name_en=None, nickname_en=None,
+               star_level=None, page=1, number=20):
+        session = DBSession()
+        query = session.query(cls)
+        total = None
+        if city_id:
+            query = query.filter(cls.city_id==city_id)
+        elif country_id:
+            query = query.filter(cls.country_id==country_id)
+        if name:
+            query = query.filter(cls.name==name)
+        elif name_en:
+            query = query.filter(cls.name_en==name_en)
+        elif nickname_en:
+            query = query.filter(cls.nickname_en==nickname_en)
+        if star_level:
+            query = query.filter(cls.star_level==star_level)
+        if page == 1:
+            total = query.count()
+        hotel_list = query.offset((page - 1) * number).limit(number).all()
+        return hotel_list, total
+
 
 class HotelAccount(Base, AccountMixin):
     __tablename__ = 'hotel_account'

@@ -81,6 +81,7 @@ from .endpoint.hotel import (
     CreateHotelCompanyContactApi,
     HotelApi,
     CreateHotelApi,
+    SearchHotelApi,
     GetHotelApi,
     HotelAccountApi,
     CreateHotelAccountApi,
@@ -181,6 +182,7 @@ app.add_resource(CreateHotelApi, '/hotel/create', endpoint='create-hotel')
 app.add_resource(GetHotelApi, '/hotel/get/<int:company>', endpoint='get-hotel-by-company')
 app.add_resource(CreateHotelFeeApi, '/hotel/fee/create', endpoint='create-hotel-fee')
 app.add_resource(HotelFeeApi, '/hotel/fee/<int:id>', endpoint='get-hotel-fee')
+app.add_resource(SearchHotelApi, '/hotel/search', endpoint='search-hotel')
 app.add_resource(GetHotelFeeApi, '/hotel/fee/hotel/<int:hotel_id>', endpoint='get-hotel-fee-by-hotel-id')
 app.add_resource(EditRoomPriceApi, '/hotel/room_price/edit', endpoint='edit-room-price')
 app.add_resource(EditMealPriceApi, '/hotel/meal_price/edit', endpoint='edit-meal-price')

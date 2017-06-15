@@ -59,6 +59,18 @@ class CreateHotelApiParser(BaseRequestParser):
     intro_en = Argument('intro_en')
 
 
+class SearchHotelApiParser(BaseRequestParser):
+    country_id = Argument('country_id', type=int, required=False)
+    city_id = Argument('city_id', type=int, required=False)
+    company_id = Argument('company_id', type=int, required=False)
+    name = Argument('name', required=False)
+    name_en = Argument('name_en', required=False)
+    nickname_en = Argument('nickname_en', required=False)
+    star_level = Argument('star_level', type=int, required=False)
+    page = Argument('page', type=int, default=1, required=False)
+    number = Argument('number', type=int, default=20, required=False)
+
+
 class CreateHotelAccountApiParser(AccountParserMixin, BaseRequestParser):
     hotel_id = Argument(
         'hotel_id', required=True, nullable=False,

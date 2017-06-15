@@ -225,6 +225,20 @@ class HotelService(BaseService):
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
 
+    def search_hotel(cls, country_id=None, city_id=None, company_id=None,
+                     name=None, name_en=None, nickname_en=None,
+                     star_level=None, page=1, number=20):
+        raw_data = []
+        hotel_list, total = Hotel.search(
+            country_id=country_id, city_id=city_id,
+            company_id=company_id, name=name, name_en=name_en,
+            nickname_en=nickname_en, star_level=star_level,
+            page=page, number=number
+        )
+        for hotel in hotel_list:
+            raw_data.append(cls._get_db_obj_data_dict(hotel))
+        return raw_data, total 
+
 
 class HotelAccountService(BaseService):
     @classmethod

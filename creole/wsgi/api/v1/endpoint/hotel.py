@@ -16,6 +16,7 @@ from ..req_param.hotel import (
     CreateHotelCompanyContactApiParser,
     CreateHotelCompanyApiParser,
     CreateHotelApiParser,
+    SearchHotelApiParser,
     CreateHotelAccountApiParser,
     CreateHotelContactApiParser,
     CreateHotelFeeApiParser,
@@ -156,6 +157,23 @@ class GetHotelApi(Resource):
     def get(self, company_id):
         hotel_list = HotelService.get_by_company_id(id)
         return api_response(data=hotel_list)
+
+
+class SearchHotelApi(Resource):
+    meta = {
+        'args_parser_dict': {
+            'get': SearchHotelApiParser(),
+        }
+    }
+
+    def get(self):
+        hotel_data, total = \
+            HotelService.search_hotel(**self.parsed_data)
+        if self.parsed_data['page'] == 1:
+            data = {'hotel_data': hotel_data, 'total': total}
+        else:
+            data = {'hotel_data': hotel_data}
+        return api_response(data=data)
 
 
 class CreateHotelApi(Resource):
