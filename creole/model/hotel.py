@@ -329,11 +329,11 @@ class HotelAccount(Base, AccountMixin):
         session.add(account)
         try:
             session.flush()
+            return account
         except IntegrityError:
             session.rollback()
             raise_error_json(
                 ClientError(errcode=CreoleErrCode.HOTEL_ACCOUNT_DUPLICATED))
-        return account
 
     @classmethod
     def get_by_hotel_id(cls, hotel_id):

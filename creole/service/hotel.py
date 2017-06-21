@@ -266,7 +266,7 @@ class HotelAccountService(BaseService):
     def create_account(cls, hotel_id, currency, bank_name,
                        deposit_bank, payee, account,
                        swift_code=None, note=None):
-        HotelAccount.create(
+        account = HotelAccount.create(
             hotel_id=hotel_id, currency=currency,
             bank_name=bank_name, deposit_bank=deposit_bank,
             payee=payee, account=account, swift_code=swift_code,
@@ -274,6 +274,7 @@ class HotelAccountService(BaseService):
         session = DBSession()
         try:
             session.commit()
+            return account.id
         except SQLAlchemyError as e:
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))

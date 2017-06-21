@@ -244,11 +244,11 @@ class CreateHotelAccountApi(Resource):
 
     def post(self):
         try:
-            contact_id = \
+            account_id = \
                 HotelAccountService.create_account(**self.parsed_data)
         except ClientError as e:
             return api_response(code=e.errcode, message=e.msg)
-        return api_response(data={'contact_id': contact_id})
+        return api_response(data={'account_id': account_id})
 
 
 class GetHotelAccountApi(Resource):
