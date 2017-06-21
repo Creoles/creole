@@ -235,6 +235,7 @@ class HotelService(BaseService):
             session.rollback()
             raise_error_json(DatabaseError(msg=repr(e)))
 
+    @classmethod
     def search_hotel(cls, country_id=None, city_id=None, company_id=None,
                      name=None, name_en=None, nickname_en=None,
                      star_level=None, page=1, number=20):
