@@ -1,6 +1,7 @@
 # coding: utf-8
 from sqlalchemy.exc import SQLAlchemyError
 
+from ..util import _func
 from .base import BaseService
 from ..model import DBSession
 from ..model.restaurant import (
@@ -116,9 +117,9 @@ class RestaurantAccountService(BaseService):
         """
         session = DBSession()
         if create_list:
-            cls.create_account(create_list)
+            cls.create_account(filter(_func, create_list))
         if update_list:
-            cls.update_account(update_list)
+            cls.update_account(filter(_func, update_list))
         if delete_id_list:
             cls.delete_account(delete_id_list)
         try:
@@ -177,11 +178,11 @@ class MealService(BaseService):
         if create_list:
             if len(create_list) > 3:
                 raise_error_json(ParameterError())
-            cls.create_meal(create_list, delete_id_list)
+            cls.create_meal(filter(_func, create_list), delete_id_list)
         if update_list:
             if len(update_list) > 3:
                 raise_error_json(ParameterError())
-            cls.update_meal_list(update_list)
+            cls.update_meal_list(filter(_func, update_list))
         if delete_id_list:
             if len(delete_id_list) > 3:
                 raise_error_json(ParameterError())

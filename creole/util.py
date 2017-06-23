@@ -5,14 +5,16 @@ import time
 import datetime
 
 
+_func = lambda x: x is not None and len(x) != 0
+
+
 def timestamp_to_date(timestamp):
-    t = time.localtime(int(timestamp))
-    return time.strftime("%Y-%m-%d", t)
+    return datetime.datetime.utcfromtimestamp(timestamp)
 
 
 def datetime_to_timestamp(dt):
     if isinstance(dt, datetime.datetime):
-        return time.mktime(dt.timetuple())
+        return int(time.mktime(dt.utctimetuple()))
     return 0
 
 

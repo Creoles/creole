@@ -42,6 +42,8 @@ class CompanyParserMixin(object):
 def dict_parser_func(param_mapping):
     def wrapper(item_dict):
         _item_dict = {}
+        if not param_mapping:
+            return _item_dict
         for k, _tuple in param_mapping.iteritems():
             _type, is_required = _tuple
             v = item_dict.get(k, None)
